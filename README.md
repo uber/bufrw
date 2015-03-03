@@ -1,40 +1,40 @@
 # bufrw
 
-<!--
-    [![build status][build-png]][build]
-    [![Coverage Status][cover-png]][cover]
-    [![Davis Dependency status][dep-png]][dep]
--->
-
-<!-- [![NPM][npm-png]][npm] -->
-
 Buffer Reading and Writing
 
 ## Example
 
+Simple length-prefixed string:
+
 ```js
 var bufrw = require("bufrw");
 
-// TODO. Show example
+var buf = bufrw.toBuffer(bufrw.str1, "hello world");
+// <Buffer 0b 68 65 6c 6c 6f 20 77 6f 72 6c 64>
+var str = bufrw.fromBuffer(bufrw.str1, buf)
+// "hello world"
 ```
+
+// TODO more examples
 
 ## Concept and Motivation
 
-// TODO. Explain what your module achieves and why.
+A combinatoric library for synchronous binary buffer reading and writing.
+
+The design is to combine:
+- needed byte length calculation
+- writing into a pre-allocated buffer
+- reading from a buffer
+
+Into a single re-combinable data type, eventually supporting code generation
+for efficiency.
+
+Any of those three steps may result in an error, so rather than rely on error
+throw/catching we use an error-able result type.
 
 ## API Documentation
 
-### `var someValue = bufrw(/*arguments*/)`
-
-<!--
-  This is a jsig notation of your interface.
-  https://github.com/jsigbiz/spec
--->
-```ocaml
-bufrw : (arg: Any) => void
-```
-
-// TODO. State what the module does.
+See docs.jsig
 
 ## Installation
 
