@@ -108,11 +108,11 @@ VariableBufferRW.prototype.readFrom = function readFrom(buffer, offset) {
     if (res.err) return res;
     offset = res.offset;
     var length = res.value;
-    var end = offset + length;
-    if (end > buffer.length) {
-        return ReadResult.shortError(length, buffer.length - offset, offset);
+    var buf = Buffer(length);
+    var copied = buffer.copy(buf, 0, offset);
+    if (copied < length) {
+        return ReadResult.shortError(length, copied, offset);
     } else {
-        var buf = buffer.slice(offset, end);
-        return ReadResult.just(end, buf);
+        return ReadResult.just(offset + length, buf);
     }
 };
