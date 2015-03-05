@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-module.exports = VariableBufferRW;
+module.exports = StringRW;
 
 var TypedError = require('error/typed');
 var inherits = require('util').inherits;
@@ -26,83 +26,58 @@ var inherits = require('util').inherits;
 var LengthResult = require('./base').LengthResult;
 var WriteResult = require('./base').WriteResult;
 var ReadResult = require('./base').ReadResult;
-var BufferRW = require('./base').BufferRW;
-
-var UInt8 = require('./atoms').UInt8;
-var UInt16BE = require('./atoms').UInt16BE;
-var UInt32BE = require('./atoms').UInt32BE;
+var VariableBufferRW = require('./variable_buffer_rw');
 
 var InvalidArgumentError = TypedError({
     type: 'variable-buffer.invalid-argument',
-    message: 'invalid argument, expected buffer, null, or undefined',
+    message: 'invalid argument, expected string, null, or undefined',
     argType: null,
     argConstructor: null
 });
 
-function VariableBufferRW(size) {
-    if (!(this instanceof VariableBufferRW)) {
-        return new VariableBufferRW(size);
+function StringRW(size, encoding) {
+    if (!(this instanceof StringRW)) {
+        return new StringRW(size, encoding);
     }
     var self = this;
-    if (typeof size === 'number') {
-        switch (size) {
-            case 1:
-                self.size = UInt8;
-                break;
-            case 2:
-                self.size = UInt16BE;
-                break;
-            case 4:
-                self.size = UInt32BE;
-                break;
-            default:
-                throw new Error('unsupported size ' + size);
-        }
-    } else {
-        self.size = size;
-    }
-    BufferRW.call(self);
+    self.encoding = encoding || 'utf8';
+    VariableBufferRW.call(self, size);
 }
-inherits(VariableBufferRW, BufferRW);
+inherits(StringRW, VariableBufferRW);
 
-VariableBufferRW.prototype.byteLength = function byteLength(buf) {
+StringRW.prototype.byteLength = function byteLength(str) {
     var self = this;
-    var length = 0;
-    if (Buffer.isBuffer(buf)) {
-        length = buf.length;
-    } else if (buf === null || buf === undefined) {
-        length = 0;
+    if (typeof str === 'string') {
+        var length = Buffer.byteLength(str, self.encoding);
+        var len = self.size.byteLength(length);
+        if (len.err) return len;
+        return LengthResult.just(len.length + length);
     } else {
         return LengthResult.error(InvalidArgumentError({
-            argType: typeof buf,
-            argConstructor: buf.constructor.name
+            argType: typeof str,
+            argConstructor: str.constructor.name
         }));
     }
-    var len = self.size.byteLength(length);
-    if (len.err) return len;
-    return LengthResult.just(len.length + length);
 };
 
-VariableBufferRW.prototype.writeInto = function writeInto(buf, buffer, offset) {
+StringRW.prototype.writeInto = function writeInto(str, buffer, offset) {
     var self = this;
-    var start = offset + self.size.width;
-    var length = 0;
-    if (Buffer.isBuffer(buf)) {
-        length = buf.copy(buffer, start);
-    } else if (buf === null || buf === undefined) {
-        length = 0;
+    if (typeof str === 'string') {
+        var start = offset + self.size.width;
+        var length = 0;
+        length = buffer.write(str, start, self.encoding);
+        var res = self.size.writeInto(length, buffer, offset);
+        if (res.err) return res;
+        return WriteResult.just(start + length);
     } else {
         return WriteResult.error(InvalidArgumentError({
-            argType: typeof buf,
-            argConstructor: buf.constructor.name
+            argType: typeof str,
+            argConstructor: str.constructor.name
         }), offset);
     }
-    var res = self.size.writeInto(length, buffer, offset);
-    if (res.err) return res;
-    return WriteResult.just(start + length);
 };
 
-VariableBufferRW.prototype.readFrom = function readFrom(buffer, offset) {
+StringRW.prototype.readFrom = function readFrom(buffer, offset) {
     var self = this;
     var res = self.size.readFrom(buffer, offset);
     if (res.err) return res;
@@ -113,6 +88,7 @@ VariableBufferRW.prototype.readFrom = function readFrom(buffer, offset) {
         return ReadResult.shortError(length, buffer.length - offset, offset);
     } else {
         var buf = buffer.slice(offset, end);
-        return ReadResult.just(end, buf);
+        var str = buf.toString(self.encoding);
+        return ReadResult.just(end, str);
     }
 };
