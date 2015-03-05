@@ -19,5 +19,3 @@
 // THE SOFTWARE.
 
 'use strict';
-
-require('./bufrw.js');
