@@ -20,5 +20,27 @@
 
 'use strict';
 
-require('./string_rw');
-require('./variable_buffer_rw');
+var structTest = require('./lib/struct_test');
+var test = require('tape');
+
+var StringRW = require('../string_rw');
+
+var str1 = StringRW(1, 'utf8');
+
+test('should read a simple str~1', function t(assert) {
+    var buf = Buffer([0x03, 0x63, 0x61, 0x74]);
+    var str = 'cat';
+    structTest.read(assert, str1, buf, function s(got, done) {
+        assert.deepEqual(got, str);
+        done();
+    });
+});
+
+test('should write a simple str~1', function t(assert) {
+    var buf = Buffer([0x03, 0x63, 0x61, 0x74]);
+    var str = 'cat';
+    structTest.write(assert, str1, str, function s(got, done) {
+        assert.deepEqual(got, buf);
+        done();
+    });
+});
