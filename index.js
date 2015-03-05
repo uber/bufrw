@@ -115,20 +115,17 @@ module.exports.FixedWidth = require('./fixed_width_rw');
 var VariableBuffer = require('./variable_buffer_rw');
 var buf1 = VariableBuffer(UInt8);
 var buf2 = VariableBuffer(UInt16BE);
-var str1 = VariableBuffer(UInt8, {
-    encoding: 'utf8',
-    autoDecode: true
-});
-var str2 = VariableBuffer(UInt16BE, {
-    encoding: 'utf8',
-    autoDecode: true
-});
-
 module.exports.buf1 = buf1;
 module.exports.buf2 = buf2;
+module.exports.VariableBuffer = VariableBuffer;
+
+var StringRW = require('./string_rw');
+var str1 = StringRW(UInt8, 'utf8');
+var str2 = StringRW(UInt16BE, 'utf8');
+
 module.exports.str1 = str1;
 module.exports.str2 = str2;
-module.exports.VariableBuffer = VariableBuffer;
+module.exports.String = StringRW;
 
 module.exports.Series = require('./series');
 module.exports.Struct = require('./struct');
