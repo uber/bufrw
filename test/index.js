@@ -20,5 +20,6 @@
 
 'use strict';
 
+require('./atoms');
 require('./string_rw');
 require('./variable_buffer_rw');
