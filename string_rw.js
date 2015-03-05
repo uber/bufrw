@@ -64,10 +64,10 @@ StringRW.prototype.readFrom = function readFrom(buffer, offset) {
     offset = res.offset;
     var length = res.value;
     var end = offset + length;
-    if (end > buffer.length) {
-        return ReadResult.shortError(length, buffer.length - offset, offset);
+    var buf = buffer.slice(offset, end);
+    if (buf.length < length) {
+        return ReadResult.shortError(length, buf.length, offset);
     } else {
-        var buf = buffer.slice(offset, end);
         var str = buf.toString(self.encoding);
         return ReadResult.just(end, str);
     }
