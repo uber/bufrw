@@ -27,20 +27,10 @@ var StringRW = require('../string_rw');
 
 var str1 = StringRW(1, 'utf8');
 
-test('should read a simple str~1', function t(assert) {
-    var buf = Buffer([0x03, 0x63, 0x61, 0x74]);
-    var str = 'cat';
-    structTest.read(assert, str1, buf, function s(got, done) {
-        assert.deepEqual(got, str);
-        done();
-    });
-});
-
-test('should write a simple str~1', function t(assert) {
-    var buf = Buffer([0x03, 0x63, 0x61, 0x74]);
-    var str = 'cat';
-    structTest.write(assert, str1, str, function s(got, done) {
-        assert.deepEqual(got, buf);
-        done();
-    });
-});
+test('StringRW: simple str~1 in utf8', structTest.cases(str1, [
+    ['', [0x00]],
+    ['cat', [0x03, 0x63, 0x61, 0x74]],
+    ['c“a”t', [0x09, 0x63, 0xe2, 0x80,
+               0x9c, 0x61, 0xe2, 0x80,
+               0x9d, 0x74]]
+]));
