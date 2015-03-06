@@ -20,7 +20,13 @@
 
 'use strict';
 
-require('./atoms');
-require('./fixed_width_rw');
-require('./string_rw');
-require('./variable_buffer_rw');
+var structTest = require('./lib/struct_test');
+var test = require('tape');
+
+var FixedWidthRW = require('../fixed_width_rw');
+
+var fix8 = FixedWidthRW(8);
+var fixed8 = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
+test('FixedWidthRW: simple fix:8', structTest.cases(fix8, [
+    [Buffer(fixed8), fixed8]
+]));
