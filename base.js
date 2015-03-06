@@ -77,6 +77,14 @@ WriteResult.just = function just(offset) {
     return WriteResult(null, offset);
 };
 
+WriteResult.shortError = function shortError(expected, actual, offset) {
+    return WriteResult.error(ShortBufferError({
+        expected: expected,
+        actual: actual,
+        offset: offset
+    }), offset);
+};
+
 function ReadResult(err, offset, value) {
     if (!(this instanceof ReadResult)) {
         return new ReadResult(err, offset, value);

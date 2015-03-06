@@ -25,80 +25,193 @@ var WriteResult = require('./base').WriteResult;
 var ReadResult = require('./base').ReadResult;
 var BufferRW = require('./base').BufferRW;
 
-function AtomRW(width, byteLength, readFrom, writeInto) {
+function AtomRW(width, readAtomFrom, writeAtomInto) {
     if (!(this instanceof AtomRW)) {
-        return new AtomRW(width, byteLength, readFrom, writeInto);
+        return new AtomRW(width, readAtomFrom, writeAtomInto);
     }
     var self = this;
     self.width = width;
-    BufferRW.call(self, byteLength, readFrom, writeInto);
+    self.readAtomFrom = readAtomFrom;
+    self.writeAtomInto = writeAtomInto;
+    BufferRW.call(self);
 }
 inherits(AtomRW, BufferRW);
 
-function byteLengthUInt8(/* n */) {
-    // TODO: type and range check
-    return LengthResult.just(1);
-}
+AtomRW.prototype.byteLength = function byteLength() {
+    var self = this;
+    return LengthResult.just(self.width);
+};
 
-function readUInt8From(buffer, offset) {
+AtomRW.prototype.readFrom = function readFrom(buffer, offset) {
+    var self = this;
     var remain = buffer.length - offset;
-    if (remain < 1) {
-        return ReadResult.shortError(1, remain, offset);
+    if (remain < self.width) {
+        return ReadResult.shortError(self.width, remain, offset);
     }
-    var value = buffer.readUInt8(offset);
-    return ReadResult.just(offset + 1, value);
-}
+    return self.readAtomFrom(buffer, offset);
+};
 
-function writeUInt8Into(value, buffer, offset) {
-    buffer.writeUInt8(value, offset);
-    return WriteResult.just(offset + 1);
-}
-
-function byteLengthUInt16BE(/* n */) {
-    // TODO: type and range check
-    return LengthResult.just(2);
-}
-
-function readUInt16BEFrom(buffer, offset) {
+AtomRW.prototype.writeInto = function writeInto(value, buffer, offset) {
+    var self = this;
     var remain = buffer.length - offset;
-    if (remain < 2) {
-        return ReadResult.shortError(2, remain, offset);
+    if (remain < self.width) {
+        return WriteResult.shortError(self.width, remain, offset);
     }
-    var value = buffer.readUInt16BE(offset);
-    return ReadResult.just(offset + 2, value);
-}
+    return self.writeAtomInto(value, buffer, offset);
+};
 
-function writeUInt16BEInto(value, buffer, offset) {
-    buffer.writeUInt16BE(value, offset);
-    return WriteResult.just(offset + 2);
-}
+var Int8 = AtomRW(1,
+    function readInt8From(buffer, offset) {
+        var value = buffer.readInt8(offset);
+        return ReadResult.just(offset + 1, value);
+    },
+    function writeInt8Into(value, buffer, offset) {
+        buffer.writeInt8(value, offset);
+        return WriteResult.just(offset + 1);
+    });
 
-function byteLengthUInt32BE(/* n */) {
-    // TODO: type and range check
-    return LengthResult.just(4);
-}
+var Int16BE = AtomRW(2,
+    function readInt16BEFrom(buffer, offset) {
+        var value = buffer.readInt16BE(offset);
+        return ReadResult.just(offset + 2, value);
+    },
+    function writeInt16BEInto(value, buffer, offset) {
+        buffer.writeInt16BE(value, offset);
+        return WriteResult.just(offset + 2);
+    });
 
-function readUInt32BEFrom(buffer, offset) {
-    var remain = buffer.length - offset;
-    if (remain < 4) {
-        return ReadResult.shortError(4, remain, offset);
-    }
-    var value = buffer.readUInt32BE(offset);
-    return ReadResult.just(offset + 4, value);
-}
+var Int32BE = AtomRW(4,
+    function readInt32BEFrom(buffer, offset) {
+        var value = buffer.readInt32BE(offset);
+        return ReadResult.just(offset + 4, value);
+    },
+    function writeInt32BEInto(value, buffer, offset) {
+        buffer.writeInt32BE(value, offset);
+        return WriteResult.just(offset + 4);
+    });
 
-function writeUInt32BEInto(value, buffer, offset) {
-    buffer.writeUInt32BE(value, offset);
-    return WriteResult.just(offset + 4);
-}
+var Int16LE = AtomRW(2,
+    function readInt16LEFrom(buffer, offset) {
+        var value = buffer.readInt16LE(offset);
+        return ReadResult.just(offset + 2, value);
+    },
+    function writeInt16LEInto(value, buffer, offset) {
+        buffer.writeInt16LE(value, offset);
+        return WriteResult.just(offset + 2);
+    });
 
-var UInt8 = AtomRW(1, byteLengthUInt8, readUInt8From, writeUInt8Into);
-var UInt16BE = AtomRW(2, byteLengthUInt16BE, readUInt16BEFrom, writeUInt16BEInto);
-var UInt32BE = AtomRW(4, byteLengthUInt32BE, readUInt32BEFrom, writeUInt32BEInto);
+var Int32LE = AtomRW(4,
+    function readInt32LEFrom(buffer, offset) {
+        var value = buffer.readInt32LE(offset);
+        return ReadResult.just(offset + 4, value);
+    },
+    function writeInt32LEInto(value, buffer, offset) {
+        buffer.writeInt32LE(value, offset);
+        return WriteResult.just(offset + 4);
+    });
 
-// TODO: full coverage of all Buffer primatives
+var UInt8 = AtomRW(1,
+    function readUInt8From(buffer, offset) {
+        var value = buffer.readUInt8(offset);
+        return ReadResult.just(offset + 1, value);
+    },
+    function writeUInt8Into(value, buffer, offset) {
+        buffer.writeUInt8(value, offset);
+        return WriteResult.just(offset + 1);
+    });
+
+var UInt16BE = AtomRW(2,
+    function readUInt16BEFrom(buffer, offset) {
+        var value = buffer.readUInt16BE(offset);
+        return ReadResult.just(offset + 2, value);
+    },
+    function writeUInt16BEInto(value, buffer, offset) {
+        buffer.writeUInt16BE(value, offset);
+        return WriteResult.just(offset + 2);
+    });
+
+var UInt32BE = AtomRW(4,
+    function readUInt32BEFrom(buffer, offset) {
+        var value = buffer.readUInt32BE(offset);
+        return ReadResult.just(offset + 4, value);
+    },
+    function writeUInt32BEInto(value, buffer, offset) {
+        buffer.writeUInt32BE(value, offset);
+        return WriteResult.just(offset + 4);
+    });
+
+var UInt16LE = AtomRW(2,
+    function readUInt16LEFrom(buffer, offset) {
+        var value = buffer.readUInt16LE(offset);
+        return ReadResult.just(offset + 2, value);
+    },
+    function writeUInt16LEInto(value, buffer, offset) {
+        buffer.writeUInt16LE(value, offset);
+        return WriteResult.just(offset + 2);
+    });
+
+var UInt32LE = AtomRW(4,
+    function readUInt32LEFrom(buffer, offset) {
+        var value = buffer.readUInt32LE(offset);
+        return ReadResult.just(offset + 4, value);
+    },
+    function writeUInt32LEInto(value, buffer, offset) {
+        buffer.writeUInt32LE(value, offset);
+        return WriteResult.just(offset + 4);
+    });
+
+var FloatLE = AtomRW(4,
+    function readFloatLEFrom(buffer, offset) {
+        var value = buffer.readFloatLE(offset);
+        return ReadResult.just(offset + 4, value);
+    },
+    function writeFloatLEInto(value, buffer, offset) {
+        buffer.writeFloatLE(value, offset);
+        return WriteResult.just(offset + 4);
+    });
+
+var FloatBE = AtomRW(4,
+    function readFloatBEFrom(buffer, offset) {
+        var value = buffer.readFloatBE(offset);
+        return ReadResult.just(offset + 4, value);
+    },
+    function writeFloatBEInto(value, buffer, offset) {
+        buffer.writeFloatBE(value, offset);
+        return WriteResult.just(offset + 4);
+    });
+
+var DoubleLE = AtomRW(8,
+    function readDoubleLEFrom(buffer, offset) {
+        var value = buffer.readDoubleLE(offset);
+        return ReadResult.just(offset + 8, value);
+    },
+    function writeDoubleLEInto(value, buffer, offset) {
+        buffer.writeDoubleLE(value, offset);
+        return WriteResult.just(offset + 8);
+    });
+
+var DoubleBE = AtomRW(8,
+    function readDoubleBEFrom(buffer, offset) {
+        var value = buffer.readDoubleBE(offset);
+        return ReadResult.just(offset + 8, value);
+    },
+    function writeDoubleBEInto(value, buffer, offset) {
+        buffer.writeDoubleBE(value, offset);
+        return WriteResult.just(offset + 8);
+    });
 
 module.exports.AtomRW = AtomRW;
+module.exports.Int8 = Int8;
+module.exports.Int16BE = Int16BE;
+module.exports.Int32BE = Int32BE;
+module.exports.Int16LE = Int16LE;
+module.exports.Int32LE = Int32LE;
 module.exports.UInt8 = UInt8;
 module.exports.UInt16BE = UInt16BE;
 module.exports.UInt32BE = UInt32BE;
+module.exports.UInt16LE = UInt16LE;
+module.exports.UInt32LE = UInt32LE;
+module.exports.FloatLE = FloatLE;
+module.exports.FloatBE = FloatBE;
+module.exports.DoubleLE = DoubleLE;
+module.exports.DoubleBE = DoubleBE;
