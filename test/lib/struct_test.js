@@ -22,13 +22,51 @@
 
 var color = require('ansi-color').set;
 var hex = require('hexer');
+var series = require('run-series');
 var util = require('util');
 var bufrw = require('bufrw');
 
+module.exports.cases = testCases;
 module.exports.read = testRead;
 module.exports.write = testWrite;
 
 /* jshint maxparams:6 */
+
+function testCases(rw, cases) {
+    return function runTestCases(assert, done) {
+        if (!done) done = assert.end;
+        series(flat1(cases.map(function eachCase(testCase) {
+            return [
+                function readTest(nextTest) {
+                    var buf = Buffer(testCase[1]);
+                    testRead(assert, rw, buf, function s(got, done) {
+                        var val = testCase[0];
+                        assert.deepEqual(got, val, util.format('read: %j', val));
+                        if (typeof val === 'object') {
+                            assert.equal(got.constructor.name, val.constructor.name,
+                                'expected ' + val.constructor.name + ' constructor');
+                        }
+                        done();
+                    }, function eatError(err) {
+                        assert.ifError(err, 'no read error');
+                        nextTest();
+                    });
+                },
+                function writeTest(nextTest) {
+                    var val = testCase[0];
+                    testWrite(assert, rw, val, function s(got, done) {
+                        var buf = Buffer(testCase[1]);
+                        assert.deepEqual(got, buf, util.format('write: %j', val));
+                        done();
+                    }, function eatError(err) {
+                        assert.ifError(err, 'no write error');
+                        nextTest();
+                    });
+                }
+            ];
+        })), done);
+    };
+}
 
 function testRead(assert, struct, buffer, t, done) {
     if (!done) done = assert.end;
@@ -135,4 +173,12 @@ function hexdump(err, buffer, desc) {
     }));
     var errname = err.type ? err.name : err.constructor.name;
     console.log(util.format('- %s: %s', errname, err.message));
+}
+
+function flat1(ar) {
+    return ar.reduce(concatArs);
+}
+
+function concatArs(a, b) {
+    return a.concat(b);
 }
