@@ -20,10 +20,19 @@
 
 'use strict';
 
-require('./atoms');
-require('./fixed_width_rw');
-require('./null_rw');
-require('./repeat_rw');
-require('./series');
-require('./string_rw');
-require('./variable_buffer_rw');
+var structTest = require('./lib/struct_test');
+var test = require('tape');
+
+var atoms = require('../atoms');
+var SeriesRW = require('../series');
+
+var tinyShortWord = SeriesRW(
+    atoms.UInt8,
+    atoms.UInt16BE,
+    atoms.UInt32BE);
+
+test('SeriesRW: tinyShortWord', structTest.cases(tinyShortWord, [
+    [[0, 0, 0], [0x00,
+                 0x00, 0x00,
+                 0x00, 0x00, 0x00, 0x00]]
+]));
