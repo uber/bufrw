@@ -22,107 +22,83 @@
 
 var color = require('ansi-color').set;
 var hex = require('hexer');
-var series = require('run-series');
 var util = require('util');
 var bufrw = require('bufrw');
 
 module.exports.cases = testCases;
-module.exports.read = testRead;
-module.exports.write = testWrite;
 
 /* jshint maxparams:6 */
 
 function testCases(rw, cases) {
     return function runTestCases(assert, done) {
         if (!done) done = assert.end;
-        series(flat1(cases.map(function eachCase(testCase) {
-            return [
-                function readTest(nextTest) {
-                    var buf = Buffer(testCase[1]);
-                    testRead(assert, rw, buf, function s(got, done) {
-                        var val = testCase[0];
-                        assert.deepEqual(got, val, util.format('read: %j', val));
-                        if (typeof val === 'object') {
-                            assert.equal(got.constructor.name, val.constructor.name,
-                                'expected ' + val.constructor.name + ' constructor');
-                        }
-                        done();
-                    }, function eatError(err) {
-                        assert.ifError(err, 'no read error');
-                        nextTest();
-                    });
-                },
-                function writeTest(nextTest) {
-                    var val = testCase[0];
-                    testWrite(assert, rw, val, function s(got, done) {
-                        var buf = Buffer(testCase[1]);
-                        assert.deepEqual(got, buf, util.format('write: %j', val));
-                        done();
-                    }, function eatError(err) {
-                        assert.ifError(err, 'no write error');
-                        nextTest();
-                    });
-                }
-            ];
-        })), done);
+        nextCase(0);
+
+        function nextCase(caseI) {
+            if (caseI >= cases.length) {
+                done();
+                return;
+            }
+
+            var testCase = cases[caseI];
+
+            readTest(assert, rw, testCase, eatReadError);
+
+            function eatReadError(err) {
+                assert.ifError(err, 'no read error');
+                writeTest(assert, rw, testCase, eatWriteError);
+            }
+
+            function eatWriteError(err) {
+                assert.ifError(err, 'no write error');
+                nextCase(caseI + 1);
+            }
+        }
+
     };
 }
 
-function testRead(assert, struct, buffer, t, done) {
-    if (!done) done = assert.end;
-    var tup = bufrw.fromBufferTuple(struct, buffer);
+function readTest(assert, rw, testCase, callback) {
+    if (!callback) callback = assert.end;
+    var buffer = Buffer(testCase[1]);
+    var tup = bufrw.fromBufferTuple(rw, buffer);
     var err = tup[0];
-    var val = tup[1];
+    var got = tup[1];
     if (err) {
         hexdump(err, buffer, 'read error at');
-        done(err);
-    } else if (val === undefined) {
-        done(new Error('Expected to have read a value'));
+        callback(err);
+    } else if (got === undefined) {
+        callback(new Error('Expected to have read a value'));
     } else {
-        t(val, done);
-    }
-}
-
-testRead.shouldError = function shouldError(assert, struct, buffer, t, done) {
-    if (!done) done = assert.end;
-    var tup = bufrw.fromBufferTuple(struct, buffer);
-    var err = tup[0];
-    // var val = tup[1];
-    if (err) {
-        t(err, done);
-    } else {
-        done(new Error('expected a read error'));
-    }
-};
-
-function testWrite(assert, struct, value, t, done) {
-    if (!done) done = assert.end;
-    var tup = bufrw.toBufferTuple(struct, value);
-    var err = tup[0];
-    var buffer = tup[1];
-    if (err) {
-        if (buffer) {
-            hexdump(err, buffer, 'write error at');
+        var val = testCase[0];
+        assert.deepEqual(got, val, util.format('read: %j', val));
+        if (typeof val === 'object') {
+            assert.equal(got.constructor.name, val.constructor.name,
+                'expected ' + val.constructor.name + ' constructor');
         }
-        done(err);
-    } else if (!Buffer.isBuffer(buffer)) {
-        done(new Error('expected to have wrote a buffer'));
-    } else {
-        t(buffer, done);
+        callback();
     }
 }
 
-testWrite.shouldError = function shouldError(assert, struct, value, t, done) {
-    if (!done) done = assert.end;
-    var tup = bufrw.toBufferTuple(struct, value);
+function writeTest(assert, rw, testCase, callback) {
+    if (!callback) callback = assert.end;
+    var val = testCase[0];
+    var tup = bufrw.toBufferTuple(rw, val);
     var err = tup[0];
-    // var buffer = tup[1];
+    var got = tup[1];
     if (err) {
-        t(err, done);
+        if (got) {
+            hexdump(err, got, 'write error at');
+        }
+        callback(err);
+    } else if (!Buffer.isBuffer(got)) {
+        callback(new Error('expected to have wrote a buffer'));
     } else {
-        done(new Error('expected a write error'));
+        var buf = Buffer(testCase[1]);
+        assert.deepEqual(got, buf, util.format('write: %j', val));
+        callback();
     }
-};
+}
 
 function hexHighlight(buffer, highlights) {
     var highlight = {};
@@ -173,12 +149,4 @@ function hexdump(err, buffer, desc) {
     }));
     var errname = err.type ? err.name : err.constructor.name;
     console.log(util.format('- %s: %s', errname, err.message));
-}
-
-function flat1(ar) {
-    return ar.reduce(concatArs);
-}
-
-function concatArs(a, b) {
-    return a.concat(b);
 }
