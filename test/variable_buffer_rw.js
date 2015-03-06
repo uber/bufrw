@@ -27,20 +27,6 @@ var VariableBufferRW = require('../variable_buffer_rw');
 
 var buf1 = VariableBufferRW(1);
 
-test('should read a simple buf~1', function t(assert) {
-    var inBuf = Buffer([0x03, 0x00, 0x88, 0xff]);
-    var outBuf = Buffer([0x00, 0x88, 0xff]);
-    structTest.read(assert, buf1, inBuf, function s(got, done) {
-        assert.deepEqual(got, outBuf);
-        done();
-    });
-});
-
-test('should write a simple buf~1', function t(assert) {
-    var inBuf = Buffer([0x00, 0x88, 0xff]);
-    var outBuf = Buffer([0x03, 0x00, 0x88, 0xff]);
-    structTest.write(assert, buf1, inBuf, function s(got, done) {
-        assert.deepEqual(got, outBuf);
-        done();
-    });
-});
+test('VariableBufferRW: simple buf~1', structTest.cases(buf1, [
+    [Buffer([0x00, 0x88, 0xff]), [0x03, 0x00, 0x88, 0xff]]
+]));

@@ -25,66 +25,90 @@ var hex = require('hexer');
 var util = require('util');
 var bufrw = require('bufrw');
 
-module.exports.read = testRead;
-module.exports.write = testWrite;
+module.exports.cases = testCases;
 
 /* jshint maxparams:6 */
 
-function testRead(assert, struct, buffer, t, done) {
-    if (!done) done = assert.end;
-    var tup = bufrw.fromBufferTuple(struct, buffer);
+function testCases(rw, cases) {
+    return function runTestCases(assert, done) {
+        if (!done) done = assert.end;
+        nextCase(0);
+
+        function nextCase(caseI) {
+            if (caseI >= cases.length) {
+                done();
+                return;
+            }
+
+            var testCase;
+            if (Array.isArray(cases[caseI])) {
+                testCase = {
+                    value: cases[caseI][0],
+                    bytes: cases[caseI][1]
+                };
+            } else if (typeof cases[caseI] !== 'object') {
+                throw new Error('invalid test case ' + caseI);
+            } else {
+                testCase = cases[caseI];
+            }
+
+            readTest(assert, rw, testCase, eatReadError);
+
+            function eatReadError(err) {
+                assert.ifError(err, 'no read error');
+                writeTest(assert, rw, testCase, eatWriteError);
+            }
+
+            function eatWriteError(err) {
+                assert.ifError(err, 'no write error');
+                nextCase(caseI + 1);
+            }
+        }
+
+    };
+}
+
+function readTest(assert, rw, testCase, callback) {
+    if (!callback) callback = assert.end;
+    var buffer = Buffer(testCase.bytes);
+    var tup = bufrw.fromBufferTuple(rw, buffer);
     var err = tup[0];
-    var val = tup[1];
+    var got = tup[1];
     if (err) {
         hexdump(err, buffer, 'read error at');
-        done(err);
-    } else if (val === null || val === undefined) {
-        done(new Error('Expected to have read a value'));
+        callback(err);
+    } else if (got === undefined) {
+        callback(new Error('Expected to have read a value'));
     } else {
-        t(val, done);
-    }
-}
-
-testRead.shouldError = function shouldError(assert, struct, buffer, t, done) {
-    if (!done) done = assert.end;
-    var tup = bufrw.fromBufferTuple(struct, buffer);
-    var err = tup[0];
-    // var val = tup[1];
-    if (err) {
-        t(err, done);
-    } else {
-        done(new Error('expected a read error'));
-    }
-};
-
-function testWrite(assert, struct, value, t, done) {
-    if (!done) done = assert.end;
-    var tup = bufrw.toBufferTuple(struct, value);
-    var err = tup[0];
-    var buffer = tup[1];
-    if (err) {
-        if (buffer) {
-            hexdump(err, buffer, 'write error at');
+        var val = testCase.value;
+        assert.deepEqual(got, val, util.format('read: %j', val));
+        if (typeof val === 'object') {
+            assert.equal(got.constructor.name, val.constructor.name,
+                'expected ' + val.constructor.name + ' constructor');
         }
-        done(err);
-    } else if (buffer === null || buffer === undefined) {
-        done(new Error('expected to have wrote a buffer'));
-    } else {
-        t(buffer, done);
+        callback();
     }
 }
 
-testWrite.shouldError = function shouldError(assert, struct, value, t, done) {
-    if (!done) done = assert.end;
-    var tup = bufrw.toBufferTuple(struct, value);
+function writeTest(assert, rw, testCase, callback) {
+    if (!callback) callback = assert.end;
+    var val = testCase.value;
+    var tup = bufrw.toBufferTuple(rw, val);
     var err = tup[0];
-    // var buffer = tup[1];
+    var got = tup[1];
     if (err) {
-        t(err, done);
+        if (got) {
+            hexdump(err, got, 'write error at');
+        }
+        callback(err);
+    } else if (!Buffer.isBuffer(got)) {
+        callback(new Error('expected to have wrote a buffer'));
     } else {
-        done(new Error('expected a write error'));
+        var buf = Buffer(testCase.bytes);
+        assert.deepEqual(got, buf, util.format('write: %j', val));
+        callback();
     }
-};
+}
 
 function hexHighlight(buffer, highlights) {
     var highlight = {};
