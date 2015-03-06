@@ -20,11 +20,13 @@
 
 'use strict';
 
-require('./atoms');
-require('./fixed_width_rw');
-require('./null_rw');
-require('./repeat_rw');
-require('./series');
-require('./skip');
-require('./string_rw');
-require('./variable_buffer_rw');
+var structTest = require('./lib/struct_test');
+var test = require('tape');
+
+var SkipRW = require('../skip');
+
+var skip5 = SkipRW(5, 0xaa);
+
+test('SkipRW: skip5', structTest.cases(skip5, [
+    [null, [0xaa, 0xaa, 0xaa, 0xaa, 0xaa]]
+]));
