@@ -34,14 +34,14 @@ var UInt32BE = require('./atoms').UInt32BE;
 
 var InvalidArgumentError = TypedError({
     type: 'variable-buffer.invalid-argument',
-    message: 'invalid argument, expected string, buffer, null, or undefined',
+    message: 'invalid argument, expected buffer, null, or undefined',
     argType: null,
     argConstructor: null
 });
 
-function VariableBufferRW(size, opts) {
+function VariableBufferRW(size) {
     if (!(this instanceof VariableBufferRW)) {
-        return new VariableBufferRW(size, opts);
+        return new VariableBufferRW(size);
     }
     var self = this;
     if (typeof size === 'number') {
@@ -61,26 +61,21 @@ function VariableBufferRW(size, opts) {
     } else {
         self.size = size;
     }
-    opts = opts || {};
-    self.encoding = opts.encoding || 'utf8';
-    self.autoDecode = opts.autoDecode || false;
     BufferRW.call(self);
 }
 inherits(VariableBufferRW, BufferRW);
 
-VariableBufferRW.prototype.byteLength = function byteLength(strOrBuf) {
+VariableBufferRW.prototype.byteLength = function byteLength(buf) {
     var self = this;
     var length = 0;
-    if (typeof strOrBuf === 'string') {
-        length = Buffer.byteLength(strOrBuf, self.encoding);
-    } else if (Buffer.isBuffer(strOrBuf)) {
-        length = strOrBuf.length;
-    } else if (strOrBuf === null || strOrBuf === undefined) {
+    if (Buffer.isBuffer(buf)) {
+        length = buf.length;
+    } else if (buf === null || buf === undefined) {
         length = 0;
     } else {
         return LengthResult.error(InvalidArgumentError({
-            argType: typeof strOrBuf,
-            argConstructor: strOrBuf.constructor.name
+            argType: typeof buf,
+            argConstructor: buf.constructor.name
         }));
     }
     var len = self.size.byteLength(length);
@@ -88,20 +83,18 @@ VariableBufferRW.prototype.byteLength = function byteLength(strOrBuf) {
     return LengthResult.just(len.length + length);
 };
 
-VariableBufferRW.prototype.writeInto = function writeInto(strOrBuf, buffer, offset) {
+VariableBufferRW.prototype.writeInto = function writeInto(buf, buffer, offset) {
     var self = this;
     var start = offset + self.size.width;
     var length = 0;
-    if (typeof strOrBuf === 'string') {
-        length = buffer.write(strOrBuf, start, self.encoding);
-    } else if (Buffer.isBuffer(strOrBuf)) {
-        length = strOrBuf.copy(buffer, start);
-    } else if (strOrBuf === null || strOrBuf === undefined) {
+    if (Buffer.isBuffer(buf)) {
+        length = buf.copy(buffer, start);
+    } else if (buf === null || buf === undefined) {
         length = 0;
     } else {
         return WriteResult.error(InvalidArgumentError({
-            argType: typeof strOrBuf,
-            argConstructor: strOrBuf.constructor.name
+            argType: typeof buf,
+            argConstructor: buf.constructor.name
         }), offset);
     }
     var res = self.size.writeInto(length, buffer, offset);
@@ -115,16 +108,11 @@ VariableBufferRW.prototype.readFrom = function readFrom(buffer, offset) {
     if (res.err) return res;
     offset = res.offset;
     var length = res.value;
-    var end = offset + length;
-    if (end > buffer.length) {
-        return ReadResult.shortError(length, buffer.length - offset, offset);
+    var buf = Buffer(length);
+    var copied = buffer.copy(buf, 0, offset);
+    if (copied < length) {
+        return ReadResult.shortError(length, copied, offset);
     } else {
-        var buf = buffer.slice(offset, end);
-        if (self.autoDecode) {
-            var str = buf.toString(self.encoding);
-            return ReadResult.just(end, str);
-        } else {
-            return ReadResult.just(end, buf);
-        }
+        return ReadResult.just(offset + length, buf);
     }
 };
