@@ -28,11 +28,11 @@ var ReadResult = require('./base').ReadResult;
 var BufferRW = require('./base').BufferRW;
 
 function SeriesRW(rws) {
-    if (!(this instanceof SeriesRW)) {
-        return new SeriesRW(rws);
-    }
     if (arguments.length > 1) {
         rws = Array.prototype.slice.call(arguments);
+    }
+    if (!(this instanceof SeriesRW)) {
+        return new SeriesRW(rws);
     }
     var self = this;
     self.rws = rws;
