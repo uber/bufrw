@@ -40,7 +40,17 @@ function testCases(rw, cases) {
                 return;
             }
 
-            var testCase = cases[caseI];
+            var testCase;
+            if (Array.isArray(cases[caseI])) {
+                testCase = {
+                    value: cases[caseI][0],
+                    bytes: cases[caseI][1]
+                };
+            } else if (typeof cases[caseI] !== 'object') {
+                throw new Error('invalid test case ' + caseI);
+            } else {
+                testCase = cases[caseI];
+            }
 
             readTest(assert, rw, testCase, eatReadError);
 
@@ -60,7 +70,7 @@ function testCases(rw, cases) {
 
 function readTest(assert, rw, testCase, callback) {
     if (!callback) callback = assert.end;
-    var buffer = Buffer(testCase[1]);
+    var buffer = Buffer(testCase.bytes);
     var tup = bufrw.fromBufferTuple(rw, buffer);
     var err = tup[0];
     var got = tup[1];
@@ -70,7 +80,7 @@ function readTest(assert, rw, testCase, callback) {
     } else if (got === undefined) {
         callback(new Error('Expected to have read a value'));
     } else {
-        var val = testCase[0];
+        var val = testCase.value;
         assert.deepEqual(got, val, util.format('read: %j', val));
         if (typeof val === 'object') {
             assert.equal(got.constructor.name, val.constructor.name,
@@ -82,7 +92,7 @@ function readTest(assert, rw, testCase, callback) {
 
 function writeTest(assert, rw, testCase, callback) {
     if (!callback) callback = assert.end;
-    var val = testCase[0];
+    var val = testCase.value;
     var tup = bufrw.toBufferTuple(rw, val);
     var err = tup[0];
     var got = tup[1];
@@ -94,7 +104,7 @@ function writeTest(assert, rw, testCase, callback) {
     } else if (!Buffer.isBuffer(got)) {
         callback(new Error('expected to have wrote a buffer'));
     } else {
-        var buf = Buffer(testCase[1]);
+        var buf = Buffer(testCase.bytes);
         assert.deepEqual(got, buf, util.format('write: %j', val));
         callback();
     }
