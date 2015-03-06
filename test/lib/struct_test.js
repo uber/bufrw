@@ -38,7 +38,7 @@ function testRead(assert, struct, buffer, t, done) {
     if (err) {
         hexdump(err, buffer, 'read error at');
         done(err);
-    } else if (val === null || val === undefined) {
+    } else if (val === undefined) {
         done(new Error('Expected to have read a value'));
     } else {
         t(val, done);
@@ -67,7 +67,7 @@ function testWrite(assert, struct, value, t, done) {
             hexdump(err, buffer, 'write error at');
         }
         done(err);
-    } else if (buffer === null || buffer === undefined) {
+    } else if (!Buffer.isBuffer(buffer)) {
         done(new Error('expected to have wrote a buffer'));
     } else {
         t(buffer, done);
