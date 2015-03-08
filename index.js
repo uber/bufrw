@@ -101,27 +101,37 @@ module.exports.LengthResult = require('./base').LengthResult;
 module.exports.WriteResult = require('./base').WriteResult;
 module.exports.ReadResult = require('./base').ReadResult;
 
-var UInt8 = require('./atoms').UInt8;
-var UInt16BE = require('./atoms').UInt16BE;
-var UInt32BE = require('./atoms').UInt32BE;
+var atoms = require('./atoms');
 
-module.exports.UInt8 = UInt8;
-module.exports.UInt16BE = UInt16BE;
-module.exports.UInt32BE = UInt32BE;
+module.exports.AtomRW = atoms.AtomRW;
+module.exports.Int8 = atoms.Int8;
+module.exports.Int16BE = atoms.Int16BE;
+module.exports.Int32BE = atoms.Int32BE;
+module.exports.Int16LE = atoms.Int16LE;
+module.exports.Int32LE = atoms.Int32LE;
+module.exports.UInt8 = atoms.UInt8;
+module.exports.UInt16BE = atoms.UInt16BE;
+module.exports.UInt32BE = atoms.UInt32BE;
+module.exports.UInt16LE = atoms.UInt16LE;
+module.exports.UInt32LE = atoms.UInt32LE;
+module.exports.FloatLE = atoms.FloatLE;
+module.exports.FloatBE = atoms.FloatBE;
+module.exports.DoubleLE = atoms.DoubleLE;
+module.exports.DoubleBE = atoms.DoubleBE;
 
 module.exports.Null = require('./null');
 module.exports.FixedWidth = require('./fixed_width_rw');
 
 var VariableBuffer = require('./variable_buffer_rw');
-var buf1 = VariableBuffer(UInt8);
-var buf2 = VariableBuffer(UInt16BE);
+var buf1 = VariableBuffer(atoms.UInt8);
+var buf2 = VariableBuffer(atoms.UInt16BE);
 module.exports.buf1 = buf1;
 module.exports.buf2 = buf2;
 module.exports.VariableBuffer = VariableBuffer;
 
 var StringRW = require('./string_rw');
-var str1 = StringRW(UInt8, 'utf8');
-var str2 = StringRW(UInt16BE, 'utf8');
+var str1 = StringRW(atoms.UInt8, 'utf8');
+var str2 = StringRW(atoms.UInt16BE, 'utf8');
 
 module.exports.str1 = str1;
 module.exports.str2 = str2;
