@@ -33,6 +33,7 @@ function compileRW(rw, name) {
 }
 
 // proveCompiledRW(
+//     // n:4 str~2
 //     bufrw.Series(
 //         bufrw.UInt32BE,
 //         bufrw.str2
@@ -53,6 +54,7 @@ function Loc(lat, lng) {
 }
 
 proveCompiledRW(
+    // lat:8<DoubleBE> lng:8<DoubleBE>
     bufrw.Struct(Loc, {
         lat: bufrw.DoubleBE,
         lng: bufrw.DoubleBE
@@ -63,6 +65,23 @@ proveCompiledRW(
       0x40, 0x05, 0xbf, 0x0a,
       0x8b, 0x14, 0x57, 0x69
     ]);
+
+// var Frame = require('tchannel/v2/frame');
+// var TestBody = require('tchannel/test/v2/test_body');
+// Frame.Types[TestBody.TypeCode] = TestBody;
+// proveCompiledRW(
+//     Frame.struct,
+//     Frame(0x01020304, TestBody(Buffer('cat'))),
+//     [
+//         0x00, 0x14,             // size:2:
+//         TestBody.TypeCode,      // type:1
+//         0x00,                   // reserved:1
+//         0x02, 0x03, 0x04, 0x05, // id:4
+//         0x06, 0x07, 0x08, 0x09, // reserved:4
+//         0x0a, 0x0b, 0x0c, 0x0d, // reserved:4
+//         0x03, 0x63, 0x61, 0x74  // payload~1
+//     ]
+// );
 
 function proveCompiledRW(rw, val, bytes) {
     var n = 10000;
