@@ -17,7 +17,9 @@
     }
   ],
   "dependencies": {
-    "error": "^5.1.1"
+    "anatta": "git://github.com/jcorbin/anatta#dev",
+    "error": "^5.1.1",
+    "escodegen": "^1.6.1"
   },
   "devDependencies": {
     "ansi-color": "^0.2.1",
