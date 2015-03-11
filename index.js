@@ -18,98 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-var TypedError = require('error/typed');
-
-var ShortReadError = TypedError({
-    type: 'short-read',
-    message: 'short read, {remaining} byte left over after consuming {offset}',
-    remaining: null,
-    buffer: null,
-    offset: null
-});
-
-var ShortWriteError = TypedError({
-    type: 'short-write',
-    message: 'short write, {remaining} byte left over after writing {offset}',
-    remaining: null,
-    buffer: null,
-    offset: null
-});
-
-var emptyBuffer = Buffer(0);
-
-function fromBuffer(struct, buffer, offset) {
-    var tup = fromBufferTuple(struct, buffer, offset);
-    var err = tup[0];
-    var value = tup[1];
-    if (err) throw err;
-    else return value;
-}
-
-function toBuffer(struct, value) {
-    var tup = toBufferTuple(struct, value);
-    var err = tup[0];
-    var buffer = tup[1];
-    if (err) throw err;
-    else return buffer;
-}
-
-function intoBuffer(struct, buffer, value) {
-    var tup = intoBufferTuple(struct, buffer, value);
-    var err = tup[0];
-    buffer = tup[1];
-    if (err) throw err;
-    else return buffer;
-}
-
-function fromBufferTuple(struct, buffer, offset) {
-    offset = offset || 0;
-    var res = struct.readFrom(buffer, offset);
-    offset = res.offset;
-    var err = res.err;
-    if (!err && offset !== buffer.length) {
-        err = ShortReadError({
-            remaining: buffer.length - offset,
-            buffer: buffer,
-            offset: offset
-        });
-    }
-    if (err) {
-        if (err.offset === undefined) err.offset = offset;
-        if (err.buffer === undefined) err.buffer = buffer;
-    }
-    return [err, res.value];
-}
-
-function toBufferTuple(struct, value) {
-    var lenRes = struct.byteLength(value);
-    if (lenRes.err) return [lenRes.err, emptyBuffer];
-    var length = lenRes.length;
-    var buffer = new Buffer(length);
-    // buffer.fill(0); TODO option
-    return intoBufferTuple(struct, buffer, value);
-}
-
-function intoBufferTuple(struct, buffer, value) {
-    var writeRes = struct.writeInto(value, buffer, 0);
-    if (writeRes.err) return [writeRes.err, buffer];
-    var offset = writeRes.offset;
-    if (offset !== buffer.length) {
-        return [ShortWriteError({
-            remaining: buffer.length - offset,
-            buffer: buffer,
-            offset: offset
-        }), buffer];
-    }
-    return [null, buffer];
-}
-
-module.exports.fromBuffer = fromBuffer;
-module.exports.toBuffer = toBuffer;
-module.exports.intoBuffer = intoBuffer;
-module.exports.fromBufferTuple = fromBufferTuple;
-module.exports.toBufferTuple = toBufferTuple;
-module.exports.intoBufferTuple = intoBufferTuple;
+module.exports.fromBuffer = require('./interface').fromBuffer;
+module.exports.toBuffer = require('./interface').toBuffer;
+module.exports.intoBuffer = require('./interface').intoBuffer;
+module.exports.fromBufferTuple = require('./interface').fromBufferTuple;
+module.exports.toBufferTuple = require('./interface').toBufferTuple;
+module.exports.intoBufferTuple = require('./interface').intoBufferTuple;
 
 module.exports.Base = require('./base').BufferRW; // TODO: align names
 module.exports.LengthResult = require('./base').LengthResult;

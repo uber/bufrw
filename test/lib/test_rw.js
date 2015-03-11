@@ -23,7 +23,8 @@
 var color = require('ansi-color').set;
 var hex = require('hexer');
 var util = require('util');
-var bufrw = require('../../index');
+var intoBufferTuple = require('../../interface').intoBufferTuple;
+var fromBufferTuple = require('../../interface').fromBufferTuple;
 
 module.exports.cases = testCases;
 
@@ -116,7 +117,7 @@ function writeTest(assert, rw, testCase) {
     var val = testCase.value;
     var got = Buffer(testCase.bytes ? testCase.bytes.length : testCase.length || 0);
     got.fill(0);
-    var tup = bufrw.intoBufferTuple(rw, got, val);
+    var tup = intoBufferTuple(rw, got, val);
     var err = tup[0];
     if (err) {
         return [err, got];
@@ -128,7 +129,7 @@ function writeTest(assert, rw, testCase) {
 
 function readTest(assert, rw, testCase) {
     var buffer = Buffer(testCase.bytes);
-    var tup = bufrw.fromBufferTuple(rw, buffer);
+    var tup = fromBufferTuple(rw, buffer);
     var err = tup[0];
     var got = tup[1];
     if (!err && got === undefined) {
