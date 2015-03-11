@@ -37,6 +37,10 @@ function testCases(rw, cases) {
                 var value = cases[i][0];
                 var bytes = cases[i][1];
                 testCase = {
+                    lengthTest: {
+                        length: bytes.length,
+                        value: value
+                    },
                     writeTest: {
                         bytes: bytes,
                         value: value
@@ -54,6 +58,11 @@ function testCases(rw, cases) {
 
             var err;
 
+            if (testCase.lengthTest) {
+                err = lengthTest(assert, rw, testCase.lengthTest);
+                assert.ifError(err, 'no length error');
+            }
+
             if (testCase.writeTest) {
                 err = writeTest(assert, rw, testCase.writeTest);
                 assert.ifError(err, 'no write error');
@@ -69,9 +78,33 @@ function testCases(rw, cases) {
     };
 }
 
+function lengthTest(assert, rw, testCase) {
+    var val = testCase.value;
+    var res = rw.byteLength(val);
+    if (res.err) {
+        return res.err;
+    }
+    assert.deepEqual(res && res.length, testCase.length, util.format('length: %j', val));
+    return null;
+}
+
+function writeTest(assert, rw, testCase) {
+    var val = testCase.value;
+    var got = Buffer(testCase.bytes.length);
+    got.fill(0);
+    var tup = bufrw.intoBufferTuple(rw, got, val);
+    var err = tup[0];
+    if (err) {
+        hexdump(err, got, 'write error at');
+        return err;
+    }
+    var buf = Buffer(testCase.bytes);
+    assert.deepEqual(got, buf, util.format('write: %j', val));
+    return null;
+}
+
 function readTest(assert, rw, testCase) {
     var buffer = Buffer(testCase.bytes);
-
     var tup = bufrw.fromBufferTuple(rw, buffer);
     var err = tup[0];
     var got = tup[1];
@@ -90,25 +123,6 @@ function readTest(assert, rw, testCase) {
         assert.equal(gotConsName, valConsName,
             'expected ' + valConsName + ' constructor');
     }
-    return null;
-}
-
-function writeTest(assert, rw, testCase) {
-    var val = testCase.value;
-    var tup = bufrw.toBufferTuple(rw, val);
-    var err = tup[0];
-    var got = tup[1];
-    if (err) {
-        if (got) {
-            hexdump(err, got, 'write error at');
-        }
-        return err;
-    }
-    if (!Buffer.isBuffer(got)) {
-        return new Error('expected to have wrote a buffer');
-    }
-    var buf = Buffer(testCase.bytes);
-    assert.deepEqual(got, buf, util.format('write: %j', val));
     return null;
 }
 
