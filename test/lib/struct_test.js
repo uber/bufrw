@@ -56,21 +56,45 @@ function testCases(rw, cases) {
                 testCase = cases[i];
             }
 
-            var err;
+            var err, res, buf;
 
             if (testCase.lengthTest) {
                 err = lengthTest(assert, rw, testCase.lengthTest);
-                assert.ifError(err, 'no length error');
+                if (testCase.lengthTest.error) {
+                    assert.deepEqual(
+                        copyErr(err, testCase.lengthTest.error),
+                        testCase.lengthTest.error, 'expected length error');
+                } else {
+                    assert.ifError(err, 'no length error');
+                }
             }
 
             if (testCase.writeTest) {
-                err = writeTest(assert, rw, testCase.writeTest);
-                assert.ifError(err, 'no write error');
+                res = writeTest(assert, rw, testCase.writeTest);
+                err = res[0];
+                buf = res[1];
+                if (testCase.writeTest.error) {
+                    assert.deepEqual(
+                        copyErr(err, testCase.writeTest.error),
+                        testCase.writeTest.error, 'expected write error');
+                } else {
+                    if (err) hexdump(err, buf, 'write error at');
+                    assert.ifError(err, 'no write error');
+                }
             }
 
             if (testCase.readTest) {
-                err = readTest(assert, rw, testCase.readTest);
-                assert.ifError(err, 'no read error');
+                res = readTest(assert, rw, testCase.readTest);
+                err = res[0];
+                buf = res[1];
+                if (testCase.readTest.error) {
+                    assert.deepEqual(
+                        copyErr(err, testCase.readTest.error),
+                        testCase.readTest.error, 'expected read error');
+                } else {
+                    if (err) hexdump(err, buf, 'read error at');
+                    assert.ifError(err, 'no read error');
+                }
             }
         }
 
@@ -90,17 +114,16 @@ function lengthTest(assert, rw, testCase) {
 
 function writeTest(assert, rw, testCase) {
     var val = testCase.value;
-    var got = Buffer(testCase.bytes.length);
+    var got = Buffer(testCase.bytes ? testCase.bytes.length : testCase.length || 0);
     got.fill(0);
     var tup = bufrw.intoBufferTuple(rw, got, val);
     var err = tup[0];
     if (err) {
-        hexdump(err, got, 'write error at');
-        return err;
+        return [err, got];
     }
     var buf = Buffer(testCase.bytes);
     assert.deepEqual(got, buf, util.format('write: %j', val));
-    return null;
+    return [null, got];
 }
 
 function readTest(assert, rw, testCase) {
@@ -108,12 +131,11 @@ function readTest(assert, rw, testCase) {
     var tup = bufrw.fromBufferTuple(rw, buffer);
     var err = tup[0];
     var got = tup[1];
-    if (err) {
-        hexdump(err, buffer, 'read error at');
-        return err;
+    if (!err && got === undefined) {
+        err = new Error('Expected to have read a value');
     }
-    if (got === undefined) {
-        return new Error('Expected to have read a value');
+    if (err) {
+        return [err, got];
     }
     var val = testCase.value;
     assert.deepEqual(got, val, util.format('read: %j', val));
@@ -123,7 +145,7 @@ function readTest(assert, rw, testCase) {
         assert.equal(gotConsName, valConsName,
             'expected ' + valConsName + ' constructor');
     }
-    return null;
+    return [null, got];
 }
 
 function hexHighlight(buffer, highlights) {
@@ -166,13 +188,24 @@ function pad(c, s, width) {
 }
 
 function hexdump(err, buffer, desc) {
-    console.log(hexHighlight(buffer, {
-        end: {
+    var highlights = {};
+    var offset = err && err.offset;
+    if (typeof offset === 'number') {
+        highlights.end = {
             desc: desc,
             offset: err && err.offset,
             color: 'red+bold'
-        }
-    }));
+        };
+    }
+    console.log(hexHighlight(buffer, highlights));
     var errname = err.type ? err.name : err.constructor.name;
     console.log(util.format('- %s: %s', errname, err.message));
+}
+
+function copyErr(err, tmpl) {
+    var out = {};
+    Object.keys(tmpl).forEach(function(key) {
+        out[key] = err[key];
+    });
+    return out;
 }
