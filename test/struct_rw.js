@@ -63,3 +63,77 @@ test('StructRW: consLoc', testRW.cases(consLoc, [
      [0x40, 0x42, 0xe3, 0x43, 0x7c, 0x56, 0x92, 0xb4,
       0xc0, 0x5e, 0x9a, 0xb8, 0xa1, 0x9c, 0x9d, 0x5a]]
 ]));
+
+var bufrw = require('../index');
+
+function Frame(mess) {
+    if (!(this instanceof Frame)) {
+        return new Frame(mess);
+    }
+    var self = this;
+    self.size = 0;
+    self.mess = mess || '';
+}
+
+Frame.rw = StructRW(Frame, [
+    {call: {
+        byteLength: function(frame) {
+            var res = bufrw.str1.byteLength(frame.mess);
+            if (res.err) return res;
+            frame.size = res.length + bufrw.UInt16BE.width;
+            if (frame.size > 10) {
+                return bufrw.LengthResult.error(new Error('arbitrary length limit'));
+            } else {
+                return bufrw.LengthResult.just(0);
+            }
+        },
+        writeInto: function(frame, buffer, offset) {
+            var res = bufrw.str1.byteLength(frame.mess);
+            if (res.err) return res;
+            frame.size = res.length + bufrw.UInt16BE.width;
+            if (buffer.length - offset < frame.size) {
+                return bufrw.WriteResult.error(new Error('not enough room'));
+            } else {
+                return bufrw.WriteResult.just(0);
+            }
+        }
+    }},
+    {name: 'size', rw: bufrw.UInt16BE},
+    {name: 'mess', rw: bufrw.str1},
+    {call: {
+        readFrom: function(frame, buffer, offset) {
+            if (offset < buffer.length) {
+                return bufrw.ReadResult.error(new Error('frame data past message'));
+            } else {
+                return bufrw.ReadResult.just(offset);
+            }
+        }
+    }}
+]);
+
+test('StructRW: frame', testRW.cases(Frame.rw, [
+    [Frame('cat'), [0x00, 0x06, 0x03, 0x63, 0x61, 0x74]],
+
+    // provoke call error paths
+    {
+        lengthTest: {
+            value: Frame('what even is this?'),
+            error: {
+                message: 'arbitrary length limit'
+            }
+        },
+        writeTest: {
+            value: Frame('what even is this?'),
+            length: 2,
+            error: {
+                message: 'not enough room'
+            }
+        },
+        readTest: {
+            bytes: [0x00, 0x00, 0x00, 0xff],
+            error: {
+                message: 'frame data past message'
+            }
+        }
+    }
+]));
