@@ -20,13 +20,13 @@
 
 'use strict';
 
-var structTest = require('./lib/struct_test');
+var testRW = require('./lib/test_rw');
 var test = require('tape');
 
 var VariableBufferRW = require('../variable_buffer_rw');
 
 var buf1 = VariableBufferRW(1);
 
-test('VariableBufferRW: simple buf~1', structTest.cases(buf1, [
+test('VariableBufferRW: simple buf~1', testRW.cases(buf1, [
     [Buffer([0x00, 0x88, 0xff]), [0x03, 0x00, 0x88, 0xff]]
 ]));

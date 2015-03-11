@@ -20,7 +20,7 @@
 
 'use strict';
 
-var structTest = require('./lib/struct_test');
+var testRW = require('./lib/test_rw');
 var test = require('tape');
 
 var atoms = require('../atoms');
@@ -28,7 +28,7 @@ var RepeatRW = require('../repeat');
 
 // n:1 (x<Int8>){n}
 var tinyIntList = RepeatRW(atoms.UInt8, atoms.Int8);
-test('RepeatRW: tinyIntList', structTest.cases(tinyIntList, [
+test('RepeatRW: tinyIntList', testRW.cases(tinyIntList, [
     [[], [0x00]],
     [[-1, 0, 1], [0x03,
                   0xff,
@@ -38,7 +38,7 @@ test('RepeatRW: tinyIntList', structTest.cases(tinyIntList, [
 
 // n:2 (x<Int16BE>){n}
 var shortIntList = RepeatRW(atoms.UInt16BE, atoms.Int16BE);
-test('RepeatRW: shortIntList', structTest.cases(shortIntList, [
+test('RepeatRW: shortIntList', testRW.cases(shortIntList, [
     [[], [0x00, 0x00]],
     [[-1, 0, 1], [0x00, 0x03,
                   0xff, 0xff,

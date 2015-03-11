@@ -20,7 +20,7 @@
 
 'use strict';
 
-var structTest = require('./lib/struct_test');
+var testRW = require('./lib/test_rw');
 var test = require('tape');
 
 var atoms = require('../atoms');
@@ -39,7 +39,7 @@ var numbers = SwitchRW(atoms.UInt8, {
     2: atoms.UInt32BE
 });
 
-test('SwitchRW: numbers', structTest.cases(numbers, [
+test('SwitchRW: numbers', testRW.cases(numbers, [
     [[0, 0x11], [0x00, 0x11]],
     [[1, 0x2222], [0x01, 0x22, 0x22]],
     [[2, 0x33333333], [0x02, 0x33, 0x33, 0x33, 0x33]]

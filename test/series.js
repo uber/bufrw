@@ -20,7 +20,7 @@
 
 'use strict';
 
-var structTest = require('./lib/struct_test');
+var testRW = require('./lib/test_rw');
 var test = require('tape');
 
 var atoms = require('../atoms');
@@ -31,7 +31,7 @@ var tinyShortWord = SeriesRW(
     atoms.UInt16BE,
     atoms.UInt32BE);
 
-test('SeriesRW: tinyShortWord', structTest.cases(tinyShortWord, [
+test('SeriesRW: tinyShortWord', testRW.cases(tinyShortWord, [
     [[0, 0, 0], [0x00,
                  0x00, 0x00,
                  0x00, 0x00, 0x00, 0x00]]
