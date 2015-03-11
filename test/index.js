@@ -20,6 +20,7 @@
 
 'use strict';
 
+require('./interface');
 require('./atoms');
 require('./fixed_width_rw');
 require('./null_rw');
