@@ -38,8 +38,6 @@ function StructRW(cons, fields, opts) {
     var self = this;
     opts = opts || {};
     self.cons = cons || makeObject;
-    self.writeGuard = opts.writeGuard || null;
-    self.readGuard = opts.readGuard || null;
     if (Array.isArray(fields)) {
         self.fields = fields;
     } else {
@@ -57,10 +55,6 @@ inherits(StructRW, BufferRW);
 
 StructRW.prototype.byteLength = function byteLength(obj) {
     var self = this;
-    if (self.writeGuard) {
-        var err = self.writeGuard(obj);
-        if (err) return LengthResult.error(err);
-    }
     var length = 0;
     for (var i = 0; i < self.fields.length; i++) {
         var field = self.fields[i];
@@ -80,10 +74,6 @@ StructRW.prototype.byteLength = function byteLength(obj) {
 
 StructRW.prototype.writeInto = function writeInto(obj, buffer, offset) {
     var self = this;
-    if (self.writeGuard) {
-        var err = self.writeGuard(obj);
-        if (err) return WriteResult.error(err, offset);
-    }
     var res = WriteResult.just(offset);
     for (var i = 0; i < self.fields.length; i++) {
         var field = self.fields[i];
@@ -118,11 +108,7 @@ StructRW.prototype.readFrom = function readFrom(buffer, offset) {
             obj[field.name] = res.value;
         }
     }
-    if (self.readGuard) {
-        var err = self.readGuard(obj);
-        if (err) return ReadResult.error(err, offset, obj);
-    }
-    return ReadResult(null, offset, obj);
+    return ReadResult.just(offset, obj);
 };
 
 function makeObject() {
