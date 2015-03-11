@@ -23,30 +23,33 @@
 var test = require('tape');
 
 var bufrw = require('../index');
+var LengthResult = require('../base').LengthResult;
+var WriteResult = require('../base').WriteResult;
+var ReadResult = require('../base').ReadResult;
 
 var byteRW = {
-    byteLength: function() {return bufrw.LengthResult.just(1);},
+    byteLength: function() {return LengthResult.just(1);},
     writeInto: function(b, buffer, offset) {
         buffer[offset] = b;
-        return bufrw.WriteResult.just(++offset);
+        return WriteResult.just(++offset);
     },
     readFrom: function(buffer, offset) {
         var b = buffer[offset];
-        return bufrw.ReadResult.just(++offset, b);
+        return ReadResult.just(++offset, b);
     },
 };
 
 var lengthErrorRW = {
-    byteLength: function() {return bufrw.LengthResult(new Error('boom'));}
+    byteLength: function() {return LengthResult(new Error('boom'));}
 };
 
 var writeErrorRW = {
-    byteLength: function() {return bufrw.LengthResult.just(0);},
-    writeInto: function() {return bufrw.WriteResult.error(new Error('bang'));}
+    byteLength: function() {return LengthResult.just(0);},
+    writeInto: function() {return WriteResult.error(new Error('bang'));}
 };
 
 var readErrorRW = {
-    readFrom: function() {return bufrw.ReadResult.error(new Error('zot'));}
+    readFrom: function() {return ReadResult.error(new Error('zot'));}
 };
 
 test('toBuffer', function t(assert) {
