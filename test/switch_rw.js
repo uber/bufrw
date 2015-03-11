@@ -20,13 +20,27 @@
 
 'use strict';
 
-require('./atoms');
-require('./fixed_width_rw');
-require('./null_rw');
-require('./repeat_rw');
-require('./series');
-require('./skip');
-require('./string_rw');
-require('./struct_rw');
-require('./switch_rw');
-require('./variable_buffer_rw');
+var structTest = require('./lib/struct_test');
+var test = require('tape');
+
+var atoms = require('../atoms');
+var SwitchRW = require('../switch');
+
+/*
+ * {
+ *     lat : DoubleBE
+ *     lng : DoubleBE
+ * }
+ */
+
+var numbers = SwitchRW(atoms.UInt8, {
+    0: atoms.UInt8,
+    1: atoms.UInt16BE,
+    2: atoms.UInt32BE
+});
+
+test('SwitchRW: numbers', structTest.cases(numbers, [
+    [[0, 0x11], [0x00, 0x11]],
+    [[1, 0x2222], [0x01, 0x22, 0x22]],
+    [[2, 0x33333333], [0x02, 0x33, 0x33, 0x33, 0x33]]
+]));
