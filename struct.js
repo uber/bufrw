@@ -108,7 +108,7 @@ StructRW.prototype.readFrom = function readFrom(buffer, offset) {
             obj[field.name] = res.value;
         }
     }
-    return ReadResult(null, offset, obj);
+    return ReadResult.just(offset, obj);
 };
 
 function makeObject() {
