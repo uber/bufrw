@@ -83,8 +83,10 @@ function readTest(assert, rw, testCase, callback) {
         var val = testCase.value;
         assert.deepEqual(got, val, util.format('read: %j', val));
         if (typeof val === 'object') {
-            assert.equal(got.constructor.name, val.constructor.name,
-                'expected ' + val.constructor.name + ' constructor');
+            var gotConsName = got && got.constructor && got.constructor.name;
+            var valConsName = val && val.constructor && val.constructor.name;
+            assert.equal(gotConsName, valConsName,
+                'expected ' + valConsName + ' constructor');
         }
         callback();
     }
