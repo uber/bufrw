@@ -23,7 +23,7 @@
 var color = require('ansi-color').set;
 var hex = require('hexer');
 var util = require('util');
-var bufrw = require('bufrw');
+var bufrw = require('../../index');
 
 module.exports.cases = testCases;
 
