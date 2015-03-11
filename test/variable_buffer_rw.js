@@ -23,10 +23,55 @@
 var testRW = require('./lib/test_rw');
 var test = require('tape');
 
+var atoms = require('../atoms');
 var VariableBufferRW = require('../variable_buffer_rw');
 
-var buf1 = VariableBufferRW(1);
+var buf1 = VariableBufferRW(atoms.UInt8);
 
 test('VariableBufferRW: simple buf~1', testRW.cases(buf1, [
-    [Buffer([0x00, 0x88, 0xff]), [0x03, 0x00, 0x88, 0xff]]
+    {
+        lengthTest: {length: 1, value: undefined},
+        writeTest: {bytes: [0x00], value: undefined}
+    },
+    {
+        lengthTest: {length: 1, value: null},
+        writeTest: {bytes: [0x00], value: null}
+    },
+    [ Buffer([0x00, 0x88, 0xff]),
+      [0x03, 0x00, 0x88, 0xff]
+    ],
+
+    // invalid value length/write errors
+    {
+        lengthTest: {value: {}, error: {
+            type: 'variable-buffer.invalid-argument',
+            name: 'VariableBufferInvalidArgumentError',
+            message: 'invalid argument, expected buffer, null, or undefined',
+            argType: 'object',
+            argConstructor: 'Object'
+        }},
+        writeTest: {value: {}, error: {
+            name: 'VariableBufferInvalidArgumentError',
+            type: 'variable-buffer.invalid-argument',
+            message: 'invalid argument, expected buffer, null, or undefined',
+            argConstructor: 'Object',
+            argType: 'object'
+        }}
+    },
+
+    // truncated buffer
+    {
+        readTest: {
+            bytes: [0x05, 0x01, 0x02, 0x03],
+            error: {
+                name: 'ShortBufferError',
+                type: 'short-buffer',
+                message: 'expected at least 5 bytes, only have 3 @1',
+                offset: 1,
+                actual: 3,
+                // buffer: <Buffer 05 01 02 03>,
+                expected: 5,
+            }
+        }
+    }
 ]));

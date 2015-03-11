@@ -23,9 +23,10 @@
 var testRW = require('./lib/test_rw');
 var test = require('tape');
 
+var atoms = require('../atoms');
 var StringRW = require('../string_rw');
 
-var str1 = StringRW(1, 'utf8');
+var str1 = StringRW(atoms.UInt8, 'utf8');
 
 test('StringRW: simple str~1 in utf8', testRW.cases(str1, [
     ['', [0x00]],
