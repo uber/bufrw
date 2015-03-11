@@ -70,6 +70,6 @@
       "formatStack": true
     }
   },
-  "private": true,
+  "private": false,
   "uber-ngen-version": "5.0.0"
 }
