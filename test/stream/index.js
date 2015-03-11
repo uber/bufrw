@@ -20,15 +20,4 @@
 
 'use strict';
 
-require('./interface');
-require('./atoms');
-require('./fixed_width_rw');
-require('./null_rw');
-require('./repeat_rw');
-require('./series');
-require('./skip');
-require('./string_rw');
-require('./struct_rw');
-require('./switch_rw');
-require('./variable_buffer_rw');
-require('./stream');
+require('./concat_read_buffer');
