@@ -19,9 +19,11 @@
 // THE SOFTWARE.
 
 module.exports.fromBuffer = require('./interface').fromBuffer;
+module.exports.byteLength = require('./interface').byteLength;
 module.exports.toBuffer = require('./interface').toBuffer;
 module.exports.intoBuffer = require('./interface').intoBuffer;
 module.exports.fromBufferTuple = require('./interface').fromBufferTuple;
+module.exports.byteLengthTuple = require('./interface').byteLengthTuple;
 module.exports.toBufferTuple = require('./interface').toBufferTuple;
 module.exports.intoBufferTuple = require('./interface').intoBufferTuple;
 
