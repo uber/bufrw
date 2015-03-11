@@ -34,9 +34,17 @@ function testCases(rw, cases) {
         for (var i = 0; i < cases.length; i++) {
             var testCase;
             if (Array.isArray(cases[i])) {
+                var value = cases[i][0];
+                var bytes = cases[i][1];
                 testCase = {
-                    value: cases[i][0],
-                    bytes: cases[i][1]
+                    writeTest: {
+                        bytes: bytes,
+                        value: value
+                    },
+                    readTest: {
+                        bytes: bytes,
+                        value: value
+                    }
                 };
             } else if (typeof cases[i] !== 'object') {
                 throw new Error('invalid test case ' + i);
@@ -46,11 +54,15 @@ function testCases(rw, cases) {
 
             var err;
 
-            err = writeTest(assert, rw, testCase);
-            assert.ifError(err, 'no write error');
+            if (testCase.writeTest) {
+                err = writeTest(assert, rw, testCase.writeTest);
+                assert.ifError(err, 'no write error');
+            }
 
-            err = readTest(assert, rw, testCase);
-            assert.ifError(err, 'no read error');
+            if (testCase.readTest) {
+                err = readTest(assert, rw, testCase.readTest);
+                assert.ifError(err, 'no read error');
+            }
         }
 
         (done || assert.end)();
