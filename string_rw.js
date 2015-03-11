@@ -35,13 +35,13 @@ var InvalidArgumentError = TypedError({
     argConstructor: null
 });
 
-function StringRW(size, encoding) {
+function StringRW(sizerw, encoding) {
     if (!(this instanceof StringRW)) {
-        return new StringRW(size, encoding);
+        return new StringRW(sizerw, encoding);
     }
     var self = this;
     self.encoding = encoding || 'utf8';
-    VariableBufferRW.call(self, size);
+    VariableBufferRW.call(self, sizerw);
 }
 inherits(StringRW, VariableBufferRW);
 
@@ -49,7 +49,7 @@ StringRW.prototype.byteLength = function byteLength(str) {
     var self = this;
     if (typeof str === 'string') {
         var length = Buffer.byteLength(str, self.encoding);
-        var len = self.size.byteLength(length);
+        var len = self.sizerw.byteLength(length);
         if (len.err) return len;
         return LengthResult.just(len.length + length);
     } else {
@@ -63,10 +63,10 @@ StringRW.prototype.byteLength = function byteLength(str) {
 StringRW.prototype.writeInto = function writeInto(str, buffer, offset) {
     var self = this;
     if (typeof str === 'string') {
-        var start = offset + self.size.width;
+        var start = offset + self.sizerw.width;
         var length = 0;
         length = buffer.write(str, start, self.encoding);
-        var res = self.size.writeInto(length, buffer, offset);
+        var res = self.sizerw.writeInto(length, buffer, offset);
         if (res.err) return res;
         return WriteResult.just(start + length);
     } else {
@@ -79,7 +79,7 @@ StringRW.prototype.writeInto = function writeInto(str, buffer, offset) {
 
 StringRW.prototype.readFrom = function readFrom(buffer, offset) {
     var self = this;
-    var res = self.size.readFrom(buffer, offset);
+    var res = self.sizerw.readFrom(buffer, offset);
     if (res.err) return res;
     offset = res.offset;
     var length = res.value;

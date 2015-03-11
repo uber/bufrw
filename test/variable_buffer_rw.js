@@ -23,9 +23,10 @@
 var testRW = require('./lib/test_rw');
 var test = require('tape');
 
+var atoms = require('../atoms');
 var VariableBufferRW = require('../variable_buffer_rw');
 
-var buf1 = VariableBufferRW(1);
+var buf1 = VariableBufferRW(atoms.UInt8);
 
 test('VariableBufferRW: simple buf~1', testRW.cases(buf1, [
     [Buffer([0x00, 0x88, 0xff]), [0x03, 0x00, 0x88, 0xff]]

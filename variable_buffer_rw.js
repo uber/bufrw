@@ -28,10 +28,6 @@ var WriteResult = require('./base').WriteResult;
 var ReadResult = require('./base').ReadResult;
 var BufferRW = require('./base').BufferRW;
 
-var UInt8 = require('./atoms').UInt8;
-var UInt16BE = require('./atoms').UInt16BE;
-var UInt32BE = require('./atoms').UInt32BE;
-
 var InvalidArgumentError = TypedError({
     type: 'variable-buffer.invalid-argument',
     message: 'invalid argument, expected buffer, null, or undefined',
@@ -39,28 +35,12 @@ var InvalidArgumentError = TypedError({
     argConstructor: null
 });
 
-function VariableBufferRW(size) {
+function VariableBufferRW(sizerw) {
     if (!(this instanceof VariableBufferRW)) {
-        return new VariableBufferRW(size);
+        return new VariableBufferRW(sizerw);
     }
     var self = this;
-    if (typeof size === 'number') {
-        switch (size) {
-            case 1:
-                self.size = UInt8;
-                break;
-            case 2:
-                self.size = UInt16BE;
-                break;
-            case 4:
-                self.size = UInt32BE;
-                break;
-            default:
-                throw new Error('unsupported size ' + size);
-        }
-    } else {
-        self.size = size;
-    }
+    self.sizerw = sizerw;
     BufferRW.call(self);
 }
 inherits(VariableBufferRW, BufferRW);
@@ -78,14 +58,14 @@ VariableBufferRW.prototype.byteLength = function byteLength(buf) {
             argConstructor: buf.constructor.name
         }));
     }
-    var len = self.size.byteLength(length);
+    var len = self.sizerw.byteLength(length);
     if (len.err) return len;
     return LengthResult.just(len.length + length);
 };
 
 VariableBufferRW.prototype.writeInto = function writeInto(buf, buffer, offset) {
     var self = this;
-    var start = offset + self.size.width;
+    var start = offset + self.sizerw.width;
     var length = 0;
     if (Buffer.isBuffer(buf)) {
         length = buf.copy(buffer, start);
@@ -97,14 +77,14 @@ VariableBufferRW.prototype.writeInto = function writeInto(buf, buffer, offset) {
             argConstructor: buf.constructor.name
         }), offset);
     }
-    var res = self.size.writeInto(length, buffer, offset);
+    var res = self.sizerw.writeInto(length, buffer, offset);
     if (res.err) return res;
     return WriteResult.just(start + length);
 };
 
 VariableBufferRW.prototype.readFrom = function readFrom(buffer, offset) {
     var self = this;
-    var res = self.size.readFrom(buffer, offset);
+    var res = self.sizerw.readFrom(buffer, offset);
     if (res.err) return res;
     offset = res.offset;
     var length = res.value;
