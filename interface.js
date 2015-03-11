@@ -48,6 +48,14 @@ function fromBuffer(struct, buffer, offset) {
     else return value;
 }
 
+function byteLength(struct, value) {
+    var tup = byteLengthTuple(struct, value);
+    var err = tup[0];
+    var length = tup[1];
+    if (err) throw err;
+    else return length;
+}
+
 function toBuffer(struct, value) {
     var tup = toBufferTuple(struct, value);
     var err = tup[0];
@@ -83,6 +91,12 @@ function fromBufferTuple(struct, buffer, offset) {
     return [err, res.value];
 }
 
+function byteLengthTuple(struct, value) {
+    var lenRes = struct.byteLength(value);
+    if (lenRes.err) return [lenRes.err, 0];
+    else return [null, lenRes.length];
+}
+
 function toBufferTuple(struct, value) {
     var lenRes = struct.byteLength(value);
     if (lenRes.err) return [lenRes.err, emptyBuffer];
@@ -107,8 +121,10 @@ function intoBufferTuple(struct, buffer, value) {
 }
 
 module.exports.fromBuffer = fromBuffer;
+module.exports.byteLength = byteLength;
 module.exports.toBuffer = toBuffer;
 module.exports.intoBuffer = intoBuffer;
 module.exports.fromBufferTuple = fromBufferTuple;
+module.exports.byteLengthTuple = byteLengthTuple;
 module.exports.toBufferTuple = toBufferTuple;
 module.exports.intoBufferTuple = intoBufferTuple;

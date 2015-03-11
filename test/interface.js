@@ -52,6 +52,16 @@ var readErrorRW = {
     readFrom: function() {return ReadResult.error(new Error('zot'));}
 };
 
+test('byteLength', function t(assert) {
+    assert.deepEqual(
+        iface.byteLength(byteRW, 1),
+        1, 'write 1 uint8');
+    assert.throws(function() {
+        iface.byteLength(lengthErrorRW, 1);
+    }, /boom/, 'length error throws');
+    assert.end();
+});
+
 test('toBuffer', function t(assert) {
     assert.deepEqual(
         iface.toBuffer(byteRW, 1),
