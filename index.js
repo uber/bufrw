@@ -24,6 +24,7 @@ var ShortReadError = TypedError({
     type: 'short-read',
     message: 'short read, {remaining} byte left over after consuming {offset}',
     remaining: null,
+    buffer: null,
     offset: null
 });
 
@@ -31,6 +32,7 @@ var ShortWriteError = TypedError({
     type: 'short-write',
     message: 'short write, {remaining} byte left over after writing {offset}',
     remaining: null,
+    buffer: null,
     offset: null
 });
 
@@ -68,6 +70,7 @@ function fromBufferTuple(struct, buffer, offset) {
     if (!err && offset !== buffer.length) {
         err = ShortReadError({
             remaining: buffer.length - offset,
+            buffer: buffer,
             offset: offset
         });
     }
@@ -94,6 +97,7 @@ function intoBufferTuple(struct, buffer, value) {
     if (offset !== buffer.length) {
         return [ShortWriteError({
             remaining: buffer.length - offset,
+            buffer: buffer,
             offset: offset
         }), buffer];
     }
