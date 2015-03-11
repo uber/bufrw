@@ -24,6 +24,18 @@ var test = require('tape');
 
 var bufrw = require('../index');
 
+var byteRW = {
+    byteLength: function() {return bufrw.LengthResult.just(1);},
+    writeInto: function(b, buffer, offset) {
+        buffer[offset] = b;
+        return bufrw.WriteResult.just(++offset);
+    },
+    readFrom: function(buffer, offset) {
+        var b = buffer[offset];
+        return bufrw.ReadResult.just(++offset, b);
+    },
+};
+
 var lengthErrorRW = {
     byteLength: function() {return bufrw.LengthResult(new Error('boom'));}
 };
@@ -39,7 +51,7 @@ var readErrorRW = {
 
 test('toBuffer', function t(assert) {
     assert.deepEqual(
-        bufrw.toBuffer(bufrw.UInt8, 1),
+        bufrw.toBuffer(byteRW, 1),
         Buffer([0x01]), 'write 1 uint8');
     assert.throws(function() {
         bufrw.toBuffer(lengthErrorRW, 1);
@@ -52,26 +64,26 @@ test('toBuffer', function t(assert) {
 
 test('intoBuffer', function t(assert) {
     assert.deepEqual(
-        bufrw.intoBuffer(bufrw.UInt8, Buffer([0]), 1),
+        bufrw.intoBuffer(byteRW, Buffer([0]), 1),
         Buffer([0x01]), 'write 1 uint8');
     assert.throws(function() {
         bufrw.intoBuffer(writeErrorRW, Buffer([0]), 1);
     }, /bang/, 'write error throws');
     assert.throws(function() {
-        bufrw.intoBuffer(bufrw.UInt8, Buffer([0, 0]), 1);
+        bufrw.intoBuffer(byteRW, Buffer([0, 0]), 1);
     }, /short write, 1 byte left over after writing 1/, 'short write error');
     assert.end();
 });
 
 test('fromBuffer', function t(assert) {
     assert.equal(
-        bufrw.fromBuffer(bufrw.UInt8, Buffer([0x01])),
+        bufrw.fromBuffer(byteRW, Buffer([0x01])),
         1, 'read 1 uint8');
     assert.throws(function() {
         bufrw.fromBuffer(readErrorRW, Buffer(0));
     }, /zot/, 'read error throws');
     assert.throws(function() {
-        bufrw.fromBuffer(bufrw.UInt8, Buffer([0, 0]));
+        bufrw.fromBuffer(byteRW, Buffer([0, 0]));
     }, /short read, 1 byte left over after consuming 1/, 'short read error');
     assert.end();
 });
