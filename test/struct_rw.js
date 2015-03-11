@@ -20,7 +20,7 @@
 
 'use strict';
 
-var structTest = require('./lib/struct_test');
+var testRW = require('./lib/test_rw');
 var test = require('tape');
 
 var atoms = require('../atoms');
@@ -38,7 +38,7 @@ var anonLoc = StructRW({
     lng: atoms.DoubleBE
 });
 
-test('StructRW: anonLoc', structTest.cases(anonLoc, [
+test('StructRW: anonLoc', testRW.cases(anonLoc, [
     [{lat: 37.775497, lng: -122.417519},
      [0x40, 0x42, 0xe3, 0x43, 0x7c, 0x56, 0x92, 0xb4,
       0xc0, 0x5e, 0x9a, 0xb8, 0xa1, 0x9c, 0x9d, 0x5a]]
@@ -58,7 +58,7 @@ var consLoc = StructRW(Loc, {
     lng: atoms.DoubleBE
 });
 
-test('StructRW: consLoc', structTest.cases(consLoc, [
+test('StructRW: consLoc', testRW.cases(consLoc, [
     [Loc(37.775497, -122.417519),
      [0x40, 0x42, 0xe3, 0x43, 0x7c, 0x56, 0x92, 0xb4,
       0xc0, 0x5e, 0x9a, 0xb8, 0xa1, 0x9c, 0x9d, 0x5a]]

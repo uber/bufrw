@@ -20,14 +20,14 @@
 
 'use strict';
 
-var structTest = require('./lib/struct_test');
+var testRW = require('./lib/test_rw');
 var test = require('tape');
 
 var StringRW = require('../string_rw');
 
 var str1 = StringRW(1, 'utf8');
 
-test('StringRW: simple str~1 in utf8', structTest.cases(str1, [
+test('StringRW: simple str~1 in utf8', testRW.cases(str1, [
     ['', [0x00]],
     ['cat', [0x03, 0x63, 0x61, 0x74]],
     ['c“a”t', [0x09, 0x63, 0xe2, 0x80,

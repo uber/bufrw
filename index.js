@@ -36,6 +36,14 @@ var ShortWriteError = TypedError({
 
 var emptyBuffer = Buffer(0);
 
+function fromBuffer(struct, buffer, offset) {
+    var tup = fromBufferTuple(struct, buffer, offset);
+    var err = tup[0];
+    var value = tup[1];
+    if (err) throw err;
+    else return value;
+}
+
 function toBuffer(struct, value) {
     var tup = toBufferTuple(struct, value);
     var err = tup[0];
@@ -44,12 +52,12 @@ function toBuffer(struct, value) {
     else return buffer;
 }
 
-function fromBuffer(struct, buffer, offset) {
-    var tup = fromBufferTuple(struct, buffer, offset);
+function intoBuffer(struct, buffer, value) {
+    var tup = intoBufferTuple(struct, buffer, value);
     var err = tup[0];
-    var value = tup[1];
+    buffer = tup[1];
     if (err) throw err;
-    else return value;
+    else return buffer;
 }
 
 function fromBufferTuple(struct, buffer, offset) {
@@ -74,27 +82,30 @@ function toBufferTuple(struct, value) {
     var lenRes = struct.byteLength(value);
     if (lenRes.err) return [lenRes.err, emptyBuffer];
     var length = lenRes.length;
-
     var buffer = new Buffer(length);
     // buffer.fill(0); TODO option
+    return intoBufferTuple(struct, buffer, value);
+}
+
+function intoBufferTuple(struct, buffer, value) {
     var writeRes = struct.writeInto(value, buffer, 0);
     if (writeRes.err) return [writeRes.err, buffer];
     var offset = writeRes.offset;
-
-    if (offset !== length) {
+    if (offset !== buffer.length) {
         return [ShortWriteError({
-            remaining: length - offset,
+            remaining: buffer.length - offset,
             offset: offset
         }), buffer];
     }
-
     return [null, buffer];
 }
 
 module.exports.fromBuffer = fromBuffer;
 module.exports.toBuffer = toBuffer;
+module.exports.intoBuffer = intoBuffer;
 module.exports.fromBufferTuple = fromBufferTuple;
 module.exports.toBufferTuple = toBufferTuple;
+module.exports.intoBufferTuple = intoBufferTuple;
 
 module.exports.Base = require('./base').BufferRW; // TODO: align names
 module.exports.LengthResult = require('./base').LengthResult;

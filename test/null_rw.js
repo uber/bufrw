@@ -20,11 +20,11 @@
 
 'use strict';
 
-var structTest = require('./lib/struct_test');
+var testRW = require('./lib/test_rw');
 var test = require('tape');
 
 var NullRW = require('../null');
 
-test('NullRW: empty <-> null', structTest.cases(NullRW, [
+test('NullRW: empty <-> null', testRW.cases(NullRW, [
     [null, []]
 ]));
