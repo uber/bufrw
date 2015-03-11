@@ -23,19 +23,19 @@
 var testRW = require('./lib/test_rw');
 var test = require('tape');
 
-var atoms = require('../atoms');
+var LengthResult = require('../base').LengthResult;
+var ReadResult = require('../base').ReadResult;
+var WriteResult = require('../base').WriteResult;
+var UInt8 = require('../atoms').UInt8;
+var UInt16BE = require('../atoms').UInt16BE;
+var DoubleBE = require('../atoms').DoubleBE;
+var StringRW = require('../string_rw');
 var StructRW = require('../struct');
-
-/*
- * {
- *     lat : DoubleBE
- *     lng : DoubleBE
- * }
- */
+var str1 = StringRW(UInt8);
 
 var anonLoc = StructRW({
-    lat: atoms.DoubleBE,
-    lng: atoms.DoubleBE
+    lat: DoubleBE,
+    lng: DoubleBE
 });
 
 test('StructRW: anonLoc', testRW.cases(anonLoc, [
@@ -54,8 +54,8 @@ function Loc(lat, lng) {
 }
 
 var consLoc = StructRW(Loc, {
-    lat: atoms.DoubleBE,
-    lng: atoms.DoubleBE
+    lat: DoubleBE,
+    lng: DoubleBE
 });
 
 test('StructRW: consLoc', testRW.cases(consLoc, [
@@ -64,7 +64,6 @@ test('StructRW: consLoc', testRW.cases(consLoc, [
       0xc0, 0x5e, 0x9a, 0xb8, 0xa1, 0x9c, 0x9d, 0x5a]]
 ]));
 
-var bufrw = require('../index');
 
 function Frame(mess) {
     if (!(this instanceof Frame)) {
@@ -78,34 +77,34 @@ function Frame(mess) {
 Frame.rw = StructRW(Frame, [
     {call: {
         byteLength: function(frame) {
-            var res = bufrw.str1.byteLength(frame.mess);
+            var res = str1.byteLength(frame.mess);
             if (res.err) return res;
-            frame.size = res.length + bufrw.UInt16BE.width;
+            frame.size = res.length + UInt16BE.width;
             if (frame.size > 10) {
-                return bufrw.LengthResult.error(new Error('arbitrary length limit'));
+                return LengthResult.error(new Error('arbitrary length limit'));
             } else {
-                return bufrw.LengthResult.just(0);
+                return LengthResult.just(0);
             }
         },
         writeInto: function(frame, buffer, offset) {
-            var res = bufrw.str1.byteLength(frame.mess);
+            var res = str1.byteLength(frame.mess);
             if (res.err) return res;
-            frame.size = res.length + bufrw.UInt16BE.width;
+            frame.size = res.length + UInt16BE.width;
             if (buffer.length - offset < frame.size) {
-                return bufrw.WriteResult.error(new Error('not enough room'));
+                return WriteResult.error(new Error('not enough room'));
             } else {
-                return bufrw.WriteResult.just(0);
+                return WriteResult.just(0);
             }
         }
     }},
-    {name: 'size', rw: bufrw.UInt16BE},
-    {name: 'mess', rw: bufrw.str1},
+    {name: 'size', rw: UInt16BE},
+    {name: 'mess', rw: str1},
     {call: {
         readFrom: function(frame, buffer, offset) {
             if (offset < buffer.length) {
-                return bufrw.ReadResult.error(new Error('frame data past message'));
+                return ReadResult.error(new Error('frame data past message'));
             } else {
-                return bufrw.ReadResult.just(offset);
+                return ReadResult.just(offset);
             }
         }
     }}
