@@ -1,6 +1,6 @@
 check:
     global:
         statements: 95
-        branches: 85
+        branches: 86
         lines: 98
         functions: 99

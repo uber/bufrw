@@ -84,11 +84,12 @@ inherits(ChunkReader, Transform);
 ChunkReader.prototype._transform = function _transform(buf, encoding, callback) {
     var self = this;
     self.buffer.push(buf);
+    var err = null;
     while (self.buffer.avail() >= self.expecting) {
         switch (self.state) {
             case States.PendingLength:
                 var sizeRes = self.sizeRW.readFrom(self.buffer, 0);
-                var err = sizeRes.err;
+                err = sizeRes.err;
                 if (!err && !sizeRes.value) {
                     err = ZeroLengthChunkError();
                 }
@@ -96,7 +97,8 @@ ChunkReader.prototype._transform = function _transform(buf, encoding, callback) 
                     self.buffer.shift(self.sizeRW.width);
                     self.expecting = self.sizeRW.width;
                     self.state = States.PendingLength;
-                    self.emit('error', err);
+                    callback(err);
+                    return;
                 } else {
                     self.expecting = sizeRes.value;
                     self.state = States.Seeking;
@@ -114,9 +116,13 @@ ChunkReader.prototype._transform = function _transform(buf, encoding, callback) 
                     }));
                     return;
                 }
-                self._readChunk(chunk);
                 self.expecting = self.sizeRW.width;
                 self.state = States.PendingLength;
+                err = self._readChunk(chunk);
+                if (err) {
+                    callback(err);
+                    return;
+                }
                 break;
 
             // istanbul ignore next
@@ -153,10 +159,11 @@ ChunkReader.prototype._readChunk = function _readChunk(chunk) {
     var self = this;
     var tup = fromBufferTuple(self.chunkRW, chunk);
     var err = tup[0];
-    var frame = tup[1];
+    var value = tup[1];
     if (err) {
-        self.emit('error', err);
+        return err;
     } else {
-        self.push(frame);
+        self.push(value);
+        return null;
     }
 };
