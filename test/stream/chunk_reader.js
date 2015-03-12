@@ -85,16 +85,12 @@ function readerTest(desc, frameRW, chunks, expected) {
         reader.on('data', function onData(frame) {
             expect('frame', frame);
         });
-        reader.on('finish', function onFinish() {
-            done();
-        });
         reader.on('error', function onError(err) {
             expect('error', err);
-            reader.end(); // TODO: why
+            reader.end();
         });
-        reader.on('end', function onEnd() {
-            done();
-        });
+        reader.on('finish', done);
+        reader.on('end', done);
         stream.pipe(reader);
     });
 }
