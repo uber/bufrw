@@ -21,3 +21,4 @@
 'use strict';
 
 require('./concat_read_buffer');
+require('./chunk_reader');
