@@ -20,6 +20,37 @@
 
 'use strict';
 
-require('./concat_read_buffer');
-require('./chunk_reader');
-require('./chunk_writer');
+var inherits = require('util').inherits;
+var Transform = require('stream').Transform;
+
+var toBufferTuple = require('../interface').toBufferTuple;
+
+module.exports = ChunkWriter;
+
+// TODO: pre-allocated buffer strategies
+
+function ChunkWriter(chunkRW, options) {
+    if (!(this instanceof ChunkWriter)) {
+        return new ChunkWriter(chunkRW, options);
+    }
+    var self = this;
+    Transform.call(self, options);
+    self._writableState.objectMode = true;
+    self._readableState.objectMode = false;
+    self.chunkRW = chunkRW;
+}
+
+inherits(ChunkWriter, Transform);
+
+ChunkWriter.prototype._transform = function _transform(value, encoding, callback) {
+    var self = this;
+    var tup = toBufferTuple(self.chunkRW, value);
+    var err = tup[0];
+    var buffer = tup[1];
+    if (err) {
+        callback(err);
+    } else {
+        self.push(buffer);
+        callback();
+    }
+};
