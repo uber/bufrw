@@ -29,7 +29,7 @@ var ReadResult = require('./base').ReadResult;
 var BufferRW = require('./base').BufferRW;
 
 var InvalidArgumentError = TypedError({
-    type: 'repeatrw.invalid-argument',
+    type: 'invalid-argument',
     message: 'invalid argument, not an array',
     argType: null,
     argConstructor: null
