@@ -29,7 +29,7 @@ var ReadResult = require('./base').ReadResult;
 var VariableBufferRW = require('./variable_buffer_rw');
 
 var InvalidArgumentError = TypedError({
-    type: 'variable-buffer.invalid-argument',
+    type: 'invalid-argument',
     message: 'invalid argument, expected string, null, or undefined',
     argType: null,
     argConstructor: null
