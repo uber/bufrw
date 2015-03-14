@@ -44,15 +44,15 @@ test('VariableBufferRW: simple buf~1', testRW.cases(buf1, [
     // invalid value length/write errors
     {
         lengthTest: {value: {}, error: {
-            type: 'variable-buffer.invalid-argument',
-            name: 'VariableBufferInvalidArgumentError',
+            type: 'invalid-argument',
+            name: 'InvalidArgumentError',
             message: 'invalid argument, expected buffer, null, or undefined',
             argType: 'object',
             argConstructor: 'Object'
         }},
         writeTest: {value: {}, error: {
-            name: 'VariableBufferInvalidArgumentError',
-            type: 'variable-buffer.invalid-argument',
+            name: 'InvalidArgumentError',
+            type: 'invalid-argument',
             message: 'invalid argument, expected buffer, null, or undefined',
             argConstructor: 'Object',
             argType: 'object'
