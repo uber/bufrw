@@ -23,6 +23,21 @@
 var testRW = require('./lib/test_rw');
 var test = require('tape');
 
+var LengthResult = require('../base').LengthResult;
+var WriteResult = require('../base').WriteResult;
+var ReadResult = require('../base').ReadResult;
+var brokenRW = {
+    byteLength: function() {
+        return LengthResult(new Error('boom'));
+    },
+    writeInto: function(val, buffer, offset) {
+        return WriteResult(new Error('bang'), offset);
+    },
+    readFrom: function(buffer, offset) {
+        return ReadResult(new Error('bork'), offset);
+    },
+};
+
 var atoms = require('../atoms');
 var SeriesRW = require('../series');
 
@@ -34,5 +49,53 @@ var tinyShortWord = SeriesRW(
 test('SeriesRW: tinyShortWord', testRW.cases(tinyShortWord, [
     [[0, 0, 0], [0x00,
                  0x00, 0x00,
-                 0x00, 0x00, 0x00, 0x00]]
+                 0x00, 0x00, 0x00, 0x00]],
+
+    // null values is ok
+    {
+        lengthTest: {
+            value: null,
+            length: 7,
+        },
+        writeTest: {
+            value: null,
+            bytes: [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+        }
+    },
+
+    // invalid arg to length/write
+    {
+        lengthTest: {value: 42, error: {
+            type: 'invalid-argument',
+            name: 'InvalidArgumentError',
+            message: 'invalid argument, expected array or null',
+            argType: 'number',
+            argConstructor: 'Number'
+        }},
+        writeTest: {value: 42, error: {
+            name: 'InvalidArgumentError',
+            type: 'invalid-argument',
+            message: 'invalid argument, expected array or null',
+            argType: 'number',
+            argConstructor: 'Number'
+        }}
+    }
+]));
+
+test('SeriesRW: passes error thru', testRW.cases(SeriesRW(brokenRW), [
+    {
+        lengthTest: {
+            value: [1],
+            error: {message: 'boom'}
+        },
+        writeTest: {
+            value: [1],
+            length: 1,
+            error: {message: 'bang'}
+        },
+        readTest: {
+            bytes: [1],
+            error: {message: 'bork'}
+        }
+    }
 ]));
