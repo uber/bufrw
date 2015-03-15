@@ -29,6 +29,28 @@ var StringRW = require('../string_rw');
 var str1 = StringRW(atoms.UInt8, 'utf8');
 
 test('StringRW: simple str~1 in utf8', testRW.cases(str1, [
+    {
+        lengthTest: {
+            value: null,
+            length: 1
+        },
+        writeTest: {
+            value: null,
+            bytes: [0x00]
+        }
+    },
+
+    {
+        lengthTest: {
+            value: undefined,
+            length: 1
+        },
+        writeTest: {
+            value: undefined,
+            bytes: [0x00]
+        }
+    },
+
     ['', [0x00]],
     ['cat', [0x03, 0x63, 0x61, 0x74]],
     ['c“a”t', [0x09, 0x63, 0xe2, 0x80,
