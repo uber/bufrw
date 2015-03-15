@@ -26,12 +26,20 @@ var test = require('tape');
 var atoms = require('../atoms');
 var SwitchRW = require('../switch');
 
-/*
- * {
- *     lat : DoubleBE
- *     lng : DoubleBE
- * }
- */
+var LengthResult = require('../base').LengthResult;
+var WriteResult = require('../base').WriteResult;
+var ReadResult = require('../base').ReadResult;
+var brokenRW = {
+    byteLength: function() {
+        return LengthResult(new Error('boom'));
+    },
+    writeInto: function(val, buffer, offset) {
+        return WriteResult(new Error('bang'), offset);
+    },
+    readFrom: function(buffer, offset) {
+        return ReadResult(new Error('bork'), offset);
+    },
+};
 
 var numbers = SwitchRW(atoms.UInt8, {
     0: atoms.UInt8,
@@ -42,5 +50,70 @@ var numbers = SwitchRW(atoms.UInt8, {
 test('SwitchRW: numbers', testRW.cases(numbers, [
     [[0, 0x11], [0x00, 0x11]],
     [[1, 0x2222], [0x01, 0x22, 0x22]],
-    [[2, 0x33333333], [0x02, 0x33, 0x33, 0x33, 0x33]]
+    [[2, 0x33333333], [0x02, 0x33, 0x33, 0x33, 0x33]],
+
+    // invalid values
+    {
+        lengthTest: {
+            value: [42, 42],
+            error: {
+                type: 'invalid-switch-value',
+                message: 'invalid switch value 42',
+                value: 42
+            }
+        },
+        writeTest: {
+            value: [42, 42],
+            length: 2,
+            error: {
+                type: 'invalid-switch-value',
+                message: 'invalid switch value 42',
+                value: 42
+            }
+        },
+        readTest: {
+            bytes: [42, 42],
+            error: {
+                type: 'invalid-switch-value',
+                message: 'invalid switch value 42',
+                value: 42
+            }
+        }
+    }
+]));
+
+test('SwitchRW: passes valrw error thru', testRW.cases(SwitchRW(brokenRW, {1: atoms.UInt8}), [
+    {
+        lengthTest: {
+            value: [1, 2],
+            error: {message: 'boom'}
+        },
+        writeTest: {
+            value: [1, 2],
+            length: 2,
+            error: {message: 'bang'}
+        },
+        readTest: {
+            bytes: [1, 2],
+            error: {message: 'bork'}
+        }
+    }
+]));
+
+test('SwitchRW: passes datarw error thru', testRW.cases(SwitchRW(atoms.UInt8, {1: brokenRW}), [
+    {
+        lengthTest: {
+            value: [1, 2],
+            error: {message: 'boom'}
+        },
+        writeTest: {
+            value: [1, 2],
+            length: 2,
+            error: {message: 'bang'}
+        },
+        readTest: {
+            bytes: [1, 2],
+            error: {message: 'bork'}
+        }
+    }
 ]));
