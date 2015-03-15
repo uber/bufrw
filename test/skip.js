@@ -25,8 +25,42 @@ var test = require('tape');
 
 var SkipRW = require('../skip');
 
-var skip5 = SkipRW(5, 0xaa);
+var skip1 = SkipRW(1);
+test('SkipRW: skip1', testRW.cases(skip1, [
+    [null, [0x00]],
 
+    // truncated buffer
+    {
+        readTest: {
+            bytes: [],
+            error: {
+                name: 'ShortBufferError',
+                type: 'short-buffer',
+                message: 'expected at least 1 bytes, only have 0 @0',
+                offset: 0,
+                actual: 0,
+                expected: 1,
+            }
+        }
+    }
+]));
+
+var skip5 = SkipRW(5, 0xaa);
 test('SkipRW: skip5', testRW.cases(skip5, [
-    [null, [0xaa, 0xaa, 0xaa, 0xaa, 0xaa]]
+    [null, [0xaa, 0xaa, 0xaa, 0xaa, 0xaa]],
+
+    // truncated buffer
+    {
+        readTest: {
+            bytes: [1, 2, 3],
+            error: {
+                name: 'ShortBufferError',
+                type: 'short-buffer',
+                message: 'expected at least 5 bytes, only have 3 @0',
+                offset: 0,
+                actual: 3,
+                expected: 5,
+            }
+        }
+    }
 ]));

@@ -29,7 +29,7 @@ var ReadResult = require('./base').ReadResult;
 var VariableBufferRW = require('./variable_buffer_rw');
 
 var InvalidArgumentError = TypedError({
-    type: 'variable-buffer.invalid-argument',
+    type: 'invalid-argument',
     message: 'invalid argument, expected string, null, or undefined',
     argType: null,
     argConstructor: null
@@ -47,34 +47,35 @@ inherits(StringRW, VariableBufferRW);
 
 StringRW.prototype.byteLength = function byteLength(str) {
     var self = this;
+    var length = 0;
     if (typeof str === 'string') {
-        var length = Buffer.byteLength(str, self.encoding);
-        var len = self.sizerw.byteLength(length);
-        if (len.err) return len;
-        return LengthResult.just(len.length + length);
-    } else {
+        length = Buffer.byteLength(str, self.encoding);
+    } else if (str !== null && str !== undefined) {
         return LengthResult.error(InvalidArgumentError({
             argType: typeof str,
             argConstructor: str.constructor.name
         }));
     }
+    var len = self.sizerw.byteLength(length);
+    if (len.err) return len;
+    return LengthResult.just(len.length + length);
 };
 
 StringRW.prototype.writeInto = function writeInto(str, buffer, offset) {
     var self = this;
+    var start = offset + self.sizerw.width;
+    var length = 0;
     if (typeof str === 'string') {
-        var start = offset + self.sizerw.width;
-        var length = 0;
         length = buffer.write(str, start, self.encoding);
-        var res = self.sizerw.writeInto(length, buffer, offset);
-        if (res.err) return res;
-        return WriteResult.just(start + length);
-    } else {
+    } else if (str !== null && str !== undefined) {
         return WriteResult.error(InvalidArgumentError({
             argType: typeof str,
             argConstructor: str.constructor.name
         }), offset);
     }
+    var res = self.sizerw.writeInto(length, buffer, offset);
+    if (res.err) return res;
+    return WriteResult.just(start + length);
 };
 
 StringRW.prototype.readFrom = function readFrom(buffer, offset) {

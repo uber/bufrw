@@ -28,5 +28,39 @@ var FixedWidthRW = require('../fixed_width_rw');
 var fix8 = FixedWidthRW(8);
 var fixed8 = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
 test('FixedWidthRW: simple fix:8', testRW.cases(fix8, [
-    [Buffer(fixed8), fixed8]
+    [Buffer(fixed8), fixed8],
+
+    // mismatch errors
+    {
+        lengthTest: {
+            value: Buffer([0x01]),
+            error: {
+                type: 'fixed-length-mismatch',
+                message: 'supplied length 1 mismatches fixed length 8',
+                expected: 8,
+                got: 1
+            }
+        },
+        writeTest: {
+            value: Buffer([0x01]),
+            error: {
+                type: 'fixed-length-mismatch',
+                message: 'supplied length 1 mismatches fixed length 8',
+                expected: 8,
+                got: 1
+            }
+        },
+        readTest: {
+            bytes: [0x01],
+            error: {
+                name: 'ShortBufferError',
+                type: 'short-buffer',
+                message: 'expected at least 8 bytes, only have 1 @0',
+                offset: 0,
+                actual: 1,
+                expected: 8
+            }
+        }
+    }
+
 ]));

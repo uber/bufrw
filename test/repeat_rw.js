@@ -26,6 +26,21 @@ var test = require('tape');
 var atoms = require('../atoms');
 var RepeatRW = require('../repeat');
 
+var LengthResult = require('../base').LengthResult;
+var WriteResult = require('../base').WriteResult;
+var ReadResult = require('../base').ReadResult;
+var brokenRW = {
+    byteLength: function() {
+        return LengthResult(new Error('boom'));
+    },
+    writeInto: function(val, buffer, offset) {
+        return WriteResult(new Error('bang'), offset);
+    },
+    readFrom: function(buffer, offset) {
+        return ReadResult(new Error('bork'), offset);
+    },
+};
+
 // n:1 (x<Int8>){n}
 var tinyIntList = RepeatRW(atoms.UInt8, atoms.Int8);
 test('RepeatRW: tinyIntList', testRW.cases(tinyIntList, [
@@ -43,5 +58,64 @@ test('RepeatRW: shortIntList', testRW.cases(shortIntList, [
     [[-1, 0, 1], [0x00, 0x03,
                   0xff, 0xff,
                   0x00, 0x00,
-                  0x00, 0x01]]
+                  0x00, 0x01]],
+
+    // invalid arguments through length/write
+    {
+        lengthTest: {
+            value: 42,
+            error: {
+                type: 'invalid-argument',
+                message: 'invalid argument, not an array',
+                argType: 'number',
+                argConstructor: 'Number'
+            }
+        },
+        writeTest: {
+            value: 42,
+            error: {
+                type: 'invalid-argument',
+                message: 'invalid argument, not an array',
+                argType: 'number',
+                argConstructor: 'Number'
+            }
+        }
+    }
+
+]));
+
+test('RepeatRW: passes countrw error thru', testRW.cases(RepeatRW(brokenRW, atoms.Int8), [
+    {
+        lengthTest: {
+            value: [],
+            error: {message: 'boom'}
+        },
+        writeTest: {
+            value: [],
+            length: 1,
+            error: {message: 'bang'}
+        },
+        readTest: {
+            bytes: [0],
+            error: {message: 'bork'}
+        }
+    }
+]));
+
+test('RepeatRW: passes partrw error thru', testRW.cases(RepeatRW(atoms.UInt8, brokenRW), [
+    {
+        lengthTest: {
+            value: [1],
+            error: {message: 'boom'}
+        },
+        writeTest: {
+            value: [1],
+            length: 1,
+            error: {message: 'bang'}
+        },
+        readTest: {
+            bytes: [1, 1],
+            error: {message: 'bork'}
+        }
+    }
 ]));

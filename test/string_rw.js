@@ -23,15 +23,103 @@
 var testRW = require('./lib/test_rw');
 var test = require('tape');
 
+var LengthResult = require('../base').LengthResult;
+var WriteResult = require('../base').WriteResult;
+var ReadResult = require('../base').ReadResult;
+var brokenRW = {
+    byteLength: function() {
+        return LengthResult(new Error('boom'));
+    },
+    writeInto: function(val, buffer, offset) {
+        return WriteResult(new Error('bang'), offset);
+    },
+    readFrom: function(buffer, offset) {
+        return ReadResult(new Error('bork'), offset);
+    },
+};
+
 var atoms = require('../atoms');
 var StringRW = require('../string_rw');
 
 var str1 = StringRW(atoms.UInt8, 'utf8');
 
 test('StringRW: simple str~1 in utf8', testRW.cases(str1, [
+    {
+        lengthTest: {
+            value: null,
+            length: 1
+        },
+        writeTest: {
+            value: null,
+            bytes: [0x00]
+        }
+    },
+
+    {
+        lengthTest: {
+            value: undefined,
+            length: 1
+        },
+        writeTest: {
+            value: undefined,
+            bytes: [0x00]
+        }
+    },
+
     ['', [0x00]],
     ['cat', [0x03, 0x63, 0x61, 0x74]],
     ['c“a”t', [0x09, 0x63, 0xe2, 0x80,
                0x9c, 0x61, 0xe2, 0x80,
-               0x9d, 0x74]]
+               0x9d, 0x74]],
+
+    // invalid arg to length/write
+    {
+        lengthTest: {value: 42, error: {
+            type: 'invalid-argument',
+            name: 'InvalidArgumentError',
+            message: 'invalid argument, expected string, null, or undefined',
+            argType: 'number',
+            argConstructor: 'Number'
+        }},
+        writeTest: {value: 42, error: {
+            name: 'InvalidArgumentError',
+            type: 'invalid-argument',
+            message: 'invalid argument, expected string, null, or undefined',
+            argType: 'number',
+            argConstructor: 'Number'
+        }}
+    },
+
+    // truncated buffer
+    {
+        readTest: {
+            bytes: [0x03, 0x63, 0x61], // cat~3 with missing "t" byte
+            error: {
+                name: 'ShortBufferError',
+                type: 'short-buffer',
+                message: 'expected at least 3 bytes, only have 2 @1',
+                offset: 1,
+                actual: 2,
+                expected: 3,
+            }
+        }
+    }
+]));
+
+test('StringRW: passes sizerw error thru', testRW.cases(StringRW(brokenRW, 'utf8'), [
+    {
+        lengthTest: {
+            value: 'cat',
+            error: {message: 'boom'}
+        },
+        writeTest: {
+            value: 'cat',
+            length: 1,
+            error: {message: 'bang'}
+        },
+        readTest: {
+            bytes: [0x03, 0x63, 0x61, 0x74],
+            error: {message: 'bork'}
+        }
+    }
 ]));

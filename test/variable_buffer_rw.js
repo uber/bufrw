@@ -23,6 +23,21 @@
 var testRW = require('./lib/test_rw');
 var test = require('tape');
 
+var LengthResult = require('../base').LengthResult;
+var WriteResult = require('../base').WriteResult;
+var ReadResult = require('../base').ReadResult;
+var brokenRW = {
+    byteLength: function() {
+        return LengthResult(new Error('boom'));
+    },
+    writeInto: function(val, buffer, offset) {
+        return WriteResult(new Error('bang'), offset);
+    },
+    readFrom: function(buffer, offset) {
+        return ReadResult(new Error('bork'), offset);
+    },
+};
+
 var atoms = require('../atoms');
 var VariableBufferRW = require('../variable_buffer_rw');
 
@@ -44,15 +59,15 @@ test('VariableBufferRW: simple buf~1', testRW.cases(buf1, [
     // invalid value length/write errors
     {
         lengthTest: {value: {}, error: {
-            type: 'variable-buffer.invalid-argument',
-            name: 'VariableBufferInvalidArgumentError',
+            type: 'invalid-argument',
+            name: 'InvalidArgumentError',
             message: 'invalid argument, expected buffer, null, or undefined',
             argType: 'object',
             argConstructor: 'Object'
         }},
         writeTest: {value: {}, error: {
-            name: 'VariableBufferInvalidArgumentError',
-            type: 'variable-buffer.invalid-argument',
+            name: 'InvalidArgumentError',
+            type: 'invalid-argument',
             message: 'invalid argument, expected buffer, null, or undefined',
             argConstructor: 'Object',
             argType: 'object'
@@ -72,6 +87,24 @@ test('VariableBufferRW: simple buf~1', testRW.cases(buf1, [
                 // buffer: <Buffer 05 01 02 03>,
                 expected: 5,
             }
+        }
+    }
+]));
+
+test('VariableBufferRW: passes sizerw error thru', testRW.cases(VariableBufferRW(brokenRW), [
+    {
+        lengthTest: {
+            value: Buffer([2]),
+            error: {message: 'boom'}
+        },
+        writeTest: {
+            value: Buffer([2]),
+            length: 2,
+            error: {message: 'bang'}
+        },
+        readTest: {
+            bytes: [1, 2],
+            error: {message: 'bork'}
         }
     }
 ]));

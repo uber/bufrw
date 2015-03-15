@@ -28,7 +28,35 @@ var atoms = require('../atoms');
 test('atoms.Int8', testRW.cases(atoms.Int8, [
     [-0x12, [0xee]],
     [    0, [0x00]],
-    [ 0x12, [0x12]]
+    [ 0x12, [0x12]],
+
+    // truncation
+    {
+        writeTest: {
+            value: 0,
+            length: 0,
+            error: {
+                type: 'short-buffer',
+                name: 'ShortBufferError',
+                message: 'expected at least 1 bytes, only have 0 @0',
+                actual: 0,
+                expected: 1,
+                offset: 0
+            }
+        },
+        readTest: {
+            bytes: [],
+            error: {
+                name: 'ShortBufferError',
+                type: 'short-buffer',
+                message: 'expected at least 1 bytes, only have 0 @0',
+                actual: 0,
+                expected: 1,
+                offset: 0
+            }
+        }
+    }
+
 ]));
 
 test('atoms.Int16BE', testRW.cases(atoms.Int16BE, [

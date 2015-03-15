@@ -205,8 +205,10 @@ function hexdump(err, buffer, desc) {
 
 function copyErr(err, tmpl) {
     var out = {};
-    Object.keys(tmpl).forEach(function(key) {
-        out[key] = err[key];
-    });
+    if (err) {
+        Object.keys(tmpl).forEach(function(key) {
+            out[key] = err[key];
+        });
+    }
     return out;
 }
