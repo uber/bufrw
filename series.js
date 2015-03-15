@@ -28,7 +28,7 @@ var ReadResult = require('./base').ReadResult;
 var BufferRW = require('./base').BufferRW;
 
 function SeriesRW(rws) {
-    if (arguments.length > 1) {
+    if (!Array.isArray(rws) || arguments.length > 1) {
         rws = Array.prototype.slice.call(arguments);
     }
     if (!(this instanceof SeriesRW)) {
