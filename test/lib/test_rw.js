@@ -57,46 +57,9 @@ function testCases(rw, cases) {
                 testCase = cases[i];
             }
 
-            var err, res, buf;
-
-            if (testCase.lengthTest) {
-                err = lengthTest(assert, rw, testCase.lengthTest);
-                if (testCase.lengthTest.error) {
-                    assert.deepEqual(
-                        copyErr(err, testCase.lengthTest.error),
-                        testCase.lengthTest.error, 'expected length error');
-                } else {
-                    assert.ifError(err, 'no length error');
-                }
-            }
-
-            if (testCase.writeTest) {
-                res = writeTest(assert, rw, testCase.writeTest);
-                err = res[0];
-                buf = res[1];
-                if (testCase.writeTest.error) {
-                    assert.deepEqual(
-                        copyErr(err, testCase.writeTest.error),
-                        testCase.writeTest.error, 'expected write error');
-                } else {
-                    if (err) hexdump(err, buf, 'write error at');
-                    assert.ifError(err, 'no write error');
-                }
-            }
-
-            if (testCase.readTest) {
-                res = readTest(assert, rw, testCase.readTest);
-                err = res[0];
-                buf = res[1];
-                if (testCase.readTest.error) {
-                    assert.deepEqual(
-                        copyErr(err, testCase.readTest.error),
-                        testCase.readTest.error, 'expected read error');
-                } else {
-                    if (err) hexdump(err, buf, 'read error at');
-                    assert.ifError(err, 'no read error');
-                }
-            }
+            if (testCase.lengthTest) lengthTest(assert, rw, testCase.lengthTest);
+            if (testCase.writeTest) writeTest(assert, rw, testCase.writeTest);
+            if (testCase.readTest) readTest(assert, rw, testCase.readTest);
         }
 
         (done || assert.end)();
@@ -107,10 +70,18 @@ function lengthTest(assert, rw, testCase) {
     var val = testCase.value;
     var res = rw.byteLength(val);
     if (res.err) {
-        return res.err;
+        if (testCase.error) {
+            assert.deepEqual(
+                copyErr(res.err, testCase.error),
+                testCase.error, 'expected length error');
+        } else {
+            assert.ifError(res.err, 'no length error');
+        }
+    } else if (testCase.error) {
+        assert.fail('expected length error');
+    } else {
+        assert.deepEqual(res && res.length, testCase.length, util.format('length: %j', val));
     }
-    assert.deepEqual(res && res.length, testCase.length, util.format('length: %j', val));
-    return null;
 }
 
 function writeTest(assert, rw, testCase) {
@@ -120,11 +91,20 @@ function writeTest(assert, rw, testCase) {
     var tup = intoBufferTuple(rw, got, val);
     var err = tup[0];
     if (err) {
-        return [err, got];
+        if (testCase.error) {
+            assert.deepEqual(
+                copyErr(err, testCase.error),
+                testCase.error, 'expected write error');
+        } else {
+            hexdump(err, got, 'write error at');
+            assert.ifError(err, 'no write error');
+        }
+    } else if (testCase.error) {
+        assert.fail('expected write error');
+    } else {
+        var buf = Buffer(testCase.bytes);
+        assert.deepEqual(got, buf, util.format('write: %j', val));
     }
-    var buf = Buffer(testCase.bytes);
-    assert.deepEqual(got, buf, util.format('write: %j', val));
-    return [null, got];
 }
 
 function readTest(assert, rw, testCase) {
@@ -132,21 +112,28 @@ function readTest(assert, rw, testCase) {
     var tup = fromBufferTuple(rw, buffer);
     var err = tup[0];
     var got = tup[1];
-    if (!err && got === undefined) {
-        err = new Error('Expected to have read a value');
-    }
     if (err) {
-        return [err, got];
+        if (testCase.error) {
+            assert.deepEqual(
+                copyErr(err, testCase.error),
+                testCase.error, 'expected read error');
+        } else {
+            if (!got && err.buffer) got = err.buffer;
+            if (Buffer.isBuffer(got)) hexdump(err, got, 'read error at');
+            assert.ifError(err, 'no read error');
+        }
+    } else if (testCase.error) {
+        assert.fail('expected read error');
+    } else {
+        var val = testCase.value;
+        assert.deepEqual(got, val, util.format('read: %j', val));
+        if (typeof val === 'object') {
+            var gotConsName = got && got.constructor && got.constructor.name;
+            var valConsName = val && val.constructor && val.constructor.name;
+            assert.equal(gotConsName, valConsName,
+                    'expected ' + valConsName + ' constructor');
+        }
     }
-    var val = testCase.value;
-    assert.deepEqual(got, val, util.format('read: %j', val));
-    if (typeof val === 'object') {
-        var gotConsName = got && got.constructor && got.constructor.name;
-        var valConsName = val && val.constructor && val.constructor.name;
-        assert.equal(gotConsName, valConsName,
-            'expected ' + valConsName + ' constructor');
-    }
-    return [null, got];
 }
 
 function hexHighlight(buffer, highlights) {
