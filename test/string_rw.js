@@ -20,7 +20,7 @@
 
 'use strict';
 
-var testRW = require('./lib/test_rw');
+var testRW = require('../test_rw');
 var test = require('tape');
 
 var LengthResult = require('../base').LengthResult;
