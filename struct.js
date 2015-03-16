@@ -38,17 +38,17 @@ function StructRW(cons, fields, opts) {
     var self = this;
     opts = opts || {};
     self.cons = cons || makeObject;
+    self.fields = [];
+    // TODO: useful to have a StructRWField prototype?
     if (Array.isArray(fields)) {
-        self.fields = fields;
+        self.fields.push.apply(self.fields, fields);
     } else {
-        var keys = Object.keys(fields);
-        self.fields = new Array(keys.length);
-        for (var i = 0; i < keys.length; i++) {
-            var field = {}; // TODO: useful to have a StructRWField prototype?
-            field.name = keys[i];
+        Object.keys(fields).forEach(function eachFieldName(fieldName) {
+            var field = {};
+            field.name = fieldName;
             field.rw = fields[field.name];
-            self.fields[i] = field;
-        }
+            self.fields.push(field);
+        });
     }
 }
 inherits(StructRW, BufferRW);
