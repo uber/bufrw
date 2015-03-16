@@ -97,7 +97,7 @@ writerTest('handles write errors', SeriesRW(UInt8, writeErrorRW),
     [
         {
             error: function(err, assert) {
-                assert.equal(err.message, 'boom', 'expected boom');
+                assert.equal(err.message, 'boom while writing [ 1, \'\' ]', 'expected boom');
             }
         }
     ]);
