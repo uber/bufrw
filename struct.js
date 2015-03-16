@@ -50,6 +50,12 @@ function StructRW(cons, fields, opts) {
             self.fields.push(field);
         });
     }
+    self.namedFields = {};
+    self.fields.forEach(function eachField(field) {
+        if (field.name) {
+            self.namedFields[field.name] = field;
+        }
+    });
 }
 inherits(StructRW, BufferRW);
 
