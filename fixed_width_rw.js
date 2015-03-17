@@ -76,7 +76,7 @@ FixedWidthRW.prototype.readFrom = function readFrom(buffer, offset) {
     if (end > buffer.length) {
         return ReadResult.shortError(self.length, buffer.length - offset, offset);
     } else {
-        var res = ReadResult.just(end, buffer.slice(offset, end)); 
+        var res = ReadResult.just(end, buffer.slice(offset, end));
         return res;
     }
 };
