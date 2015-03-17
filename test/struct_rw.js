@@ -23,6 +23,7 @@
 var testRW = require('../test_rw');
 var test = require('tape');
 
+var bufrw = require('../');
 var LengthResult = require('../base').LengthResult;
 var ReadResult = require('../base').ReadResult;
 var WriteResult = require('../base').WriteResult;
@@ -132,6 +133,46 @@ test('StructRW: frame', testRW.cases(Frame.rw, [
             bytes: [0x00, 0x00, 0x00, 0xff],
             error: {
                 message: 'frame data past message'
+            }
+        }
+    }
+]));
+
+
+function Thing(foo, bar) {
+    if (!(this instanceof Thing)) return new Thing(foo, bar);
+    var self = this;
+    self.foo = foo;
+    self.bar = bar;
+}
+
+Thing.RW = bufrw.Struct(Thing, {
+    foo: bufrw.UInt8,
+    bar: bufrw.UInt8,
+    baz: bufrw.FixedWidth(8)
+});
+
+test('StructRW: writing with invalid field', testRW.cases(Thing.RW, [
+    {
+        lengthTest: {
+            value: Thing(8, 9),
+            error: {
+                name: 'MissingFieldError',
+                type: 'missing.field',
+                message: 'missing field baz on Thing',
+                struct: 'Thing',
+                field: 'baz'
+            }
+        },
+        writeTest: {
+            value: Thing(8, 9),
+            length: 10,
+            error: {
+                name: 'MissingFieldError',
+                type: 'missing.field',
+                message: 'missing field baz on Thing',
+                struct: 'Thing',
+                field: 'baz'
             }
         }
     }
