@@ -21,9 +21,18 @@
 'use strict';
 
 var inherits = require('util').inherits;
+var inspect = require('util').inspect;
 var Transform = require('stream').Transform;
+var WrappedError = require('error/wrapped');
 
 var toBufferTuple = require('../interface').toBufferTuple;
+
+var ChunkWriteError = WrappedError({
+    type: 'chunk-write',
+    message: '{origMessage} while writing {valueInspected}',
+    valueInspected: null,
+    value: null
+});
 
 module.exports = ChunkWriter;
 
@@ -48,7 +57,10 @@ ChunkWriter.prototype._transform = function _transform(value, encoding, callback
     var err = tup[0];
     var buffer = tup[1];
     if (err) {
-        callback(err);
+        callback(ChunkWriteError(err, {
+            valueInspected: inspect(value),
+            value: value
+        }));
     } else {
         self.push(buffer);
         callback();
