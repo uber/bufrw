@@ -108,7 +108,12 @@ function toBufferTuple(struct, value) {
 
 function intoBufferTuple(struct, buffer, value) {
     var writeRes = struct.writeInto(value, buffer, 0);
-    if (writeRes.err) return [writeRes.err, buffer];
+    if (writeRes.err) {
+        // istanbul ignore else
+        if (!Buffer.isBuffer(writeRes.err.buffer)) writeRes.err.buffer = buffer;
+        if (typeof writeRes.err.offset !== 'number') writeRes.err.offset = writeRes.offset;
+        return [writeRes.err, buffer];
+    }
     var offset = writeRes.offset;
     if (offset !== buffer.length) {
         return [ShortWriteError({
