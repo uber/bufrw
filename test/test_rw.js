@@ -77,13 +77,11 @@ test('testRW: unexpected errors', function t(assert) {
         assert.equal(results[1].actual.message, 'bang', 'expected actual "bang" error');
         assert.equal(results[2].name, 'no read error', 'expected "no read error"');
         assert.equal(results[2].actual.message, 'bork', 'expected actual "bork" error');
-        assert.equal(
-            rwTest.hexdumpStream.read(),
-            '00: 00                                       .\n' +
-            '- BangError: bang\n' +
+        assert.equal(rwTest.hexdumpStream.read(),
+            'write error: BangError: bang\n' +
             '00: \x1b[31m\x1b[1m00\x1b[0m                                       \x1b[31m\x1b[1m.\x1b[0m\n' +
-            '- read error at: \x1b[31m\x1b[1m0x00\x1b[0m\n' +
-            '- Error: bork\n');
+            'read error: Error: bork\n' +
+            '00: \x1b[31m\x1b[1m00\x1b[0m                                       \x1b[31m\x1b[1m.\x1b[0m\n');
         assert.end();
     });
 });
@@ -111,7 +109,7 @@ test('testRW: error expectations', function t(assert) {
         assert.equal(results[0].name, 'expected length error', 'expected "expected length error"');
         assert.equal(results[1].name, 'expected write error', 'expected "expected write error"');
         assert.equal(results[2].name, 'expected read error', 'expected "expected read error"');
-        assert.equal( rwTest.hexdumpStream.read(), null);
+        assert.equal(rwTest.hexdumpStream.read(), null);
         assert.end();
     });
 });
