@@ -20,7 +20,10 @@
 
 'use strict';
 
+var color = require('ansi-color').set;
+var hex = require('hexer');
 var TypedError = require('error/typed');
+var util = require('util');
 
 var ShortReadError = TypedError({
     type: 'short-read',
@@ -125,6 +128,113 @@ function intoBufferTuple(struct, buffer, value) {
     return [null, buffer];
 }
 
+// istanbul ignore next TODO
+function formatError(err, options) {
+    options = options || {};
+    var name = err.name || err.constructor.name;
+    var str = util.format('%s: %s\n', name, err.message);
+    if (Buffer.isBuffer(err.buffer)) {
+        if (options.color) {
+            str += formatBufferColored(err, options);
+        } else {
+            str += formatBufferUncolored(err, options);
+        }
+        str += '\n';
+    }
+    return str;
+}
+
+// istanbul ignore next TODO
+function formatBufferColored(err, options) {
+    options = options || {};
+    var markColor = options.markColor || 'red+bold';
+
+    var hasOffset = !(err.offset === undefined || err.offset === null);
+    var hasEnd = !(err.endOffset === undefined || err.endOffset === null);
+    var within = false;
+
+    var opts = {};
+    if (hasOffset) {
+        if (hasEnd) {
+        opts.decorateHexen = decorateRangedError;
+        opts.decorateHuman = decorateRangedError;
+        } else {
+            opts.decorateHexen = decorateError;
+            opts.decorateHuman = decorateError;
+        }
+    }
+    return hex(err.buffer, opts);
+
+    function decorateRangedError(totalOffset, screenOffset, str) {
+        if (totalOffset === err.offset) {
+            within = true;
+            return color(str, markColor);
+        } else if (totalOffset === err.endOffset-1) {
+            within = false;
+            return color(str, markColor);
+        } else if (within) {
+            return color(str, markColor);
+        } else {
+            return str;
+        }
+    }
+
+    function decorateError(totalOffset, screenOffset, str) {
+        if (totalOffset === err.offset) {
+            return color(str, markColor);
+        } else {
+            return str;
+        }
+    }
+}
+
+// istanbul ignore next TODO
+function formatBufferUncolored(err, options) {
+    options = options || {};
+
+    var hasOffset = !(err.offset === undefined || err.offset === null);
+    var hasEnd = !(err.endOffset === undefined || err.endOffset === null);
+    var markStart = options.markStart || '>';
+    var markEnd = options.markEnd || '<';
+    var accum = 0;
+
+    var opts = {};
+    if (hasOffset) {
+        opts.groupSeparator = '';
+        if (hasEnd) {
+            opts.decorateHexen = decorateRangedError;
+        } else {
+            opts.decorateHexen = decorateError;
+        }
+    }
+    return hex(err.buffer, opts);
+
+    function decorateRangedError(totalOffset, screenOffset, hexen) {
+        if (totalOffset === err.offset) {
+            accum = 1;
+            return ' ' + markStart + hexen;
+        } else if (totalOffset === err.endOffset-1) {
+            var s = hexen + markEnd;
+            while (accum-- > 0) s += ' ';
+            accum = 0;
+            return s;
+        } else if (accum) {
+            accum += 2;
+            return hexen;
+        } else {
+            return ' ' + hexen + ' ';
+        }
+    }
+
+    function decorateError(totalOffset, screenOffset, hexen) {
+        if (totalOffset === err.offset) {
+            return markStart + hexen + markEnd;
+        } else {
+            return ' ' + hexen + ' ';
+        }
+    }
+}
+
 module.exports.fromBuffer = fromBuffer;
 module.exports.byteLength = byteLength;
 module.exports.toBuffer = toBuffer;
@@ -133,3 +243,4 @@ module.exports.fromBufferTuple = fromBufferTuple;
 module.exports.byteLengthTuple = byteLengthTuple;
 module.exports.toBufferTuple = toBufferTuple;
 module.exports.intoBufferTuple = intoBufferTuple;
+module.exports.formatError = formatError;
