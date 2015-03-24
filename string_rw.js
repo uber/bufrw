@@ -82,13 +82,14 @@ StringRW.prototype.readFrom = function readFrom(buffer, offset) {
     var self = this;
     var res = self.sizerw.readFrom(buffer, offset);
     if (res.err) return res;
-    offset = res.offset;
     var length = res.value;
-    var end = offset + length;
-    var buf = buffer.slice(offset, end);
-    if (buf.length < length) {
-        return ReadResult.shortError(length, buf.length, offset);
+    var remain = buffer.length - res.offset;
+    if (remain < length) {
+        return ReadResult.shortError(length, remain, offset, res.offset);
     } else {
+        offset = res.offset;
+        var end = offset + length;
+        var buf = buffer.slice(offset, end);
         var str = buf.toString(self.encoding);
         return ReadResult.just(end, str);
     }

@@ -33,6 +33,15 @@ var ShortBufferError = TypedError({
     offset: null
 });
 
+var ShortBufferRangedError = TypedError({
+    type: 'short-buffer-ranged',
+    message: 'expected at least {expected} bytes, only have {actual} @[{offset}:{endOffset}]',
+    expected: null,
+    actual: null,
+    offset: null,
+    endOffset: null
+});
+
 function BufferRW(byteLength, readFrom, writeInto) {
     if (!(this instanceof BufferRW)) {
         return new BufferRW(byteLength, readFrom, writeInto);
@@ -103,10 +112,19 @@ ReadResult.just = function just(offset, value) {
     return ReadResult(null, offset, value);
 };
 
-ReadResult.shortError = function shortError(expected, actual, offset) {
-    return ReadResult.error(ShortBufferError({
-        expected: expected,
-        actual: actual,
-        offset: offset
-    }), offset);
+ReadResult.shortError = function shortError(expected, actual, offset, endOffset) {
+    if (endOffset === undefined) {
+        return ReadResult.error(ShortBufferError({
+            expected: expected,
+            actual: actual,
+            offset: offset
+        }), offset);
+    } else {
+        return ReadResult.error(ShortBufferRangedError({
+            expected: expected,
+            actual: actual,
+            offset: offset,
+            endOffset: endOffset
+        }), offset);
+    }
 };
