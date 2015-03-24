@@ -26,6 +26,7 @@ module.exports.fromBufferTuple = require('./interface').fromBufferTuple;
 module.exports.byteLengthTuple = require('./interface').byteLengthTuple;
 module.exports.toBufferTuple = require('./interface').toBufferTuple;
 module.exports.intoBufferTuple = require('./interface').intoBufferTuple;
+module.exports.formatError = require('./interface').formatError;
 
 module.exports.Base = require('./base').BufferRW; // TODO: align names
 module.exports.LengthResult = require('./base').LengthResult;

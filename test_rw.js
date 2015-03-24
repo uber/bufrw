@@ -20,11 +20,10 @@
 
 'use strict';
 
-var color = require('ansi-color').set;
-var hex = require('hexer');
 var util = require('util');
 var intoBufferTuple = require('./interface').intoBufferTuple;
 var fromBufferTuple = require('./interface').fromBufferTuple;
+var formatError = require('./interface').formatError;
 
 module.exports.cases = testCases;
 
@@ -66,8 +65,9 @@ function testCases(rw, cases) {
         (done || assert.end)();
     };
     self.hexdumpStream = process.stdout;
-    self.hexdump = function hexdumpBuffer(err, buffer, desc) {
-        hexdump(self.hexdumpStream, err, buffer, desc);
+    self.hexdump = function hexdumpBuffer(desc, err) {
+        self.hexdumpStream.write(util.format('%s: %s',
+            desc, formatError(err, {color: true})));
     };
     self.assert = null;
     self.rw = null;
@@ -104,7 +104,7 @@ function writeTest(self, testCase) {
                 copyErr(err, testCase.error),
                 testCase.error, 'expected write error');
         } else {
-            self.hexdump(err, got, 'write error at');
+            self.hexdump('write error', err);
             self.assert.ifError(err, 'no write error');
         }
     } else if (testCase.error) {
@@ -129,7 +129,7 @@ function readTest(self, testCase) {
             // istanbul ignore else
             if (!got && err.buffer) got = err.buffer;
             // istanbul ignore else
-            if (Buffer.isBuffer(got)) self.hexdump(err, got, 'read error at');
+            if (Buffer.isBuffer(got)) self.hexdump('read error', err);
             self.assert.ifError(err, 'no read error');
         }
     } else if (testCase.error) {
@@ -144,56 +144,6 @@ function readTest(self, testCase) {
                 'expected ' + valConsName + ' constructor');
         }
     }
-}
-
-function hexHighlight(buffer, highlights) {
-    var highlight = {};
-
-    Object.keys(highlights).forEach(function eachHighlight(name) {
-        var h = highlights[name];
-        highlight[h.offset] = h.color;
-    });
-
-    var opts = {
-        decorateHexen: decorate,
-        decorateHuman: decorate
-    };
-    var out = hex(buffer, opts);
-
-    Object.keys(highlights).forEach(function eachHighlight(name) {
-        var h = highlights[name];
-        var off = h.offset.toString(16);
-        off = '0x' + pad('0', off, opts.offsetWidth);
-        out += util.format('\n- %s: %s', h.desc, color(off, h.color));
-    });
-
-    out = out.replace(/\n+$/, '');
-    return out;
-    function decorate(bufOffset, screenOffset, str) {
-        var c = highlight[bufOffset];
-        if (c) str = color(str, c);
-        return str;
-    }
-}
-
-function pad(c, s, width) {
-    while (s.length < width) s = c + s;
-    return s;
-}
-
-function hexdump(stream, err, buffer, desc) {
-    var highlights = {};
-    var offset = err && err.offset;
-    if (typeof offset === 'number') {
-        highlights.end = {
-            desc: desc,
-            offset: err && err.offset,
-            color: 'red+bold'
-        };
-    }
-    stream.write(hexHighlight(buffer, highlights) + '\n');
-    var errname = err.type ? err.name : err.constructor.name;
-    stream.write(util.format('- %s: %s\n', errname, err.message));
 }
 
 function copyErr(err, tmpl) {
