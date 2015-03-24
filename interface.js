@@ -148,12 +148,15 @@ function formatError(err, options) {
 function formatBufferColored(err, options) {
     options = options || {};
     var markColor = options.markColor || 'red+bold';
+    var errColor = typeof markColor === 'function' ? markColor : function(str) {
+        return color(str, markColor);
+    };
 
     var hasOffset = !(err.offset === undefined || err.offset === null);
     var hasEnd = !(err.endOffset === undefined || err.endOffset === null);
     var within = false;
 
-    var opts = {};
+    var opts = options.hexerOptions ? Object.create(options.hexerOptions) : {};
     if (hasOffset) {
         if (hasEnd) {
         opts.decorateHexen = decorateRangedError;
@@ -167,13 +170,13 @@ function formatBufferColored(err, options) {
 
     function decorateRangedError(totalOffset, screenOffset, str) {
         if (totalOffset === err.offset) {
-            within = true;
-            return color(str, markColor);
+            within = totalOffset !== err.endOffset-1;
+            return errColor(str);
         } else if (totalOffset === err.endOffset-1) {
             within = false;
-            return color(str, markColor);
+            return errColor(str);
         } else if (within) {
-            return color(str, markColor);
+            return errColor(str);
         } else {
             return str;
         }
@@ -181,7 +184,7 @@ function formatBufferColored(err, options) {
 
     function decorateError(totalOffset, screenOffset, str) {
         if (totalOffset === err.offset) {
-            return color(str, markColor);
+            return errColor(str);
         } else {
             return str;
         }
@@ -198,7 +201,7 @@ function formatBufferUncolored(err, options) {
     var markEnd = options.markEnd || '<';
     var accum = 0;
 
-    var opts = {};
+    var opts = options.hexerOptions ? Object.create(options.hexerOptions) : {};
     if (hasOffset) {
         opts.groupSeparator = '';
         if (hasEnd) {
@@ -209,12 +212,22 @@ function formatBufferUncolored(err, options) {
     }
     return hex(err.buffer, opts);
 
+    // TODO: suspected broken across lines, should either test and complete or
+    // use some sort of alternate notation such as interstitial lines
     function decorateRangedError(totalOffset, screenOffset, hexen) {
+        var s;
         if (totalOffset === err.offset) {
             accum = 1;
-            return ' ' + markStart + hexen;
+            s = markStart + hexen;
+            if (totalOffset === err.endOffset-1) {
+                s += markEnd;
+                accum = 0;
+            } else {
+                s = ' ' + s;
+            }
+            return s;
         } else if (totalOffset === err.endOffset-1) {
-            var s = hexen + markEnd;
+            s = hexen + markEnd;
             while (accum-- > 0) s += ' ';
             accum = 0;
             return s;
