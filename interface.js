@@ -167,7 +167,7 @@ function formatBufferColored(err, options) {
 
     function decorateRangedError(totalOffset, screenOffset, str) {
         if (totalOffset === err.offset) {
-            within = true;
+            within = totalOffset !== err.endOffset-1;
             return color(str, markColor);
         } else if (totalOffset === err.endOffset-1) {
             within = false;
@@ -209,12 +209,22 @@ function formatBufferUncolored(err, options) {
     }
     return hex(err.buffer, opts);
 
+    // TODO: suspected broken across lines, should either test and complete or
+    // use some sort of alternate notation such as interstitial lines
     function decorateRangedError(totalOffset, screenOffset, hexen) {
+        var s;
         if (totalOffset === err.offset) {
             accum = 1;
-            return ' ' + markStart + hexen;
+            s = markStart + hexen;
+            if (totalOffset === err.endOffset-1) {
+                s += markEnd;
+                accum = 0;
+            } else {
+                s = ' ' + s;
+            }
+            return s;
         } else if (totalOffset === err.endOffset-1) {
-            var s = hexen + markEnd;
+            s = hexen + markEnd;
             while (accum-- > 0) s += ' ';
             accum = 0;
             return s;
