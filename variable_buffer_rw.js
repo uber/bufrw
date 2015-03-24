@@ -86,13 +86,14 @@ VariableBufferRW.prototype.readFrom = function readFrom(buffer, offset) {
     var self = this;
     var res = self.sizerw.readFrom(buffer, offset);
     if (res.err) return res;
-    offset = res.offset;
     var length = res.value;
-    var buf = Buffer(length);
-    var copied = buffer.copy(buf, 0, offset);
-    if (copied < length) {
-        return ReadResult.shortError(length, copied, offset);
+    var remain = buffer.length - res.offset;
+    if (remain < length) {
+        return ReadResult.shortError(length, remain, offset);
     } else {
+        offset = res.offset;
+        var buf = Buffer(length);
+        buffer.copy(buf, 0, offset);
         return ReadResult.just(offset + length, buf);
     }
 };

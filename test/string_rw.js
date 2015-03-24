@@ -97,8 +97,8 @@ test('StringRW: simple str~1 in utf8', testRW.cases(str1, [
             error: {
                 name: 'ShortBufferError',
                 type: 'short-buffer',
-                message: 'expected at least 3 bytes, only have 2 @1',
-                offset: 1,
+                message: 'expected at least 3 bytes, only have 2 @0',
+                offset: 0,
                 actual: 2,
                 expected: 3,
             }
