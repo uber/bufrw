@@ -153,7 +153,7 @@ function formatBufferColored(err, options) {
     var hasEnd = !(err.endOffset === undefined || err.endOffset === null);
     var within = false;
 
-    var opts = {};
+    var opts = options.hexerOptions ? Object.create(options.hexerOptions) : {};
     if (hasOffset) {
         if (hasEnd) {
         opts.decorateHexen = decorateRangedError;
@@ -198,7 +198,7 @@ function formatBufferUncolored(err, options) {
     var markEnd = options.markEnd || '<';
     var accum = 0;
 
-    var opts = {};
+    var opts = options.hexerOptions ? Object.create(options.hexerOptions) : {};
     if (hasOffset) {
         opts.groupSeparator = '';
         if (hasEnd) {
