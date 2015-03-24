@@ -148,6 +148,9 @@ function formatError(err, options) {
 function formatBufferColored(err, options) {
     options = options || {};
     var markColor = options.markColor || 'red+bold';
+    var errColor = typeof markColor === 'function' ? markColor : function(str) {
+        return color(str, markColor);
+    };
 
     var hasOffset = !(err.offset === undefined || err.offset === null);
     var hasEnd = !(err.endOffset === undefined || err.endOffset === null);
@@ -168,12 +171,12 @@ function formatBufferColored(err, options) {
     function decorateRangedError(totalOffset, screenOffset, str) {
         if (totalOffset === err.offset) {
             within = totalOffset !== err.endOffset-1;
-            return color(str, markColor);
+            return errColor(str);
         } else if (totalOffset === err.endOffset-1) {
             within = false;
-            return color(str, markColor);
+            return errColor(str);
         } else if (within) {
-            return color(str, markColor);
+            return errColor(str);
         } else {
             return str;
         }
@@ -181,7 +184,7 @@ function formatBufferColored(err, options) {
 
     function decorateError(totalOffset, screenOffset, str) {
         if (totalOffset === err.offset) {
-            return color(str, markColor);
+            return errColor(str);
         } else {
             return str;
         }
