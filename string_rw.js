@@ -85,7 +85,7 @@ StringRW.prototype.readFrom = function readFrom(buffer, offset) {
     var length = res.value;
     var remain = buffer.length - res.offset;
     if (remain < length) {
-        return ReadResult.shortError(length, remain, offset);
+        return ReadResult.shortError(length, remain, offset, res.offset);
     } else {
         offset = res.offset;
         var end = offset + length;

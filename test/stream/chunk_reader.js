@@ -135,14 +135,15 @@ readerTest('errors on truncated frame', frameRW, [
     {
         error: function(err, assert) {
             assert.deepEqual(err, {
-                type: 'short-buffer',
-                name: 'ShortBufferError',
-                message: 'expected at least 1 bytes, only have 0 @1',
+                type: 'short-buffer-ranged',
+                name: 'ShortBufferRangedError',
+                message: 'expected at least 1 bytes, only have 0 @[1:2]',
                 expected: 1,
                 actual: 0,
                 buffer: Buffer([2, 1]),
-                offset: 1
-            }, 'expected ShortBufferError');
+                offset: 1,
+                endOffset: 2
+            }, 'expected ShortBufferRangedError');
         }
     },
     {
