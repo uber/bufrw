@@ -79,8 +79,8 @@ test('VariableBufferRW: simple buf~1', testRW.cases(buf1, [
         readTest: {
             bytes: [0x05, 0x01, 0x02, 0x03],
             error: {
-                name: 'ShortBufferRangedError',
-                type: 'short-buffer-ranged',
+                name: 'ShortBufferError',
+                type: 'short-buffer',
                 message: 'expected at least 5 bytes, only have 3 @[0:1]',
                 offset: 0,
                 endOffset: 1,

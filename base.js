@@ -34,7 +34,7 @@ var ShortBufferError = TypedError({
 });
 
 var ShortBufferRangedError = TypedError({
-    type: 'short-buffer-ranged',
+    type: 'short-buffer',
     message: 'expected at least {expected} bytes, only have {actual} @[{offset}:{endOffset}]',
     expected: null,
     actual: null,
