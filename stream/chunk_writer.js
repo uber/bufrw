@@ -22,7 +22,7 @@
 
 var inherits = require('util').inherits;
 var inspect = require('util').inspect;
-var Transform = require('stream').Transform;
+var Transform = require('readable-stream').Transform;
 var WrappedError = require('error/wrapped');
 
 var toBufferTuple = require('../interface').toBufferTuple;

@@ -22,7 +22,7 @@
 
 var testRW = require('../test_rw');
 var TypedError = require('error/typed');
-var PassThrough = require('stream').PassThrough;
+var PassThrough = require('readable-stream').PassThrough;
 var test = require('tape');
 
 var LengthResult = require('../base').LengthResult;

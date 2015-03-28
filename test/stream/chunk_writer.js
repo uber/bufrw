@@ -20,7 +20,7 @@
 
 'use strict';
 
-var PassThrough = require('stream').PassThrough;
+var PassThrough = require('readable-stream').PassThrough;
 var util = require('util');
 
 var ChunkWriter = require('../../stream/chunk_writer.js');
