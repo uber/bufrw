@@ -20,7 +20,7 @@
     "ansi-color": "^0.2.1",
     "error": "^5.1.1",
     "hexer": "^1.3.5",
-    "readable-stream": "^1.0.33"
+    "readable-stream": "1.0.33"
   },
   "devDependencies": {
     "coveralls": "^2.10.0",
