@@ -20,150 +20,36 @@
 
 'use strict';
 
-var TypedError = require('error/typed');
 var inherits = require('util').inherits;
 var Transform = require('readable-stream').Transform;
-var ConcatReadBuffer = require('./concat_read_buffer');
-var fromBufferTuple = require('../interface').fromBufferTuple;
-
-var ZeroLengthChunkError = TypedError({
-    type: 'zero-length-chunk',
-    message: 'zero length chunk encountered'
-});
-
-var BrokenReaderStateError = TypedError({
-    type: 'broken-reader-state',
-    message: 'reader in invalid state {state} expecting {expecting} avail {aval}',
-    state: null,
-    expecting: null,
-    avail: null
-});
-
-var TruncatedReadError = TypedError({
-    type: 'truncated-read',
-    message: 'read truncated by end of stream with {length} bytes in buffer',
-    length: null,
-    buffer: null,
-    state: null,
-    expecting: null
-});
-
-var BadSizeRWError = TypedError({
-    type: 'bad-size-rw',
-    message: 'bad sizeRW, expected a fixed-width atom'
-});
+var ReadMachine = require('./read_machine');
 
 module.exports = ChunkReader;
-
-var States = {
-    PendingLength: 0,
-    Seeking: 1
-};
 
 function ChunkReader(sizeRW, chunkRW, options) {
     if (!(this instanceof ChunkReader)) {
         return new ChunkReader(sizeRW, chunkRW, options);
     }
     options = options || {};
-    // istanbul ignore if
-    if (typeof sizeRW.width !== 'number') {
-        throw BadSizeRWError();
-    }
     var self = this;
     Transform.call(self, options);
     self._readableState.objectMode = true;
-    self.sizeRW = sizeRW;
-    self.chunkRW = chunkRW;
-    self.buffer = new ConcatReadBuffer();
-    self.expecting = self.sizeRW.width;
-    self.state = States.PendingLength;
+    self.mach = ReadMachine(sizeRW, chunkRW, emit);
+    function emit(value) {
+        self.push(value);
+    }
 }
 
 inherits(ChunkReader, Transform);
 
 ChunkReader.prototype._transform = function _transform(buf, encoding, callback) {
     var self = this;
-    self.buffer.push(buf);
-    var err = null;
-    while (self.buffer.avail() >= self.expecting) {
-        switch (self.state) {
-            case States.PendingLength:
-                var sizeRes = self.sizeRW.readFrom(self.buffer, 0);
-                err = sizeRes.err;
-                if (!err && !sizeRes.value) {
-                    err = ZeroLengthChunkError();
-                }
-                if (err) {
-                    self.buffer.shift(self.sizeRW.width);
-                    self.expecting = self.sizeRW.width;
-                    self.state = States.PendingLength;
-                    callback(err);
-                    return;
-                } else {
-                    self.expecting = sizeRes.value;
-                    self.state = States.Seeking;
-                }
-                break;
-
-            case States.Seeking:
-                var chunk = self.buffer.shift(self.expecting);
-                // istanbul ignore if
-                if (!chunk.length) {
-                    callback(BrokenReaderStateError({
-                        state: self.state,
-                        expecting: self.expecting,
-                        avail: self.buffer.avail()
-                    }));
-                    return;
-                }
-                self.expecting = self.sizeRW.width;
-                self.state = States.PendingLength;
-                err = self._readChunk(chunk);
-                if (err) {
-                    callback(err);
-                    return;
-                }
-                break;
-
-            // istanbul ignore next
-            default:
-                callback(BrokenReaderStateError({
-                    state: self.state,
-                    expecting: self.expecting,
-                    avail: self.buffer.avail()
-                }));
-                return;
-        }
-    }
-    callback();
+    var err = self.mach.handleChunk(buf);
+    callback(err);
 };
 
 ChunkReader.prototype._flush = function _flush(callback) {
     var self = this;
-    var avail = self.buffer.avail();
-    if (avail) {
-        self.buffer.clear();
-        self.expecting = 4;
-        self.state = States.PendingLength;
-        callback(TruncatedReadError({
-            length: avail,
-            state: self.state,
-            expecting: self.expecting
-        }));
-    } else {
-        callback();
-    }
-};
-
-ChunkReader.prototype._readChunk = function _readChunk(chunk) {
-    var self = this;
-    var tup = fromBufferTuple(self.chunkRW, chunk);
-    var err = tup[0];
-    var value = tup[1];
-    if (err) {
-        return err;
-    } else {
-        self.push(value);
-        return null;
-    }
+    var err = self.mach.flush();
+    callback(err);
 };

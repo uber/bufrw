@@ -30,6 +30,7 @@ var ShortBufferError = TypedError({
     message: 'expected at least {expected} bytes, only have {actual} @{offset}',
     expected: null,
     actual: null,
+    buffer: null,
     offset: null
 });
 
