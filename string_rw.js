@@ -89,8 +89,7 @@ StringRW.prototype.readFrom = function readFrom(buffer, offset) {
     } else {
         offset = res.offset;
         var end = offset + length;
-        var buf = buffer.slice(offset, end);
-        var str = buf.toString(self.encoding);
+        var str = buffer.toString(self.encoding, offset, end);
         return ReadResult.just(end, str);
     }
 };
