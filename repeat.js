@@ -95,5 +95,5 @@ RepeatRW.prototype.readFrom = function readFrom(buffer, offset) {
         offset = res.offset;
         values[i] = res.value;
     }
-    return ReadResult(null, offset, values);
+    return new ReadResult(null, offset, values);
 };

@@ -28,13 +28,13 @@ var WriteResult = require('../base').WriteResult;
 var ReadResult = require('../base').ReadResult;
 var brokenRW = {
     byteLength: function() {
-        return LengthResult(new Error('boom'));
+        return new LengthResult(new Error('boom'));
     },
     writeInto: function(val, buffer, offset) {
-        return WriteResult(new Error('bang'), offset);
+        return new WriteResult(new Error('bang'), offset);
     },
     readFrom: function(buffer, offset) {
-        return ReadResult(new Error('bork'), offset);
+        return new ReadResult(new Error('bork'), offset);
     },
 };
 

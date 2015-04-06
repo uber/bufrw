@@ -54,7 +54,7 @@ FixedWidthRW.prototype.byteLength = function byteLength(slice) {
             got: slice.length
         }));
     } else {
-        return LengthResult.just(self.length);
+        return new LengthResult(null, self.length);
     }
 };
 
@@ -67,7 +67,7 @@ FixedWidthRW.prototype.writeInto = function writeInto(slice, buffer, offset) {
         }), offset);
     }
     slice.copy(buffer, offset);
-    return WriteResult.just(offset + self.length);
+    return new WriteResult(null, offset + self.length);
 };
 
 FixedWidthRW.prototype.readFrom = function readFrom(buffer, offset) {
@@ -76,7 +76,7 @@ FixedWidthRW.prototype.readFrom = function readFrom(buffer, offset) {
     if (end > buffer.length) {
         return ReadResult.shortError(self.length, buffer.length - offset, offset);
     } else {
-        var res = ReadResult.just(end, buffer.slice(offset, end));
+        var res = new ReadResult(null, end, buffer.slice(offset, end));
         return res;
     }
 };

@@ -64,7 +64,7 @@ SwitchRW.prototype.byteLength = function byteLength(obj) {
     if (vallen.err) return vallen;
     var caselen = datarw.byteLength(data);
     if (caselen.err) return caselen;
-    return LengthResult.just(vallen.length + caselen.length);
+    return new LengthResult(null, vallen.length + caselen.length);
 };
 
 SwitchRW.prototype.writeInto = function writeInto(obj, buffer, offset) {
@@ -100,7 +100,7 @@ SwitchRW.prototype.readFrom = function readFrom(buffer, offset) {
     offset = res.offset;
     var data = res.value;
     var obj = self.cons(val, data);
-    return ReadResult.just(offset, obj);
+    return new ReadResult(null, offset, obj);
 };
 
 function makePair(a, b) {

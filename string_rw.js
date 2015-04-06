@@ -58,7 +58,7 @@ StringRW.prototype.byteLength = function byteLength(str) {
     }
     var len = self.sizerw.byteLength(length);
     if (len.err) return len;
-    return LengthResult.just(len.length + length);
+    return new LengthResult(null, len.length + length);
 };
 
 StringRW.prototype.writeInto = function writeInto(str, buffer, offset) {
@@ -75,7 +75,7 @@ StringRW.prototype.writeInto = function writeInto(str, buffer, offset) {
     }
     var res = self.sizerw.writeInto(length, buffer, offset);
     if (res.err) return res;
-    return WriteResult.just(start + length);
+    return new WriteResult(null, start + length);
 };
 
 StringRW.prototype.readFrom = function readFrom(buffer, offset) {
@@ -90,6 +90,6 @@ StringRW.prototype.readFrom = function readFrom(buffer, offset) {
         offset = res.offset;
         var end = offset + length;
         var str = buffer.toString(self.encoding, offset, end);
-        return ReadResult.just(end, str);
+        return new ReadResult(null, end, str);
     }
 };

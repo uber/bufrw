@@ -43,7 +43,7 @@ function StructRW(cons, fields, opts) {
     }
     var self = this;
     opts = opts || {};
-    self.cons = cons || makeObject;
+    self.cons = cons || Object;
     self.fields = [];
     // TODO: useful to have a StructRWField prototype?
     if (Array.isArray(fields)) {
@@ -89,12 +89,12 @@ StructRW.prototype.byteLength = function byteLength(obj) {
         if (res.err) return res;
         length += res.length;
     }
-    return LengthResult.just(length);
+    return new LengthResult(null, length);
 };
 
 StructRW.prototype.writeInto = function writeInto(obj, buffer, offset) {
     var self = this;
-    var res = WriteResult.just(offset);
+    var res = new WriteResult(null, offset);
     for (var i = 0; i < self.fields.length; i++) {
         var field = self.fields[i];
 
@@ -120,7 +120,7 @@ StructRW.prototype.writeInto = function writeInto(obj, buffer, offset) {
 
 StructRW.prototype.readFrom = function readFrom(buffer, offset) {
     var self = this;
-    var obj = self.cons();
+    var obj = new self.cons();
     for (var i = 0; i < self.fields.length; i++) {
         var field = self.fields[i];
         var res;
@@ -136,9 +136,5 @@ StructRW.prototype.readFrom = function readFrom(buffer, offset) {
             obj[field.name] = res.value;
         }
     }
-    return ReadResult.just(offset, obj);
+    return new ReadResult(null, offset, obj);
 };
-
-function makeObject() {
-    return {};
-}

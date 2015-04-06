@@ -39,14 +39,14 @@ inherits(SkipRW, FixedWidthRW);
 
 SkipRW.prototype.byteLength = function byteLength() {
     var self = this;
-    return LengthResult.just(self.length);
+    return new LengthResult(null, self.length);
 };
 
 SkipRW.prototype.writeInto = function writeInto(val, buffer, offset) {
     var self = this;
     var end = offset + self.length;
     buffer.fill(self.fill, offset, end);
-    return WriteResult.just(end);
+    return new WriteResult(null, end);
 };
 
 SkipRW.prototype.readFrom = function readFrom(buffer, offset) {
@@ -55,6 +55,6 @@ SkipRW.prototype.readFrom = function readFrom(buffer, offset) {
     if (end > buffer.length) {
         return ReadResult.shortError(self.length, buffer.length - offset, offset);
     } else {
-        return ReadResult.just(end, null);
+        return new ReadResult(null, end, null);
     }
 };

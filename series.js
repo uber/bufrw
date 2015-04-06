@@ -61,7 +61,7 @@ SeriesRW.prototype.byteLength = function byteLength(values) {
         if (res.err) return res;
         length += res.length;
     }
-    return LengthResult.just(length);
+    return new LengthResult(null, length);
 };
 
 SeriesRW.prototype.writeInto = function writeInto(values, buffer, offset) {
@@ -72,7 +72,7 @@ SeriesRW.prototype.writeInto = function writeInto(values, buffer, offset) {
             argConstructor: values.constructor.name
         }));
     }
-    var res = WriteResult.just(offset);
+    var res = new WriteResult(null, offset);
     for (var i = 0; i < self.rws.length; i++) {
         res = self.rws[i].writeInto(values && values[i], buffer, offset);
         if (res.err) return res;
@@ -90,5 +90,5 @@ SeriesRW.prototype.readFrom = function readFrom(buffer, offset) {
         offset = res.offset;
         values[i] = res.value;
     }
-    return ReadResult(null, offset, values);
+    return new ReadResult(null, offset, values);
 };

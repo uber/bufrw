@@ -36,25 +36,25 @@ var BangError = TypedError({
 
 var dummyRW = {
     byteLength: function() {
-        return LengthResult.just(0);
+        return new LengthResult.just(0);
     },
     writeInto: function(val, buffer, offset) {
-        return WriteResult.just(offset);
+        return new WriteResult.just(offset);
     },
     readFrom: function(buffer, offset) {
-        return ReadResult.just(offset, null);
+        return new ReadResult.just(offset, null);
     },
 };
 
 var brokenRW = {
     byteLength: function() {
-        return LengthResult(new Error('boom'));
+        return new LengthResult(new Error('boom'));
     },
     writeInto: function(val, buffer, offset) {
-        return WriteResult(BangError(), offset);
+        return new WriteResult(BangError(), offset);
     },
     readFrom: function(buffer, offset) {
-        return ReadResult(new Error('bork'), offset);
+        return new ReadResult(new Error('bork'), offset);
     },
 };
 

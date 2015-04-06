@@ -40,16 +40,16 @@ var byteRW = {
 };
 
 var lengthErrorRW = {
-    byteLength: function() {return LengthResult(new Error('boom'));}
+    byteLength: function() {return new LengthResult(new Error('boom'));}
 };
 
 var writeErrorRW = {
-    byteLength: function() {return LengthResult.just(0);},
-    writeInto: function() {return WriteResult.error(new Error('bang'));}
+    byteLength: function() {return new LengthResult.just(0);},
+    writeInto: function() {return new WriteResult.error(new Error('bang'));}
 };
 
 var readErrorRW = {
-    readFrom: function() {return ReadResult.error(new Error('zot'));}
+    readFrom: function() {return new ReadResult.error(new Error('zot'));}
 };
 
 test('byteLength', function t(assert) {

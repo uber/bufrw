@@ -54,41 +54,35 @@ function BufferRW(byteLength, readFrom, writeInto) {
 }
 
 function LengthResult(err, length) {
-    if (!(this instanceof LengthResult)) {
-        return new LengthResult(err, length);
-    }
     var self = this;
     self.err = err || null;
     self.length = length || 0;
 }
 
 LengthResult.error = function error(err, length) {
-    return LengthResult(err, length);
+    return new LengthResult(err, length);
 };
 
 LengthResult.just = function just(length) {
-    return LengthResult(null, length);
+    return new LengthResult(null, length);
 };
 
 function WriteResult(err, offset) {
-    if (!(this instanceof WriteResult)) {
-        return new WriteResult(err, offset);
-    }
     var self = this;
     self.err = err || null;
     self.offset = offset || 0;
 }
 
 WriteResult.error = function error(err, offset) {
-    return WriteResult(err, offset);
+    return new WriteResult(err, offset);
 };
 
 WriteResult.just = function just(offset) {
-    return WriteResult(null, offset);
+    return new WriteResult(null, offset);
 };
 
 WriteResult.shortError = function shortError(expected, actual, offset) {
-    return WriteResult.error(ShortBufferError({
+    return new WriteResult(new ShortBufferError({
         expected: expected,
         actual: actual,
         offset: offset
@@ -96,9 +90,6 @@ WriteResult.shortError = function shortError(expected, actual, offset) {
 };
 
 function ReadResult(err, offset, value) {
-    if (!(this instanceof ReadResult)) {
-        return new ReadResult(err, offset, value);
-    }
     var self = this;
     self.err = err || null;
     self.offset = offset || 0;
@@ -106,22 +97,22 @@ function ReadResult(err, offset, value) {
 }
 
 ReadResult.error = function error(err, offset, value) {
-    return ReadResult(err, offset, value);
+    return new ReadResult(err, offset, value);
 };
 
 ReadResult.just = function just(offset, value) {
-    return ReadResult(null, offset, value);
+    return new ReadResult(null, offset, value);
 };
 
 ReadResult.shortError = function shortError(expected, actual, offset, endOffset) {
     if (endOffset === undefined) {
-        return ReadResult.error(ShortBufferError({
+        return new ReadResult(new ShortBufferError({
             expected: expected,
             actual: actual,
             offset: offset
         }), offset);
     } else {
-        return ReadResult.error(ShortBufferRangedError({
+        return new ReadResult(new ShortBufferRangedError({
             expected: expected,
             actual: actual,
             offset: offset,

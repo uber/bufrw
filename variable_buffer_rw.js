@@ -60,7 +60,7 @@ VariableBufferRW.prototype.byteLength = function byteLength(buf) {
     }
     var len = self.sizerw.byteLength(length);
     if (len.err) return len;
-    return LengthResult.just(len.length + length);
+    return new LengthResult(null, len.length + length);
 };
 
 VariableBufferRW.prototype.writeInto = function writeInto(buf, buffer, offset) {
@@ -79,7 +79,7 @@ VariableBufferRW.prototype.writeInto = function writeInto(buf, buffer, offset) {
     }
     var res = self.sizerw.writeInto(length, buffer, offset);
     if (res.err) return res;
-    return WriteResult.just(start + length);
+    return new WriteResult(null, start + length);
 };
 
 VariableBufferRW.prototype.readFrom = function readFrom(buffer, offset) {
@@ -94,6 +94,6 @@ VariableBufferRW.prototype.readFrom = function readFrom(buffer, offset) {
         offset = res.offset;
         var buf = Buffer(length);
         buffer.copy(buf, 0, offset);
-        return ReadResult.just(offset + length, buf);
+        return new ReadResult(null, offset + length, buf);
     }
 };

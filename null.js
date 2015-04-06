@@ -24,15 +24,15 @@ var ReadResult = require('./base').ReadResult;
 var BufferRW = require('./base').BufferRW;
 
 function nullByteLength() {
-    return LengthResult.just(0);
+    return new LengthResult(null, 0);
 }
 
 function nullWriteInto(val, buffer, offset) {
-    return WriteResult.just(offset);
+    return new WriteResult(null, offset);
 }
 
 function nullReadFrom(buffer, offset) {
-    return ReadResult.just(offset, null);
+    return new ReadResult(null, offset, null);
 }
 
 var NullRW = BufferRW(nullByteLength, nullReadFrom, nullWriteInto);
