@@ -44,7 +44,7 @@ function SwitchRW(valrw, cases, opts) {
     var self = this;
     self.valrw = valrw;
     self.cases = cases;
-    self.cons = opts.cons || makePair;
+    self.cons = opts.cons || Pair;
     self.valKey = opts.valKey || '0';
     self.dataKey = opts.dataKey || '1';
 }
@@ -99,10 +99,16 @@ SwitchRW.prototype.readFrom = function readFrom(buffer, offset) {
     if (res.err) return res;
     offset = res.offset;
     var data = res.value;
-    var obj = self.cons(val, data);
+    var obj = new self.cons(val, data);
     return new ReadResult(null, offset, obj);
 };
 
-function makePair(a, b) {
-    return [a, b];
+function Pair(a, b) {
+    var self = this;
+    Array.call(self);
+    self[0] = a;
+    self[1] = b;
 }
+inherits(Pair, Array);
+
+SwitchRW.Pair = Pair;

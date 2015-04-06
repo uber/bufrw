@@ -25,6 +25,7 @@ var test = require('tape');
 
 var atoms = require('../atoms');
 var SwitchRW = require('../switch');
+var Pair = SwitchRW.Pair;
 
 var LengthResult = require('../base').LengthResult;
 var WriteResult = require('../base').WriteResult;
@@ -48,9 +49,9 @@ var numbers = SwitchRW(atoms.UInt8, {
 });
 
 test('SwitchRW: numbers', testRW.cases(numbers, [
-    [[0, 0x11], [0x00, 0x11]],
-    [[1, 0x2222], [0x01, 0x22, 0x22]],
-    [[2, 0x33333333], [0x02, 0x33, 0x33, 0x33, 0x33]],
+    [new Pair(0, 0x11), [0x00, 0x11]],
+    [new Pair(1, 0x2222), [0x01, 0x22, 0x22]],
+    [new Pair(2, 0x33333333), [0x02, 0x33, 0x33, 0x33, 0x33]],
 
     // invalid values
     {
