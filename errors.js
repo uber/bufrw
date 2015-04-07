@@ -45,6 +45,14 @@ module.exports.FixedLengthMismatch = TypedError({
     got: null
 });
 
+module.exports.RangeError = TypedError({
+    type: 'bufrw.range-error',
+    message: 'value {value} out of range, min: {min} max: {max}',
+    value: null,
+    min: null,
+    max: null
+});
+
 module.exports.InvalidArgument = TypedError({
     type: 'bufrw.invalid-argument',
     message: 'invalid argument, expected {expected}',

@@ -30,6 +30,26 @@ test('atoms.Int8', testRW.cases(atoms.Int8, [
     [    0, [0x00]],
     [ 0x12, [0x12]],
 
+    // value validation
+    {
+        writeTest: {
+            value: null,
+            error: {
+                type: 'bufrw.invalid-argument',
+                message: 'invalid argument, expected a number'
+            }
+        }
+    },
+    {
+        writeTest: {
+            value: 1000,
+            error: {
+                type: 'bufrw.range-error',
+                message: 'value 1000 out of range, min: -128 max: 127'
+            }
+        }
+    },
+
     // truncation
     {
         writeTest: {
