@@ -24,6 +24,7 @@ var color = require('ansi-color').set;
 var hex = require('hexer');
 var TypedError = require('error/typed');
 var util = require('util');
+var Result = require('./result');
 
 var ShortReadError = TypedError({
     type: 'short-read',
@@ -44,38 +45,44 @@ var ShortWriteError = TypedError({
 var emptyBuffer = Buffer(0);
 
 function fromBuffer(struct, buffer, offset) {
-    var tup = fromBufferTuple(struct, buffer, offset);
-    var err = tup[0];
-    var value = tup[1];
-    if (err) throw err;
-    else return value;
+    return fromBufferResult(struct, buffer, offset).toValue();
 }
 
 function byteLength(struct, value) {
-    var tup = byteLengthTuple(struct, value);
-    var err = tup[0];
-    var length = tup[1];
-    if (err) throw err;
-    else return length;
+    return byteLengthResult(struct, value).toValue();
 }
 
 function toBuffer(struct, value) {
-    var tup = toBufferTuple(struct, value);
-    var err = tup[0];
-    var buffer = tup[1];
-    if (err) throw err;
-    else return buffer;
+    return toBufferResult(struct, value).toValue();
 }
 
 function intoBuffer(struct, buffer, value) {
-    var tup = intoBufferTuple(struct, buffer, value);
-    var err = tup[0];
-    buffer = tup[1];
-    if (err) throw err;
-    else return buffer;
+    return intoBufferResult(struct, buffer, value).toValue();
 }
 
+// The "Tuple" methods are deprecated
+
+/* istanbul ignore next */
 function fromBufferTuple(struct, buffer, offset) {
+    return fromBufferResult(struct, buffer, offset).toTuple();
+}
+
+/* istanbul ignore next */
+function byteLengthTuple(struct, value) {
+    return byteLengthResult(struct, value).toTuple();
+}
+
+/* istanbul ignore next */
+function toBufferTuple(struct, value) {
+    return toBufferResult(struct, value).toTuple();
+}
+
+/* istanbul ignore next */
+function intoBufferTuple(struct, buffer, value) {
+    return intoBufferResult(struct, buffer, value).toTuple();
+}
+
+function fromBufferResult(struct, buffer, offset) {
     offset = offset || 0;
     var res = struct.readFrom(buffer, offset);
     offset = res.offset;
@@ -91,41 +98,41 @@ function fromBufferTuple(struct, buffer, offset) {
         if (err.offset === undefined) err.offset = offset;
         if (err.buffer === undefined) err.buffer = buffer;
     }
-    return [err, res.value];
+    return new Result(err, res.value);
 }
 
-function byteLengthTuple(struct, value) {
+function byteLengthResult(struct, value) {
     var lenRes = struct.byteLength(value);
-    if (lenRes.err) return [lenRes.err, 0];
-    else return [null, lenRes.length];
+    if (lenRes.err) return new Result(lenRes.err, 0);
+    else return new Result(null, lenRes.length);
 }
 
-function toBufferTuple(struct, value) {
+function toBufferResult(struct, value) {
     var lenRes = struct.byteLength(value);
-    if (lenRes.err) return [lenRes.err, emptyBuffer];
+    if (lenRes.err) return new Result(lenRes.err, emptyBuffer);
     var length = lenRes.length;
     var buffer = new Buffer(length);
     // buffer.fill(0); TODO option
-    return intoBufferTuple(struct, buffer, value);
+    return intoBufferResult(struct, buffer, value);
 }
 
-function intoBufferTuple(struct, buffer, value) {
+function intoBufferResult(struct, buffer, value) {
     var writeRes = struct.writeInto(value, buffer, 0);
     if (writeRes.err) {
         // istanbul ignore else
         if (!Buffer.isBuffer(writeRes.err.buffer)) writeRes.err.buffer = buffer;
         if (typeof writeRes.err.offset !== 'number') writeRes.err.offset = writeRes.offset;
-        return [writeRes.err, buffer];
+        return new Result(writeRes.err, buffer);
     }
     var offset = writeRes.offset;
     if (offset !== buffer.length) {
-        return [ShortWriteError({
+        return new Result(ShortWriteError({
             remaining: buffer.length - offset,
             buffer: buffer,
             offset: offset
-        }), buffer];
+        }), buffer);
     }
-    return [null, buffer];
+    return new Result(null, buffer);
 }
 
 // istanbul ignore next TODO
@@ -252,8 +259,14 @@ module.exports.fromBuffer = fromBuffer;
 module.exports.byteLength = byteLength;
 module.exports.toBuffer = toBuffer;
 module.exports.intoBuffer = intoBuffer;
+module.exports.formatError = formatError;
+
 module.exports.fromBufferTuple = fromBufferTuple;
 module.exports.byteLengthTuple = byteLengthTuple;
 module.exports.toBufferTuple = toBufferTuple;
 module.exports.intoBufferTuple = intoBufferTuple;
-module.exports.formatError = formatError;
+
+module.exports.fromBufferResult = fromBufferResult;
+module.exports.byteLengthResult = byteLengthResult;
+module.exports.toBufferResult = toBufferResult;
+module.exports.intoBufferResult = intoBufferResult;
