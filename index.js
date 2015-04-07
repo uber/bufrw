@@ -22,10 +22,17 @@ module.exports.fromBuffer = require('./interface').fromBuffer;
 module.exports.byteLength = require('./interface').byteLength;
 module.exports.toBuffer = require('./interface').toBuffer;
 module.exports.intoBuffer = require('./interface').intoBuffer;
+
 module.exports.fromBufferTuple = require('./interface').fromBufferTuple;
 module.exports.byteLengthTuple = require('./interface').byteLengthTuple;
 module.exports.toBufferTuple = require('./interface').toBufferTuple;
 module.exports.intoBufferTuple = require('./interface').intoBufferTuple;
+
+module.exports.fromBufferResult = require('./interface').fromBufferResult;
+module.exports.byteLengthResult = require('./interface').byteLengthResult;
+module.exports.toBufferResult = require('./interface').toBufferResult;
+module.exports.intoBufferResult = require('./interface').intoBufferResult;
+
 module.exports.formatError = require('./interface').formatError;
 
 module.exports.Base = require('./base').BufferRW; // TODO: align names
