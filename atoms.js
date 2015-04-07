@@ -62,7 +62,7 @@ AtomRW.prototype.writeInto = function writeInto(value, buffer, offset) {
 
 var Int8 = AtomRW(1,
     function readInt8From(buffer, offset) {
-        var value = buffer.readInt8(offset);
+        var value = buffer.readInt8(offset, true);
         return new ReadResult(null, offset + 1, value);
     },
     function writeInt8Into(value, buffer, offset) {
@@ -72,7 +72,7 @@ var Int8 = AtomRW(1,
 
 var Int16BE = AtomRW(2,
     function readInt16BEFrom(buffer, offset) {
-        var value = buffer.readInt16BE(offset);
+        var value = buffer.readInt16BE(offset, true);
         return new ReadResult(null, offset + 2, value);
     },
     function writeInt16BEInto(value, buffer, offset) {
@@ -82,7 +82,7 @@ var Int16BE = AtomRW(2,
 
 var Int32BE = AtomRW(4,
     function readInt32BEFrom(buffer, offset) {
-        var value = buffer.readInt32BE(offset);
+        var value = buffer.readInt32BE(offset, true);
         return new ReadResult(null, offset + 4, value);
     },
     function writeInt32BEInto(value, buffer, offset) {
@@ -92,7 +92,7 @@ var Int32BE = AtomRW(4,
 
 var Int16LE = AtomRW(2,
     function readInt16LEFrom(buffer, offset) {
-        var value = buffer.readInt16LE(offset);
+        var value = buffer.readInt16LE(offset, true);
         return new ReadResult(null, offset + 2, value);
     },
     function writeInt16LEInto(value, buffer, offset) {
@@ -102,7 +102,7 @@ var Int16LE = AtomRW(2,
 
 var Int32LE = AtomRW(4,
     function readInt32LEFrom(buffer, offset) {
-        var value = buffer.readInt32LE(offset);
+        var value = buffer.readInt32LE(offset, true);
         return new ReadResult(null, offset + 4, value);
     },
     function writeInt32LEInto(value, buffer, offset) {
@@ -112,7 +112,7 @@ var Int32LE = AtomRW(4,
 
 var UInt8 = AtomRW(1,
     function readUInt8From(buffer, offset) {
-        var value = buffer.readUInt8(offset);
+        var value = buffer.readUInt8(offset, true);
         return new ReadResult(null, offset + 1, value);
     },
     function writeUInt8Into(value, buffer, offset) {
@@ -122,7 +122,7 @@ var UInt8 = AtomRW(1,
 
 var UInt16BE = AtomRW(2,
     function readUInt16BEFrom(buffer, offset) {
-        var value = buffer.readUInt16BE(offset);
+        var value = buffer.readUInt16BE(offset, true);
         return new ReadResult(null, offset + 2, value);
     },
     function writeUInt16BEInto(value, buffer, offset) {
@@ -132,7 +132,7 @@ var UInt16BE = AtomRW(2,
 
 var UInt32BE = AtomRW(4,
     function readUInt32BEFrom(buffer, offset) {
-        var value = buffer.readUInt32BE(offset);
+        var value = buffer.readUInt32BE(offset, true);
         return new ReadResult(null, offset + 4, value);
     },
     function writeUInt32BEInto(value, buffer, offset) {
@@ -142,7 +142,7 @@ var UInt32BE = AtomRW(4,
 
 var UInt16LE = AtomRW(2,
     function readUInt16LEFrom(buffer, offset) {
-        var value = buffer.readUInt16LE(offset);
+        var value = buffer.readUInt16LE(offset, true);
         return new ReadResult(null, offset + 2, value);
     },
     function writeUInt16LEInto(value, buffer, offset) {
@@ -152,7 +152,7 @@ var UInt16LE = AtomRW(2,
 
 var UInt32LE = AtomRW(4,
     function readUInt32LEFrom(buffer, offset) {
-        var value = buffer.readUInt32LE(offset);
+        var value = buffer.readUInt32LE(offset, true);
         return new ReadResult(null, offset + 4, value);
     },
     function writeUInt32LEInto(value, buffer, offset) {
@@ -162,7 +162,7 @@ var UInt32LE = AtomRW(4,
 
 var FloatLE = AtomRW(4,
     function readFloatLEFrom(buffer, offset) {
-        var value = buffer.readFloatLE(offset);
+        var value = buffer.readFloatLE(offset, true);
         return new ReadResult(null, offset + 4, value);
     },
     function writeFloatLEInto(value, buffer, offset) {
@@ -172,7 +172,7 @@ var FloatLE = AtomRW(4,
 
 var FloatBE = AtomRW(4,
     function readFloatBEFrom(buffer, offset) {
-        var value = buffer.readFloatBE(offset);
+        var value = buffer.readFloatBE(offset, true);
         return new ReadResult(null, offset + 4, value);
     },
     function writeFloatBEInto(value, buffer, offset) {
@@ -182,7 +182,7 @@ var FloatBE = AtomRW(4,
 
 var DoubleLE = AtomRW(8,
     function readDoubleLEFrom(buffer, offset) {
-        var value = buffer.readDoubleLE(offset);
+        var value = buffer.readDoubleLE(offset, true);
         return new ReadResult(null, offset + 8, value);
     },
     function writeDoubleLEInto(value, buffer, offset) {
@@ -192,7 +192,7 @@ var DoubleLE = AtomRW(8,
 
 var DoubleBE = AtomRW(8,
     function readDoubleBEFrom(buffer, offset) {
-        var value = buffer.readDoubleBE(offset);
+        var value = buffer.readDoubleBE(offset, true);
         return new ReadResult(null, offset + 8, value);
     },
     function writeDoubleBEInto(value, buffer, offset) {
