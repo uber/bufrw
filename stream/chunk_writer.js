@@ -25,7 +25,7 @@ var inspect = require('util').inspect;
 var Transform = require('readable-stream').Transform;
 var WrappedError = require('error/wrapped');
 
-var toBufferTuple = require('../interface').toBufferTuple;
+var toBufferResult = require('../interface').toBufferResult;
 
 var ChunkWriteError = WrappedError({
     type: 'chunk-write',
@@ -53,9 +53,9 @@ inherits(ChunkWriter, Transform);
 
 ChunkWriter.prototype._transform = function _transform(value, encoding, callback) {
     var self = this;
-    var tup = toBufferTuple(self.chunkRW, value);
-    var err = tup[0];
-    var buffer = tup[1];
+    var res = toBufferResult(self.chunkRW, value);
+    var err = res.error;
+    var buffer = res.value;
     if (err) {
         callback(ChunkWriteError(err, {
             valueInspected: inspect(value),

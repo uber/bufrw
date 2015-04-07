@@ -23,8 +23,8 @@
 var color = require('ansi-color').set;
 var hex = require('hexer');
 var util = require('util');
-var intoBufferTuple = require('./interface').intoBufferTuple;
-var fromBufferTuple = require('./interface').fromBufferTuple;
+var intoBufferResult = require('./interface').intoBufferResult;
+var fromBufferResult = require('./interface').fromBufferResult;
 var formatError = require('./interface').formatError;
 
 module.exports.cases = testCases;
@@ -98,8 +98,8 @@ function writeTest(self, testCase) {
     var val = testCase.value;
     var got = Buffer(testCase.bytes ? testCase.bytes.length : testCase.length || 0);
     got.fill(0);
-    var tup = intoBufferTuple(self.rw, got, val);
-    var err = tup[0];
+    var res = intoBufferResult(self.rw, got, val);
+    var err = res.error;
     if (err) {
         if (testCase.error) {
             self.assert.deepEqual(
@@ -157,9 +157,9 @@ function hexdiff(a, b) {
 
 function readTest(self, testCase) {
     var buffer = Buffer(testCase.bytes);
-    var tup = fromBufferTuple(self.rw, buffer);
-    var err = tup[0];
-    var got = tup[1];
+    var res = fromBufferResult(self.rw, buffer);
+    var err = res.error;
+    var got = res.value;
     if (err) {
         if (testCase.error) {
             self.assert.deepEqual(
