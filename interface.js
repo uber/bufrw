@@ -166,8 +166,8 @@ function formatBufferColored(err, options) {
     var opts = options.hexerOptions ? Object.create(options.hexerOptions) : {};
     if (hasOffset) {
         if (hasEnd) {
-        opts.decorateHexen = decorateRangedError;
-        opts.decorateHuman = decorateRangedError;
+            opts.decorateHexen = decorateRangedError;
+            opts.decorateHuman = decorateRangedError;
         } else {
             opts.decorateHexen = decorateError;
             opts.decorateHuman = decorateError;
