@@ -79,9 +79,9 @@ test('testRW: unexpected errors', function t(assert) {
         assert.equal(results[2].actual.message, 'bork', 'expected actual "bork" error');
         assert.equal(rwTest.hexdumpStream.read(),
             'write error: BangError: bang\n' +
-            '00: \x1b[31m\x1b[1m00\x1b[0m                                       \x1b[31m\x1b[1m.\x1b[0m\n' +
+            '00\x1b[36m:\x1b[0m \x1b[31m\x1b[1m00\x1b[0m                                       \x1b[31m\x1b[1m.\x1b[0m\n' +
             'read error: Error: bork\n' +
-            '00: \x1b[31m\x1b[1m00\x1b[0m                                       \x1b[31m\x1b[1m.\x1b[0m\n');
+            '00\x1b[36m:\x1b[0m \x1b[31m\x1b[1m00\x1b[0m                                       \x1b[31m\x1b[1m.\x1b[0m\n');
         assert.end();
     });
 });

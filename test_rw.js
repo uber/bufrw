@@ -20,8 +20,7 @@
 
 'use strict';
 
-var color = require('ansi-color').set;
-var hex = require('hexer');
+var hexdiff = require('hexer/diff');
 var util = require('util');
 var intoBufferResult = require('./interface').intoBufferResult;
 var fromBufferResult = require('./interface').fromBufferResult;
@@ -116,43 +115,14 @@ function writeTest(self, testCase) {
         var buf = Buffer(testCase.bytes);
         // istanbul ignore if
         if (got.toString('hex') !== buf.toString('hex')) {
-            self.assert.comment('expected v actual:\n' + hexdiff(buf, got));
+            self.assert.comment('expected v actual:\n' +
+                hexdiff(buf, got, {colored: true}));
             self.assert.fail(desc);
         } else {
             self.assert.pass(desc);
         }
     }
 
-}
-
-// istanbul ignore next
-function hexdiff(a, b) {
-    var adump = hex(a, {
-        emptyHuman: ' ',
-        decorateHexen: highlightA
-    }).split('\n');
-    var bdump = hex(b, {
-        emptyHuman: ' ',
-        decorateHexen: highlightB
-    }).split('\n');
-    return adump.map(function each(aline, i) {
-        var bline = bdump[i];
-        var sep = aline === bline ? ' ' : color('|', 'blue+bold');
-        return aline + ' ' + sep + ' ' + bline;
-    }).join('\n');
-
-    function highlightA(i, j, str) {
-        if (a[i] !== b[i]) {
-            str = color(str, 'red+bold');
-        }
-        return str;
-    }
-    function highlightB(i, j, str) {
-        if (a[i] !== b[i]) {
-            str = color(str, 'green+bold');
-        }
-        return str;
-    }
 }
 
 function readTest(self, testCase) {

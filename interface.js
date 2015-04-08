@@ -22,6 +22,7 @@
 
 var color = require('ansi-color').set;
 var hex = require('hexer');
+var render = require('hexer/render');
 var TypedError = require('error/typed');
 var util = require('util');
 var Result = require('./result');
@@ -164,10 +165,13 @@ function formatBufferColored(err, options) {
     var within = false;
 
     var opts = options.hexerOptions ? Object.create(options.hexerOptions) : {};
+    if (opts.colored === undefined) {
+        opts.colored = true;
+    }
     if (hasOffset) {
         if (hasEnd) {
-        opts.decorateHexen = decorateRangedError;
-        opts.decorateHuman = decorateRangedError;
+            opts.decorateHexen = decorateRangedError;
+            opts.decorateHuman = decorateRangedError;
         } else {
             opts.decorateHexen = decorateError;
             opts.decorateHuman = decorateError;
@@ -178,12 +182,12 @@ function formatBufferColored(err, options) {
     function decorateRangedError(totalOffset, screenOffset, str) {
         if (totalOffset === err.offset) {
             within = totalOffset !== err.endOffset-1;
-            return errColor(str);
+            return errColor(render.stripColor(str));
         } else if (totalOffset === err.endOffset-1) {
             within = false;
-            return errColor(str);
+            return errColor(render.stripColor(str));
         } else if (within) {
-            return errColor(str);
+            return errColor(render.stripColor(str));
         } else {
             return str;
         }
@@ -191,7 +195,7 @@ function formatBufferColored(err, options) {
 
     function decorateError(totalOffset, screenOffset, str) {
         if (totalOffset === err.offset) {
-            return errColor(str);
+            return errColor(render.stripColor(str));
         } else {
             return str;
         }
