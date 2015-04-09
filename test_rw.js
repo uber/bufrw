@@ -20,19 +20,17 @@
 
 'use strict';
 
+var hex = require('hexer');
 var hexdiff = require('hexer/diff');
 var util = require('util');
 var intoBufferResult = require('./interface').intoBufferResult;
 var fromBufferResult = require('./interface').fromBufferResult;
-var formatError = require('./interface').formatError;
+var errorHighlighter = require('./error_highlighter');
 
 module.exports.cases = testCases;
 
 function testCases(rw, cases) {
     var self = function runTestCases(assert, done) {
-        self = Object.create(self);
-        self.assert = assert;
-        self.rw = rw;
         for (var i = 0; i < cases.length; i++) {
             var testCase;
             if (Array.isArray(cases[i])) {
@@ -57,25 +55,32 @@ function testCases(rw, cases) {
             } else {
                 testCase = cases[i];
             }
-
-            if (testCase.lengthTest) lengthTest(self, testCase.lengthTest);
-            if (testCase.writeTest) writeTest(self, testCase.writeTest);
-            if (testCase.readTest) readTest(self, testCase.readTest);
+            new RWTestCase(assert, rw, testCase).run();
         }
-
         (done || assert.end)();
-    };
-    self.hexdumpStream = process.stdout;
-    self.hexdump = function hexdumpBuffer(desc, err) {
-        self.hexdumpStream.write(util.format('%s: %s',
-            desc, formatError(err, {color: true})));
     };
     self.assert = null;
     self.rw = null;
     return self;
 }
 
-function lengthTest(self, testCase) {
+function RWTestCase(assert, rw, testCase) {
+    var self = this;
+    self.assert = assert;
+    self.rw = rw;
+    self.testCase = testCase;
+}
+
+RWTestCase.prototype.run = function run() {
+    var self = this;
+    if (self.testCase.lengthTest) self.runLengthTest();
+    if (self.testCase.writeTest) self.runWriteTest();
+    if (self.testCase.readTest) self.runReadTest();
+};
+
+RWTestCase.prototype.runLengthTest = function runLengthTest() {
+    var self = this;
+    var testCase = self.testCase.lengthTest;
     var val = testCase.value;
     var res = self.rw.byteLength(val);
     if (res.err) {
@@ -91,9 +96,11 @@ function lengthTest(self, testCase) {
     } else {
         self.assert.deepEqual(res && res.length, testCase.length, util.format('length: %j', val));
     }
-}
+};
 
-function writeTest(self, testCase) {
+RWTestCase.prototype.runWriteTest = function runWriteTest() {
+    var self = this;
+    var testCase = self.testCase.writeTest;
     var val = testCase.value;
     var got = Buffer(testCase.bytes ? testCase.bytes.length : testCase.length || 0);
     got.fill(0);
@@ -105,8 +112,9 @@ function writeTest(self, testCase) {
                 copyErr(err, testCase.error),
                 testCase.error, 'expected write error');
         } else {
-            self.hexdump('write error', err);
             self.assert.ifError(err, 'no write error');
+            // istanbul ignore else
+            if (err) self.dumpError('write', err);
         }
     } else if (testCase.error) {
         self.assert.fail('expected write error');
@@ -122,10 +130,11 @@ function writeTest(self, testCase) {
             self.assert.pass(desc);
         }
     }
+};
 
-}
-
-function readTest(self, testCase) {
+RWTestCase.prototype.runReadTest = function runReadTest() {
+    var self = this;
+    var testCase = self.testCase.readTest;
     var buffer = Buffer(testCase.bytes);
     var res = fromBufferResult(self.rw, buffer);
     var err = res.error;
@@ -136,11 +145,9 @@ function readTest(self, testCase) {
                 copyErr(err, testCase.error),
                 testCase.error, 'expected read error');
         } else {
-            // istanbul ignore else
-            if (!got && err.buffer) got = err.buffer;
-            // istanbul ignore else
-            if (Buffer.isBuffer(got)) self.hexdump('read error', err);
             self.assert.ifError(err, 'no read error');
+            // istanbul ignore else
+            if (err) self.dumpError('read', err);
         }
     } else if (testCase.error) {
         self.assert.fail('expected read error');
@@ -154,7 +161,27 @@ function readTest(self, testCase) {
                 'expected ' + valConsName + ' constructor');
         }
     }
-}
+};
+
+RWTestCase.prototype.dumpError = function dumpError(kind, err) {
+    var self = this;
+    var highlight = errorHighlighter(err);
+    // istanbul ignore next
+    var errName = err.name || err.constructor.name;
+    var dump = util.format('%s error %s: %s\n',
+        kind, errName, err.message);
+    // istanbul ignore else
+    if (err.buffer) {
+        dump += hex(err.buffer, {
+            colored: true,
+            decorateHexen: highlight,
+            decorateHuman: highlight
+        });
+    }
+    dump.split(/\n/).forEach(function each(line) {
+        self.assert.comment(line);
+    });
+};
 
 function copyErr(err, tmpl) {
     var out = {};

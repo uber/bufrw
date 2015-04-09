@@ -22,7 +22,6 @@
 
 var testRW = require('../test_rw');
 var TypedError = require('error/typed');
-var PassThrough = require('readable-stream').PassThrough;
 var test = require('tape');
 
 var LengthResult = require('../base').LengthResult;
@@ -69,19 +68,25 @@ test('testRW: unexpected errors', function t(assert) {
     var rwTest = testRW.cases(brokenRW, [
         [null, [0x00]]
     ]);
-    rwTest.hexdumpStream = PassThrough({encoding: 'utf8'});
     runMockedTest(rwTest, function done(results) {
         assert.equal(results[0].name, 'no length error', 'expected "no length error"');
         assert.equal(results[0].actual.message, 'boom', 'expected actual "boom" error');
+
         assert.equal(results[1].name, 'no write error', 'expected "no write error"');
         assert.equal(results[1].actual.message, 'bang', 'expected actual "bang" error');
-        assert.equal(results[2].name, 'no read error', 'expected "no read error"');
-        assert.equal(results[2].actual.message, 'bork', 'expected actual "bork" error');
-        assert.equal(rwTest.hexdumpStream.read(),
-            'write error: BangError: bang\n' +
-            '00\x1b[36m:\x1b[0m \x1b[31m\x1b[1m00\x1b[0m                                       \x1b[31m\x1b[1m.\x1b[0m\n' +
-            'read error: Error: bork\n' +
-            '00\x1b[36m:\x1b[0m \x1b[31m\x1b[1m00\x1b[0m                                       \x1b[31m\x1b[1m.\x1b[0m\n');
+        assert.equal(results[2],
+            'write error BangError: bang');
+        assert.equal(results[3],
+            '00\x1b[36m:\x1b[0m \x1b[31m\x1b[1m00\x1b[0m                                       \x1b[31m\x1b[1m.\x1b[0m');
+
+        assert.equal(results[4].name, 'no read error', 'expected "no read error"');
+        assert.equal(results[4].actual.message, 'bork', 'expected actual "bork" error');
+
+        assert.equal(results[5],
+            'read error Error: bork');
+        assert.equal(results[6],
+            '00\x1b[36m:\x1b[0m \x1b[31m\x1b[1m00\x1b[0m                                       \x1b[31m\x1b[1m.\x1b[0m');
+
         assert.end();
     });
 });
@@ -104,12 +109,10 @@ test('testRW: error expectations', function t(assert) {
             }
         }
     ]);
-    rwTest.hexdumpStream = PassThrough({encoding: 'utf8'});
     runMockedTest(rwTest, function done(results) {
         assert.equal(results[0].name, 'expected length error', 'expected "expected length error"');
         assert.equal(results[1].name, 'expected write error', 'expected "expected write error"');
         assert.equal(results[2].name, 'expected read error', 'expected "expected read error"');
-        assert.equal(rwTest.hexdumpStream.read(), null);
         assert.end();
     });
 });
