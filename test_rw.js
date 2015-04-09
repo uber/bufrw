@@ -112,8 +112,8 @@ RWTestCase.prototype.runWriteTest = function runWriteTest() {
                 copyErr(err, testCase.error),
                 testCase.error, 'expected write error');
         } else {
-            self.hexdump('write error', err);
             self.assert.ifError(err, 'no write error');
+            self.dumpError('write', err);
         }
     } else if (testCase.error) {
         self.assert.fail('expected write error');
@@ -147,8 +147,8 @@ RWTestCase.prototype.runReadTest = function runReadTest() {
             // istanbul ignore else
             if (!got && err.buffer) got = err.buffer;
             // istanbul ignore else
-            if (Buffer.isBuffer(got)) self.hexdump('read error', err);
             self.assert.ifError(err, 'no read error');
+            if (Buffer.isBuffer(got)) self.dumpError('read', err);
         }
     } else if (testCase.error) {
         self.assert.fail('expected read error');
@@ -164,10 +164,10 @@ RWTestCase.prototype.runReadTest = function runReadTest() {
     }
 };
 
-RWTestCase.prototype.hexdump = function hexdump(desc, err) {
+RWTestCase.prototype.dumpError = function dumpError(kind, err) {
     var self = this;
-    var dump = util.format('%s: %s',
-        desc, formatError(err, {color: true}));
+    var dump = util.format('%s error: %s',
+        kind, formatError(err, {color: true}));
     self.hexdumpStream.write(dump);
 };
 
