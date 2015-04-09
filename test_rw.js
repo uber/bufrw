@@ -113,7 +113,8 @@ RWTestCase.prototype.runWriteTest = function runWriteTest() {
                 testCase.error, 'expected write error');
         } else {
             self.assert.ifError(err, 'no write error');
-            self.dumpError('write', err);
+            // istanbul ignore else
+            if (err) self.dumpError('write', err);
         }
     } else if (testCase.error) {
         self.assert.fail('expected write error');
