@@ -20,12 +20,11 @@
 
 'use strict';
 
-var color = require('ansi-color').set;
 var hex = require('hexer');
-var render = require('hexer/render');
 var TypedError = require('error/typed');
 var util = require('util');
 var Result = require('./result');
+var errorHighlighter = require('./error_highlighter');
 
 var ShortReadError = TypedError({
     type: 'short-read',
@@ -155,51 +154,14 @@ function formatError(err, options) {
 // istanbul ignore next TODO
 function formatBufferColored(err, options) {
     options = options || {};
-    var markColor = options.markColor || 'red+bold';
-    var errColor = typeof markColor === 'function' ? markColor : function(str) {
-        return color(str, markColor);
-    };
-
-    var hasOffset = !(err.offset === undefined || err.offset === null);
-    var hasEnd = !(err.endOffset === undefined || err.endOffset === null);
-    var within = false;
-
     var opts = options.hexerOptions ? Object.create(options.hexerOptions) : {};
     if (opts.colored === undefined) {
         opts.colored = true;
     }
-    if (hasOffset) {
-        if (hasEnd) {
-            opts.decorateHexen = decorateRangedError;
-            opts.decorateHuman = decorateRangedError;
-        } else {
-            opts.decorateHexen = decorateError;
-            opts.decorateHuman = decorateError;
-        }
-    }
+    var highlight = errorHighlighter(err, options);
+    opts.decorateHexen = highlight;
+    opts.decorateHuman = highlight;
     return hex(err.buffer, opts);
-
-    function decorateRangedError(totalOffset, screenOffset, str) {
-        if (totalOffset === err.offset) {
-            within = totalOffset !== err.endOffset-1;
-            return errColor(render.stripColor(str));
-        } else if (totalOffset === err.endOffset-1) {
-            within = false;
-            return errColor(render.stripColor(str));
-        } else if (within) {
-            return errColor(render.stripColor(str));
-        } else {
-            return str;
-        }
-    }
-
-    function decorateError(totalOffset, screenOffset, str) {
-        if (totalOffset === err.offset) {
-            return errColor(render.stripColor(str));
-        } else {
-            return str;
-        }
-    }
 }
 
 // istanbul ignore next TODO
