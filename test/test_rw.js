@@ -74,9 +74,8 @@ test('testRW: unexpected errors', function t(assert) {
 
         assert.equal(results[1].name, 'no write error', 'expected "no write error"');
         assert.equal(results[1].actual.message, 'bang', 'expected actual "bang" error');
-
         assert.equal(results[2],
-            'write error: BangError: bang');
+            'write error BangError: bang');
         assert.equal(results[3],
             '00\x1b[36m:\x1b[0m \x1b[31m\x1b[1m00\x1b[0m                                       \x1b[31m\x1b[1m.\x1b[0m');
 
@@ -84,7 +83,7 @@ test('testRW: unexpected errors', function t(assert) {
         assert.equal(results[4].actual.message, 'bork', 'expected actual "bork" error');
 
         assert.equal(results[5],
-            'read error: Error: bork');
+            'read error Error: bork');
         assert.equal(results[6],
             '00\x1b[36m:\x1b[0m \x1b[31m\x1b[1m00\x1b[0m                                       \x1b[31m\x1b[1m.\x1b[0m');
 

@@ -20,11 +20,12 @@
 
 'use strict';
 
+var hex = require('hexer');
 var hexdiff = require('hexer/diff');
 var util = require('util');
 var intoBufferResult = require('./interface').intoBufferResult;
 var fromBufferResult = require('./interface').fromBufferResult;
-var formatError = require('./interface').formatError;
+var errorHighlighter = require('./error_highlighter');
 
 module.exports.cases = testCases;
 
@@ -163,12 +164,21 @@ RWTestCase.prototype.runReadTest = function runReadTest() {
 
 RWTestCase.prototype.dumpError = function dumpError(kind, err) {
     var self = this;
-    var dump = util.format('%s error: %s',
-        kind, formatError(err, {color: true}));
-    dump.split(/\n/).forEach(function each(line, i, lines) {
-        if (line.length || i < lines.length -1 ) {
-            self.assert.comment(line);
-        }
+    var highlight = errorHighlighter(err);
+    // istanbul ignore next
+    var errName = err.name || err.constructor.name;
+    var dump = util.format('%s error %s: %s\n',
+        kind, errName, err.message);
+    // istanbul ignore else
+    if (err.buffer) {
+        dump += hex(err.buffer, {
+            colored: true,
+            decorateHexen: highlight,
+            decorateHuman: highlight
+        });
+    }
+    dump.split(/\n/).forEach(function each(line) {
+        self.assert.comment(line);
     });
 };
 
