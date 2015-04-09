@@ -25,6 +25,7 @@ var hexdiff = require('hexer/diff');
 var util = require('util');
 var intoBufferResult = require('./interface').intoBufferResult;
 var fromBufferResult = require('./interface').fromBufferResult;
+var AnnotatedBuffer = require('./annotated_buffer');
 var errorHighlighter = require('./error_highlighter');
 
 module.exports.cases = testCases;
@@ -136,6 +137,7 @@ RWTestCase.prototype.runReadTest = function runReadTest() {
     var self = this;
     var testCase = self.testCase.readTest;
     var buffer = Buffer(testCase.bytes);
+    buffer = new AnnotatedBuffer(buffer);
     var res = fromBufferResult(self.rw, buffer);
     var err = res.error;
     var got = res.value;
@@ -170,8 +172,14 @@ RWTestCase.prototype.dumpError = function dumpError(kind, err) {
     var errName = err.name || err.constructor.name;
     var dump = util.format('%s error %s: %s\n',
         kind, errName, err.message);
+    if (err.buffer && err.buffer.hexdump) {
+        dump += err.buffer.hexdump({
+            colored: true,
+            boldStart: false,
+            highlight: highlight
+        });
     // istanbul ignore else
-    if (err.buffer) {
+    } else if (err.buffer) {
         dump += hex(err.buffer, {
             colored: true,
             decorateHexen: highlight,

@@ -85,7 +85,7 @@ test('testRW: unexpected errors', function t(assert) {
         assert.equal(results[5],
             'read error Error: bork');
         assert.equal(results[6],
-            '00\x1b[36m:\x1b[0m \x1b[31m\x1b[1m00\x1b[0m                                       \x1b[31m\x1b[1m.\x1b[0m');
+            '00\x1b[36m:\x1b[0m 00                                       \x1b[30m\x1b[1m.\x1b[0m');
 
         assert.end();
     });
