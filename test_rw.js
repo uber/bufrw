@@ -68,7 +68,6 @@ function RWTestCase(assert, rw, testCase) {
     self.assert = assert;
     self.rw = rw;
     self.testCase = testCase;
-    self.hexdumpStream = process.stdout;
 }
 
 RWTestCase.prototype.run = function run() {
@@ -144,11 +143,9 @@ RWTestCase.prototype.runReadTest = function runReadTest() {
                 copyErr(err, testCase.error),
                 testCase.error, 'expected read error');
         } else {
-            // istanbul ignore else
-            if (!got && err.buffer) got = err.buffer;
-            // istanbul ignore else
             self.assert.ifError(err, 'no read error');
-            if (Buffer.isBuffer(got)) self.dumpError('read', err);
+            // istanbul ignore else
+            if (err) self.dumpError('read', err);
         }
     } else if (testCase.error) {
         self.assert.fail('expected read error');
@@ -168,7 +165,11 @@ RWTestCase.prototype.dumpError = function dumpError(kind, err) {
     var self = this;
     var dump = util.format('%s error: %s',
         kind, formatError(err, {color: true}));
-    self.hexdumpStream.write(dump);
+    dump.split(/\n/).forEach(function each(line, i, lines) {
+        if (line.length || i < lines.length -1 ) {
+            self.assert.comment(line);
+        }
+    });
 };
 
 function copyErr(err, tmpl) {
