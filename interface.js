@@ -77,17 +77,18 @@ function checkAllReadFrom(res, buffer) {
     return res;
 }
 
-function fromBufferResult(rw, buffer, offset) {
-    offset = offset || 0;
-    var res = rw.readFrom(buffer, offset);
-    res = checkAllReadFrom(res, buffer);
-    offset = res.offset;
-    var err = res.err;
+function genericResult(err, value, buffer, offset) {
     if (err) {
         if (err.offset === undefined) err.offset = offset;
         if (err.buffer === undefined) err.buffer = buffer;
     }
-    return new Result(err, res.value);
+    return new Result(err, value);
+}
+
+function fromBufferResult(rw, buffer, offset) {
+    var res = rw.readFrom(buffer, offset || 0);
+    res = checkAllReadFrom(res, buffer);
+    return genericResult(res.err, res.value, buffer, res.offset);
 }
 
 function byteLengthResult(rw, value) {
@@ -119,12 +120,7 @@ function checkAllWroteOver(res, buffer) {
 function intoBufferResult(rw, buffer, value) {
     var res = rw.writeInto(value, buffer, 0);
     res = checkAllWroteOver(res, buffer);
-    if (res.err) {
-        // istanbul ignore else
-        if (!Buffer.isBuffer(res.err.buffer)) res.err.buffer = buffer;
-        if (typeof res.err.offset !== 'number') res.err.offset = res.offset;
-    }
-    return new Result(res.err, buffer);
+    return genericResult(res.err, buffer, buffer, res.offset);
 }
 
 // istanbul ignore next TODO
