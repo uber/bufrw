@@ -105,8 +105,7 @@ function toBufferResult(rw, value) {
     return intoBufferResult(rw, buffer, value);
 }
 
-function intoBufferResult(rw, buffer, value) {
-    var res = rw.writeInto(value, buffer, 0);
+function checkAllWroteOver(res, buffer) {
     if (!res.err && res.offset !== buffer.length) {
         res.err = errors.ShortWrite({
             remaining: buffer.length - res.offset,
@@ -114,6 +113,12 @@ function intoBufferResult(rw, buffer, value) {
             offset: res.offset
         });
     }
+    return res;
+}
+
+function intoBufferResult(rw, buffer, value) {
+    var res = rw.writeInto(value, buffer, 0);
+    res = checkAllWroteOver(res, buffer);
     if (res.err) {
         // istanbul ignore else
         if (!Buffer.isBuffer(res.err.buffer)) res.err.buffer = buffer;
