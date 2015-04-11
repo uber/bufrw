@@ -31,7 +31,7 @@ module.exports.expected = function expected(got, descr) {
 };
 
 module.exports.BrokenReaderState = TypedError({
-    type: 'broken-reader-state',
+    type: 'bufrw.broken-reader-state',
     message: 'reader in invalid state {state} expecting {expecting} avail {aval}',
     state: null,
     expecting: null,
@@ -39,14 +39,14 @@ module.exports.BrokenReaderState = TypedError({
 });
 
 module.exports.FixedLengthMismatch = TypedError({
-    type: 'fixed-length-mismatch',
+    type: 'bufrw.fixed-length-mismatch',
     message: 'supplied length {got} mismatches fixed length {expected}',
     expected: null,
     got: null
 });
 
 module.exports.InvalidArgument = TypedError({
-    type: 'invalid-argument',
+    type: 'bufrw.invalid-argument',
     message: 'invalid argument, expected {expected}',
     expected: null,
     argType: null,
@@ -54,20 +54,20 @@ module.exports.InvalidArgument = TypedError({
 });
 
 module.exports.InvalidSwitchValue = TypedError({
-    type: 'invalid-switch-value',
+    type: 'bufrw.invalid-switch-value',
     message: 'invalid switch value {value}',
     value: null
 });
 
 module.exports.MissingStructField = TypedError({
-    type: 'missing.field',
+    type: 'bufrw.missing.struct-field',
     message: 'missing field {field} on {struct}',
     field: null,
     struct: null
 });
 
 module.exports.ShortBuffer = TypedError({
-    type: 'short-buffer',
+    type: 'bufrw.short-buffer',
     message: 'expected at least {expected} bytes, only have {actual} @{offset}',
     expected: null,
     actual: null,
@@ -76,7 +76,7 @@ module.exports.ShortBuffer = TypedError({
 });
 
 module.exports.ShortBufferRanged = TypedError({
-    type: 'short-buffer',
+    type: 'bufrw.short-buffer',
     message: 'expected at least {expected} bytes, only have {actual} @[{offset}:{endOffset}]',
     expected: null,
     actual: null,
@@ -85,7 +85,7 @@ module.exports.ShortBufferRanged = TypedError({
 });
 
 module.exports.ShortRead = TypedError({
-    type: 'short-read',
+    type: 'bufrw.short-read',
     message: 'short read, {remaining} byte left over after consuming {offset}',
     remaining: null,
     buffer: null,
@@ -93,7 +93,7 @@ module.exports.ShortRead = TypedError({
 });
 
 module.exports.ShortWrite = TypedError({
-    type: 'short-write',
+    type: 'bufrw.short-write',
     message: 'short write, {remaining} byte left over after writing {offset}',
     remaining: null,
     buffer: null,
@@ -101,7 +101,7 @@ module.exports.ShortWrite = TypedError({
 });
 
 module.exports.TruncatedRead = TypedError({
-    type: 'truncated-read',
+    type: 'bufrw.truncated-read',
     message: 'read truncated by end of stream with {length} bytes in buffer',
     length: null,
     buffer: null,
@@ -110,6 +110,6 @@ module.exports.TruncatedRead = TypedError({
 });
 
 module.exports.ZeroLengthChunk = TypedError({
-    type: 'zero-length-chunk',
+    type: 'bufrw.zero-length-chunk',
     message: 'zero length chunk encountered'
 });

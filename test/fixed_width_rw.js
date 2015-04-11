@@ -35,7 +35,7 @@ test('FixedWidthRW: simple fix:8', testRW.cases(fix8, [
         lengthTest: {
             value: Buffer([0x01]),
             error: {
-                type: 'fixed-length-mismatch',
+                type: 'bufrw.fixed-length-mismatch',
                 message: 'supplied length 1 mismatches fixed length 8',
                 expected: 8,
                 got: 1
@@ -44,7 +44,7 @@ test('FixedWidthRW: simple fix:8', testRW.cases(fix8, [
         writeTest: {
             value: Buffer([0x01]),
             error: {
-                type: 'fixed-length-mismatch',
+                type: 'bufrw.fixed-length-mismatch',
                 message: 'supplied length 1 mismatches fixed length 8',
                 expected: 8,
                 got: 1
@@ -53,8 +53,8 @@ test('FixedWidthRW: simple fix:8', testRW.cases(fix8, [
         readTest: {
             bytes: [0x01],
             error: {
-                name: 'ShortBufferError',
-                type: 'short-buffer',
+                name: 'BufrwShortBufferError',
+                type: 'bufrw.short-buffer',
                 message: 'expected at least 8 bytes, only have 1 @0',
                 offset: 0,
                 actual: 1,

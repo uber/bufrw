@@ -75,15 +75,15 @@ test('StringRW: simple str~1 in utf8', testRW.cases(str1, [
     // invalid arg to length/write
     {
         lengthTest: {value: 42, error: {
-            type: 'invalid-argument',
-            name: 'InvalidArgumentError',
+            type: 'bufrw.invalid-argument',
+            name: 'BufrwInvalidArgumentError',
             message: 'invalid argument, expected string, null, or undefined',
             argType: 'number',
             argConstructor: 'Number'
         }},
         writeTest: {value: 42, error: {
-            name: 'InvalidArgumentError',
-            type: 'invalid-argument',
+            name: 'BufrwInvalidArgumentError',
+            type: 'bufrw.invalid-argument',
             message: 'invalid argument, expected string, null, or undefined',
             argType: 'number',
             argConstructor: 'Number'
@@ -95,8 +95,8 @@ test('StringRW: simple str~1 in utf8', testRW.cases(str1, [
         readTest: {
             bytes: [0x03, 0x63, 0x61], // cat~3 with missing "t" byte
             error: {
-                name: 'ShortBufferError',
-                type: 'short-buffer',
+                name: 'BufrwShortBufferError',
+                type: 'bufrw.short-buffer',
                 message: 'expected at least 3 bytes, only have 2 @[0:1]',
                 offset: 0,
                 endOffset: 1,

@@ -65,7 +65,7 @@ test('RepeatRW: shortIntList', testRW.cases(shortIntList, [
         lengthTest: {
             value: 42,
             error: {
-                type: 'invalid-argument',
+                type: 'bufrw.invalid-argument',
                 message: 'invalid argument, expected an array',
                 argType: 'number',
                 argConstructor: 'Number'
@@ -74,7 +74,7 @@ test('RepeatRW: shortIntList', testRW.cases(shortIntList, [
         writeTest: {
             value: 42,
             error: {
-                type: 'invalid-argument',
+                type: 'bufrw.invalid-argument',
                 message: 'invalid argument, expected an array',
                 argType: 'number',
                 argConstructor: 'Number'
