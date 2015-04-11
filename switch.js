@@ -21,18 +21,12 @@
 module.exports = SwitchRW;
 
 var inherits = require('util').inherits;
-var TypedError = require('error/typed');
 
 var LengthResult = require('./base').LengthResult;
 var WriteResult = require('./base').WriteResult;
 var ReadResult = require('./base').ReadResult;
 var BufferRW = require('./base').BufferRW;
-
-var InvalidValueError = TypedError({
-    type: 'invalid-switch-value',
-    message: 'invalid switch value {value}',
-    value: null
-});
+var errors = require('./errors');
 
 // TODO: cases should be an es6 map
 
@@ -56,7 +50,7 @@ SwitchRW.prototype.byteLength = function byteLength(obj) {
     var data = obj[self.dataKey];
     var datarw = self.cases[val];
     if (datarw === undefined) {
-        return LengthResult.error(InvalidValueError({
+        return LengthResult.error(errors.InvalidSwitchValueError({
             value: val
         }));
     }
@@ -73,7 +67,7 @@ SwitchRW.prototype.writeInto = function writeInto(obj, buffer, offset) {
     var data = obj[self.dataKey];
     var datarw = self.cases[val];
     if (datarw === undefined) {
-        return WriteResult.error(InvalidValueError({
+        return WriteResult.error(errors.InvalidSwitchValueError({
             value: val
         }), offset);
     }
@@ -91,7 +85,7 @@ SwitchRW.prototype.readFrom = function readFrom(buffer, offset) {
     var val = res.value;
     var datarw = self.cases[val];
     if (datarw === undefined) {
-        return ReadResult.error(InvalidValueError({
+        return ReadResult.error(errors.InvalidSwitchValueError({
             value: val
         }), offset);
     }

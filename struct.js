@@ -21,17 +21,12 @@
 module.exports = StructRW;
 
 var inherits = require('util').inherits;
-var TypedError = require('error/typed');
 
 var LengthResult = require('./base').LengthResult;
 var WriteResult = require('./base').WriteResult;
 var ReadResult = require('./base').ReadResult;
 var BufferRW = require('./base').BufferRW;
-
-var MissingFieldError = TypedError({
-    type: 'missing.field',
-    message: 'missing field {field} on {struct}'
-});
+var errors = require('./errors');
 
 function StructRW(cons, fields, opts) {
     if (!(this instanceof StructRW)) {
@@ -72,7 +67,7 @@ StructRW.prototype.byteLength = function byteLength(obj) {
         var field = self.fields[i];
 
         if (field.name && !obj.hasOwnProperty(field.name)) {
-            return LengthResult.error(MissingFieldError({
+            return LengthResult.error(errors.MissingStructFieldError({
                 field: field.name,
                 struct: self.cons.name
             }));
@@ -99,7 +94,7 @@ StructRW.prototype.writeInto = function writeInto(obj, buffer, offset) {
         var field = self.fields[i];
 
         if (field.name && !obj.hasOwnProperty(field.name)) {
-            return WriteResult.error(MissingFieldError({
+            return WriteResult.error(errors.MissingStructFieldError({
                 field: field.name,
                 struct: self.cons.name
             }));

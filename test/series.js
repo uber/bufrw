@@ -68,14 +68,14 @@ test('SeriesRW: tinyShortWord', testRW.cases(tinyShortWord, [
         lengthTest: {value: 42, error: {
             type: 'invalid-argument',
             name: 'InvalidArgumentError',
-            message: 'invalid argument, expected array or null',
+            message: 'invalid argument, expected an array or null',
             argType: 'number',
             argConstructor: 'Number'
         }},
         writeTest: {value: 42, error: {
             name: 'InvalidArgumentError',
             type: 'invalid-argument',
-            message: 'invalid argument, expected array or null',
+            message: 'invalid argument, expected an array or null',
             argType: 'number',
             argConstructor: 'Number'
         }}

@@ -20,20 +20,13 @@
 
 module.exports = VariableBufferRW;
 
-var TypedError = require('error/typed');
 var inherits = require('util').inherits;
 
 var LengthResult = require('./base').LengthResult;
 var WriteResult = require('./base').WriteResult;
 var ReadResult = require('./base').ReadResult;
 var BufferRW = require('./base').BufferRW;
-
-var InvalidArgumentError = TypedError({
-    type: 'invalid-argument',
-    message: 'invalid argument, expected buffer, null, or undefined',
-    argType: null,
-    argConstructor: null
-});
+var errors = require('./errors');
 
 function VariableBufferRW(sizerw) {
     if (!(this instanceof VariableBufferRW)) {
@@ -53,7 +46,8 @@ VariableBufferRW.prototype.byteLength = function byteLength(buf) {
     } else if (buf === null || buf === undefined) {
         length = 0;
     } else {
-        return LengthResult.error(InvalidArgumentError({
+        return LengthResult.error(errors.InvalidArgumentError({
+            expected: 'buffer, null, or undefined',
             argType: typeof buf,
             argConstructor: buf.constructor.name
         }));
@@ -72,7 +66,8 @@ VariableBufferRW.prototype.writeInto = function writeInto(buf, buffer, offset) {
     } else if (buf === null || buf === undefined) {
         length = 0;
     } else {
-        return WriteResult.error(InvalidArgumentError({
+        return WriteResult.error(errors.InvalidArgumentError({
+            expected: 'buffer, null, or undefined',
             argType: typeof buf,
             argConstructor: buf.constructor.name
         }), offset);
