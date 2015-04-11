@@ -65,7 +65,7 @@ SeriesRW.prototype.writeInto = function writeInto(values, buffer, offset) {
             expected: 'an array or null',
             argType: typeof values,
             argConstructor: values.constructor.name
-        }));
+        }), offset);
     }
     var res = new WriteResult(null, offset);
     for (var i = 0; i < self.rws.length; i++) {
