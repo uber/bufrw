@@ -111,30 +111,23 @@ ReadMachine.prototype.seek = function seek() {
     }
     self.expecting = self.sizeRW.width;
     self.state = States.PendingLength;
-    var err = self._readChunk(chunk);
-    if (err) return err;
-    return null;
-};
 
-ReadMachine.prototype._readChunk = function _readChunk(chunk) {
-    var self = this;
     var res = self.chunkRW.readFrom(chunk, 0);
-    var err = res.err;
 
     // istanbul ignore if
-    if (!err && res.offset < chunk.length) {
-        err = errors.ShortRead({
+    if (!res.err && res.offset < chunk.length) {
+        res.err = errors.ShortRead({
             remaining: chunk.length - res.offset,
             buffer: chunk,
             offset: res.offset
         });
     }
-    if (err) {
-        // istanbul ignore else
-        if (err.buffer === undefined) err.buffer = chunk;
-        if (err.offset === undefined) err.offset = res.offset;
 
-        return err;
+    if (res.err) {
+        // istanbul ignore else
+        if (res.err.buffer === undefined) res.err.buffer = chunk;
+        if (res.err.offset === undefined) res.err.offset = res.offset;
+        return res.err;
     } else {
         self.emit(res.value);
         return null;
