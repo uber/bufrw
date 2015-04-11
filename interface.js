@@ -101,14 +101,14 @@ function toBufferResult(rw, value) {
 }
 
 function intoBufferResult(rw, buffer, value) {
-    var writeRes = rw.writeInto(value, buffer, 0);
-    if (writeRes.err) {
+    var res = rw.writeInto(value, buffer, 0);
+    if (res.err) {
         // istanbul ignore else
-        if (!Buffer.isBuffer(writeRes.err.buffer)) writeRes.err.buffer = buffer;
-        if (typeof writeRes.err.offset !== 'number') writeRes.err.offset = writeRes.offset;
-        return new Result(writeRes.err, buffer);
+        if (!Buffer.isBuffer(res.err.buffer)) res.err.buffer = buffer;
+        if (typeof res.err.offset !== 'number') res.err.offset = res.offset;
+        return new Result(res.err, buffer);
     }
-    var offset = writeRes.offset;
+    var offset = res.offset;
     if (offset !== buffer.length) {
         return new Result(errors.ShortWrite({
             remaining: buffer.length - offset,
