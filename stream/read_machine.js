@@ -22,6 +22,7 @@
 
 var ConcatReadBuffer = require('./concat_read_buffer');
 var errors = require('../errors');
+var fromBufferResult = require('../interface').fromBufferResult;
 
 module.exports = ReadMachine;
 
@@ -112,21 +113,8 @@ ReadMachine.prototype.seek = function seek() {
     self.expecting = self.sizeRW.width;
     self.state = States.PendingLength;
 
-    var res = self.chunkRW.readFrom(chunk, 0);
-
-    // istanbul ignore if
-    if (!res.err && res.offset < chunk.length) {
-        res.err = errors.ShortRead({
-            remaining: chunk.length - res.offset,
-            buffer: chunk,
-            offset: res.offset
-        });
-    }
-
+    var res = fromBufferResult(self.chunkRW, chunk, 0);
     if (res.err) {
-        // istanbul ignore else
-        if (res.err.buffer === undefined) res.err.buffer = chunk;
-        if (res.err.offset === undefined) res.err.offset = res.offset;
         return res.err;
     } else {
         self.emit(res.value);
