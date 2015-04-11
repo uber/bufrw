@@ -46,11 +46,7 @@ VariableBufferRW.prototype.byteLength = function byteLength(buf) {
     } else if (buf === null || buf === undefined) {
         length = 0;
     } else {
-        return LengthResult.error(errors.InvalidArgument({
-            expected: 'buffer, null, or undefined',
-            argType: typeof buf,
-            argConstructor: buf.constructor.name
-        }));
+        return LengthResult.error(errors.expected(buf, 'buffer, null, or undefined'));
     }
     var len = self.sizerw.byteLength(length);
     if (len.err) return len;
@@ -66,11 +62,7 @@ VariableBufferRW.prototype.writeInto = function writeInto(buf, buffer, offset) {
     } else if (buf === null || buf === undefined) {
         length = 0;
     } else {
-        return WriteResult.error(errors.InvalidArgument({
-            expected: 'buffer, null, or undefined',
-            argType: typeof buf,
-            argConstructor: buf.constructor.name
-        }), offset);
+        return WriteResult.error(errors.expected(buf, 'buffer, null, or undefined'), offset);
     }
     var res = self.sizerw.writeInto(length, buffer, offset);
     if (res.err) return res;

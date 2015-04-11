@@ -36,11 +36,7 @@ function ReadMachine(sizeRW, chunkRW, emit) {
     }
     // istanbul ignore if
     if (typeof sizeRW.width !== 'number') {
-        throw errors.InvalidArgument({
-            expected: 'atomic RW',
-            argType: typeof sizeRW,
-            argConstructor: sizeRW.constructor.name
-        });
+        throw errors.expected(sizeRW, 'atomic RW');
     }
     var self = this;
     self.sizeRW = sizeRW;

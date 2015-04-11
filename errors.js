@@ -22,6 +22,14 @@
 
 var TypedError = require('error/typed');
 
+module.exports.expected = function expected(got, descr) {
+    return module.exports.InvalidArgument({
+        expected: descr,
+        argType: typeof got,
+        argConstructor: got.constructor.name
+    });
+};
+
 module.exports.BrokenReaderState = TypedError({
     type: 'broken-reader-state',
     message: 'reader in invalid state {state} expecting {expecting} avail {aval}',

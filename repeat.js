@@ -40,11 +40,7 @@ inherits(RepeatRW, BufferRW);
 
 RepeatRW.prototype.byteLength = function byteLength(values) {
     if (!Array.isArray(values)) {
-        return LengthResult.error(errors.InvalidArgument({
-            expected: 'an array',
-            argType: typeof values,
-            argConstructor: values.constructor.name
-        }));
+        return LengthResult.error(errors.expected(values, 'an array'));
     }
     var self = this;
     var res = self.countrw.byteLength(values.length);
@@ -59,11 +55,7 @@ RepeatRW.prototype.byteLength = function byteLength(values) {
 
 RepeatRW.prototype.writeInto = function writeInto(values, buffer, offset) {
     if (!Array.isArray(values)) {
-        return WriteResult.error(errors.InvalidArgument({
-            expected: 'an array',
-            argType: typeof values,
-            argConstructor: values.constructor.name
-        }), offset);
+        return WriteResult.error(errors.expected(values, 'an array'), offset);
     }
     var self = this;
     var res = self.countrw.writeInto(values.length, buffer, offset);
