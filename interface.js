@@ -102,21 +102,19 @@ function toBufferResult(rw, value) {
 
 function intoBufferResult(rw, buffer, value) {
     var res = rw.writeInto(value, buffer, 0);
+    if (!res.err && res.offset !== buffer.length) {
+        res.err = errors.ShortWrite({
+            remaining: buffer.length - res.offset,
+            buffer: buffer,
+            offset: res.offset
+        });
+    }
     if (res.err) {
         // istanbul ignore else
         if (!Buffer.isBuffer(res.err.buffer)) res.err.buffer = buffer;
         if (typeof res.err.offset !== 'number') res.err.offset = res.offset;
-        return new Result(res.err, buffer);
     }
-    var offset = res.offset;
-    if (offset !== buffer.length) {
-        return new Result(errors.ShortWrite({
-            remaining: buffer.length - offset,
-            buffer: buffer,
-            offset: offset
-        }), buffer);
-    }
-    return new Result(null, buffer);
+    return new Result(res.err, buffer);
 }
 
 // istanbul ignore next TODO
