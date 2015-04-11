@@ -44,7 +44,7 @@ StringRW.prototype.byteLength = function byteLength(str) {
     if (typeof str === 'string') {
         length = Buffer.byteLength(str, self.encoding);
     } else if (str !== null && str !== undefined) {
-        return LengthResult.error(errors.InvalidArgumentError({
+        return LengthResult.error(errors.InvalidArgument({
             expected: 'string, null, or undefined',
             argType: typeof str,
             argConstructor: str.constructor.name
@@ -62,7 +62,7 @@ StringRW.prototype.writeInto = function writeInto(str, buffer, offset) {
     if (typeof str === 'string') {
         length = buffer.write(str, start, self.encoding);
     } else if (str !== null && str !== undefined) {
-        return WriteResult.error(errors.InvalidArgumentError({
+        return WriteResult.error(errors.InvalidArgument({
             expected: 'string, null, or undefined',
             argType: typeof str,
             argConstructor: str.constructor.name

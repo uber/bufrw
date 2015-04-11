@@ -41,7 +41,7 @@ inherits(FixedWidthRW, BufferRW);
 FixedWidthRW.prototype.byteLength = function byteLength(slice) {
     var self = this;
     if (slice.length !== self.length) {
-        return LengthResult.error(errors.FixedLengthMismatchError({
+        return LengthResult.error(errors.FixedLengthMismatch({
             expected: self.length,
             got: slice.length
         }));
@@ -53,7 +53,7 @@ FixedWidthRW.prototype.byteLength = function byteLength(slice) {
 FixedWidthRW.prototype.writeInto = function writeInto(slice, buffer, offset) {
     var self = this;
     if (slice.length !== self.length) {
-        return WriteResult.error(errors.FixedLengthMismatchError({
+        return WriteResult.error(errors.FixedLengthMismatch({
             expected: self.length,
             got: slice.length
         }), offset);

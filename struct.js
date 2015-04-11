@@ -67,7 +67,7 @@ StructRW.prototype.byteLength = function byteLength(obj) {
         var field = self.fields[i];
 
         if (field.name && !obj.hasOwnProperty(field.name)) {
-            return LengthResult.error(errors.MissingStructFieldError({
+            return LengthResult.error(errors.MissingStructField({
                 field: field.name,
                 struct: self.cons.name
             }));
@@ -94,7 +94,7 @@ StructRW.prototype.writeInto = function writeInto(obj, buffer, offset) {
         var field = self.fields[i];
 
         if (field.name && !obj.hasOwnProperty(field.name)) {
-            return WriteResult.error(errors.MissingStructFieldError({
+            return WriteResult.error(errors.MissingStructField({
                 field: field.name,
                 struct: self.cons.name
             }));

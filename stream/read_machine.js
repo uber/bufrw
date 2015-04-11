@@ -36,7 +36,7 @@ function ReadMachine(sizeRW, chunkRW, emit) {
     }
     // istanbul ignore if
     if (typeof sizeRW.width !== 'number') {
-        throw errors.InvalidArgumentError({
+        throw errors.InvalidArgument({
             expected: 'atomic RW',
             argType: typeof sizeRW,
             argConstructor: sizeRW.constructor.name
@@ -72,7 +72,7 @@ ReadMachine.prototype.handleChunk = function handleChunk(buf) {
 
             // istanbul ignore next
             default:
-                err = errors.BrokenReaderStateError({
+                err = errors.BrokenReaderState({
                     state: self.state,
                     expecting: self.expecting,
                     avail: self.buffer.avail()
@@ -88,7 +88,7 @@ ReadMachine.prototype.pend = function pend() {
     var sizeRes = self.sizeRW.readFrom(self.buffer, 0);
     var err = sizeRes.err;
     if (!err && !sizeRes.value) {
-        err = errors.ZeroLengthChunkError();
+        err = errors.ZeroLengthChunk();
     }
     if (err) {
         self.buffer.shift(self.sizeRW.width);
@@ -107,7 +107,7 @@ ReadMachine.prototype.seek = function seek() {
     var chunk = self.buffer.shift(self.expecting);
     // istanbul ignore if
     if (!chunk.length) {
-        return errors.BrokenReaderStateError({
+        return errors.BrokenReaderState({
             state: self.state,
             expecting: self.expecting,
             avail: self.buffer.avail()
@@ -127,7 +127,7 @@ ReadMachine.prototype._readChunk = function _readChunk(chunk) {
 
     // istanbul ignore if
     if (!err && res.offset < chunk.length) {
-        err = errors.ShortReadError({
+        err = errors.ShortRead({
             remaining: chunk.length - res.offset,
             buffer: chunk,
             offset: res.offset
@@ -152,7 +152,7 @@ ReadMachine.prototype.flush = function flush() {
         self.buffer.clear();
         self.expecting = 4;
         self.state = States.PendingLength;
-        return errors.TruncatedReadError({
+        return errors.TruncatedRead({
             length: avail,
             state: self.state,
             expecting: self.expecting

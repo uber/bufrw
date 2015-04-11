@@ -64,7 +64,7 @@ WriteResult.just = function just(offset) {
 };
 
 WriteResult.shortError = function shortError(expected, actual, offset) {
-    return new WriteResult(new errors.ShortBufferError({
+    return new WriteResult(new errors.ShortBuffer({
         expected: expected,
         actual: actual,
         offset: offset
@@ -88,13 +88,13 @@ ReadResult.just = function just(offset, value) {
 
 ReadResult.shortError = function shortError(expected, actual, offset, endOffset) {
     if (endOffset === undefined) {
-        return new ReadResult(new errors.ShortBufferError({
+        return new ReadResult(new errors.ShortBuffer({
             expected: expected,
             actual: actual,
             offset: offset
         }), offset);
     } else {
-        return new ReadResult(new errors.ShortBufferRangedError({
+        return new ReadResult(new errors.ShortBufferRanged({
             expected: expected,
             actual: actual,
             offset: offset,

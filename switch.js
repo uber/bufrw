@@ -50,7 +50,7 @@ SwitchRW.prototype.byteLength = function byteLength(obj) {
     var data = obj[self.dataKey];
     var datarw = self.cases[val];
     if (datarw === undefined) {
-        return LengthResult.error(errors.InvalidSwitchValueError({
+        return LengthResult.error(errors.InvalidSwitchValue({
             value: val
         }));
     }
@@ -67,7 +67,7 @@ SwitchRW.prototype.writeInto = function writeInto(obj, buffer, offset) {
     var data = obj[self.dataKey];
     var datarw = self.cases[val];
     if (datarw === undefined) {
-        return WriteResult.error(errors.InvalidSwitchValueError({
+        return WriteResult.error(errors.InvalidSwitchValue({
             value: val
         }), offset);
     }
@@ -85,7 +85,7 @@ SwitchRW.prototype.readFrom = function readFrom(buffer, offset) {
     var val = res.value;
     var datarw = self.cases[val];
     if (datarw === undefined) {
-        return ReadResult.error(errors.InvalidSwitchValueError({
+        return ReadResult.error(errors.InvalidSwitchValue({
             value: val
         }), offset);
     }

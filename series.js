@@ -42,7 +42,7 @@ inherits(SeriesRW, BufferRW);
 
 SeriesRW.prototype.byteLength = function byteLength(values) {
     if (!Array.isArray(values) && values !== null) {
-        return LengthResult.error(errors.InvalidArgumentError({
+        return LengthResult.error(errors.InvalidArgument({
             expected: 'an array or null',
             argType: typeof values,
             argConstructor: values.constructor.name
@@ -61,7 +61,7 @@ SeriesRW.prototype.byteLength = function byteLength(values) {
 SeriesRW.prototype.writeInto = function writeInto(values, buffer, offset) {
     var self = this;
     if (!Array.isArray(values) && values !== null) {
-        return WriteResult.error(errors.InvalidArgumentError({
+        return WriteResult.error(errors.InvalidArgument({
             expected: 'an array or null',
             argType: typeof values,
             argConstructor: values.constructor.name

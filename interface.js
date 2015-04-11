@@ -72,7 +72,7 @@ function fromBufferResult(struct, buffer, offset) {
     offset = res.offset;
     var err = res.err;
     if (!err && offset !== buffer.length) {
-        err = errors.ShortReadError({
+        err = errors.ShortRead({
             remaining: buffer.length - offset,
             buffer: buffer,
             offset: offset
@@ -110,7 +110,7 @@ function intoBufferResult(struct, buffer, value) {
     }
     var offset = writeRes.offset;
     if (offset !== buffer.length) {
-        return new Result(errors.ShortWriteError({
+        return new Result(errors.ShortWrite({
             remaining: buffer.length - offset,
             buffer: buffer,
             offset: offset
