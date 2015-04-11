@@ -28,47 +28,47 @@ var errorHighlighter = require('./error_highlighter');
 
 var emptyBuffer = Buffer(0);
 
-function fromBuffer(struct, buffer, offset) {
-    return fromBufferResult(struct, buffer, offset).toValue();
+function fromBuffer(rw, buffer, offset) {
+    return fromBufferResult(rw, buffer, offset).toValue();
 }
 
-function byteLength(struct, value) {
-    return byteLengthResult(struct, value).toValue();
+function byteLength(rw, value) {
+    return byteLengthResult(rw, value).toValue();
 }
 
-function toBuffer(struct, value) {
-    return toBufferResult(struct, value).toValue();
+function toBuffer(rw, value) {
+    return toBufferResult(rw, value).toValue();
 }
 
-function intoBuffer(struct, buffer, value) {
-    return intoBufferResult(struct, buffer, value).toValue();
+function intoBuffer(rw, buffer, value) {
+    return intoBufferResult(rw, buffer, value).toValue();
 }
 
 // The "Tuple" methods are deprecated
 
 /* istanbul ignore next */
-function fromBufferTuple(struct, buffer, offset) {
-    return fromBufferResult(struct, buffer, offset).toTuple();
+function fromBufferTuple(rw, buffer, offset) {
+    return fromBufferResult(rw, buffer, offset).toTuple();
 }
 
 /* istanbul ignore next */
-function byteLengthTuple(struct, value) {
-    return byteLengthResult(struct, value).toTuple();
+function byteLengthTuple(rw, value) {
+    return byteLengthResult(rw, value).toTuple();
 }
 
 /* istanbul ignore next */
-function toBufferTuple(struct, value) {
-    return toBufferResult(struct, value).toTuple();
+function toBufferTuple(rw, value) {
+    return toBufferResult(rw, value).toTuple();
 }
 
 /* istanbul ignore next */
-function intoBufferTuple(struct, buffer, value) {
-    return intoBufferResult(struct, buffer, value).toTuple();
+function intoBufferTuple(rw, buffer, value) {
+    return intoBufferResult(rw, buffer, value).toTuple();
 }
 
-function fromBufferResult(struct, buffer, offset) {
+function fromBufferResult(rw, buffer, offset) {
     offset = offset || 0;
-    var res = struct.readFrom(buffer, offset);
+    var res = rw.readFrom(buffer, offset);
     offset = res.offset;
     var err = res.err;
     if (!err && offset !== buffer.length) {
@@ -85,23 +85,23 @@ function fromBufferResult(struct, buffer, offset) {
     return new Result(err, res.value);
 }
 
-function byteLengthResult(struct, value) {
-    var lenRes = struct.byteLength(value);
+function byteLengthResult(rw, value) {
+    var lenRes = rw.byteLength(value);
     if (lenRes.err) return new Result(lenRes.err, 0);
     else return new Result(null, lenRes.length);
 }
 
-function toBufferResult(struct, value) {
-    var lenRes = struct.byteLength(value);
+function toBufferResult(rw, value) {
+    var lenRes = rw.byteLength(value);
     if (lenRes.err) return new Result(lenRes.err, emptyBuffer);
     var length = lenRes.length;
     var buffer = new Buffer(length);
     // buffer.fill(0); TODO option
-    return intoBufferResult(struct, buffer, value);
+    return intoBufferResult(rw, buffer, value);
 }
 
-function intoBufferResult(struct, buffer, value) {
-    var writeRes = struct.writeInto(value, buffer, 0);
+function intoBufferResult(rw, buffer, value) {
+    var writeRes = rw.writeInto(value, buffer, 0);
     if (writeRes.err) {
         // istanbul ignore else
         if (!Buffer.isBuffer(writeRes.err.buffer)) writeRes.err.buffer = buffer;
