@@ -86,7 +86,8 @@ function genericResult(err, value, buffer, offset) {
 }
 
 function fromBufferResult(rw, buffer, offset) {
-    var res = rw.readFrom(buffer, offset || 0);
+    var start = offset || 0;
+    var res = rw.readFrom(buffer, start);
     res = checkAllReadFrom(res, buffer);
     return genericResult(res.err, res.value, buffer, res.offset);
 }
