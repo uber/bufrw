@@ -36,8 +36,8 @@ test('atoms.Int8', testRW.cases(atoms.Int8, [
             value: 0,
             length: 0,
             error: {
-                type: 'short-buffer',
-                name: 'ShortBufferError',
+                type: 'bufrw.short-buffer',
+                name: 'BufrwShortBufferError',
                 message: 'expected at least 1 bytes, only have 0 @0',
                 actual: 0,
                 expected: 1,
@@ -47,8 +47,8 @@ test('atoms.Int8', testRW.cases(atoms.Int8, [
         readTest: {
             bytes: [],
             error: {
-                name: 'ShortBufferError',
-                type: 'short-buffer',
+                name: 'BufrwShortBufferError',
+                type: 'bufrw.short-buffer',
                 message: 'expected at least 1 bytes, only have 0 @0',
                 actual: 0,
                 expected: 1,

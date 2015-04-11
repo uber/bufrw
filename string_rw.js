@@ -20,20 +20,13 @@
 
 module.exports = StringRW;
 
-var TypedError = require('error/typed');
 var inherits = require('util').inherits;
 
 var LengthResult = require('./base').LengthResult;
 var WriteResult = require('./base').WriteResult;
 var ReadResult = require('./base').ReadResult;
+var errors = require('./errors');
 var VariableBufferRW = require('./variable_buffer_rw');
-
-var InvalidArgumentError = TypedError({
-    type: 'invalid-argument',
-    message: 'invalid argument, expected string, null, or undefined',
-    argType: null,
-    argConstructor: null
-});
 
 function StringRW(sizerw, encoding) {
     if (!(this instanceof StringRW)) {
@@ -51,10 +44,7 @@ StringRW.prototype.byteLength = function byteLength(str) {
     if (typeof str === 'string') {
         length = Buffer.byteLength(str, self.encoding);
     } else if (str !== null && str !== undefined) {
-        return LengthResult.error(InvalidArgumentError({
-            argType: typeof str,
-            argConstructor: str.constructor.name
-        }));
+        return LengthResult.error(errors.expected(str, 'string, null, or undefined'));
     }
     var len = self.sizerw.byteLength(length);
     if (len.err) return len;
@@ -68,10 +58,7 @@ StringRW.prototype.writeInto = function writeInto(str, buffer, offset) {
     if (typeof str === 'string') {
         length = buffer.write(str, start, self.encoding);
     } else if (str !== null && str !== undefined) {
-        return WriteResult.error(InvalidArgumentError({
-            argType: typeof str,
-            argConstructor: str.constructor.name
-        }), offset);
+        return WriteResult.error(errors.expected(str, 'string, null, or undefined'), offset);
     }
     var res = self.sizerw.writeInto(length, buffer, offset);
     if (res.err) return res;

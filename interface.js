@@ -21,26 +21,10 @@
 'use strict';
 
 var hex = require('hexer');
-var TypedError = require('error/typed');
 var util = require('util');
 var Result = require('./result');
+var errors = require('./errors');
 var errorHighlighter = require('./error_highlighter');
-
-var ShortReadError = TypedError({
-    type: 'short-read',
-    message: 'short read, {remaining} byte left over after consuming {offset}',
-    remaining: null,
-    buffer: null,
-    offset: null
-});
-
-var ShortWriteError = TypedError({
-    type: 'short-write',
-    message: 'short write, {remaining} byte left over after writing {offset}',
-    remaining: null,
-    buffer: null,
-    offset: null
-});
 
 var emptyBuffer = Buffer(0);
 
@@ -88,7 +72,7 @@ function fromBufferResult(struct, buffer, offset) {
     offset = res.offset;
     var err = res.err;
     if (!err && offset !== buffer.length) {
-        err = ShortReadError({
+        err = errors.ShortRead({
             remaining: buffer.length - offset,
             buffer: buffer,
             offset: offset
@@ -126,7 +110,7 @@ function intoBufferResult(struct, buffer, value) {
     }
     var offset = writeRes.offset;
     if (offset !== buffer.length) {
-        return new Result(ShortWriteError({
+        return new Result(errors.ShortWrite({
             remaining: buffer.length - offset,
             buffer: buffer,
             offset: offset

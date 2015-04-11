@@ -18,30 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-var TypedError = require('error/typed');
+var errors = require('./errors');
 
 module.exports.BufferRW = BufferRW;
 module.exports.LengthResult = LengthResult;
 module.exports.WriteResult = WriteResult;
 module.exports.ReadResult = ReadResult;
-
-var ShortBufferError = TypedError({
-    type: 'short-buffer',
-    message: 'expected at least {expected} bytes, only have {actual} @{offset}',
-    expected: null,
-    actual: null,
-    buffer: null,
-    offset: null
-});
-
-var ShortBufferRangedError = TypedError({
-    type: 'short-buffer',
-    message: 'expected at least {expected} bytes, only have {actual} @[{offset}:{endOffset}]',
-    expected: null,
-    actual: null,
-    offset: null,
-    endOffset: null
-});
 
 function BufferRW(byteLength, readFrom, writeInto) {
     if (!(this instanceof BufferRW)) {
@@ -82,7 +64,7 @@ WriteResult.just = function just(offset) {
 };
 
 WriteResult.shortError = function shortError(expected, actual, offset) {
-    return new WriteResult(new ShortBufferError({
+    return new WriteResult(new errors.ShortBuffer({
         expected: expected,
         actual: actual,
         offset: offset
@@ -106,13 +88,13 @@ ReadResult.just = function just(offset, value) {
 
 ReadResult.shortError = function shortError(expected, actual, offset, endOffset) {
     if (endOffset === undefined) {
-        return new ReadResult(new ShortBufferError({
+        return new ReadResult(new errors.ShortBuffer({
             expected: expected,
             actual: actual,
             offset: offset
         }), offset);
     } else {
-        return new ReadResult(new ShortBufferRangedError({
+        return new ReadResult(new errors.ShortBufferRanged({
             expected: expected,
             actual: actual,
             offset: offset,

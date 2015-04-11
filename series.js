@@ -20,20 +20,13 @@
 
 module.exports = SeriesRW;
 
-var TypedError = require('error/typed');
 var inherits = require('util').inherits;
 
 var LengthResult = require('./base').LengthResult;
 var WriteResult = require('./base').WriteResult;
 var ReadResult = require('./base').ReadResult;
 var BufferRW = require('./base').BufferRW;
-
-var InvalidArgumentError = TypedError({
-    type: 'invalid-argument',
-    message: 'invalid argument, expected array or null',
-    argType: null,
-    argConstructor: null
-});
+var errors = require('./errors');
 
 function SeriesRW(rws) {
     if (!Array.isArray(rws) || arguments.length > 1) {
@@ -49,10 +42,7 @@ inherits(SeriesRW, BufferRW);
 
 SeriesRW.prototype.byteLength = function byteLength(values) {
     if (!Array.isArray(values) && values !== null) {
-        return LengthResult.error(InvalidArgumentError({
-            argType: typeof values,
-            argConstructor: values.constructor.name
-        }));
+        return LengthResult.error(errors.expected(values, 'an array or null'));
     }
     var self = this;
     var length = 0;
@@ -67,10 +57,7 @@ SeriesRW.prototype.byteLength = function byteLength(values) {
 SeriesRW.prototype.writeInto = function writeInto(values, buffer, offset) {
     var self = this;
     if (!Array.isArray(values) && values !== null) {
-        return WriteResult.error(InvalidArgumentError({
-            argType: typeof values,
-            argConstructor: values.constructor.name
-        }));
+        return WriteResult.error(errors.expected(values, 'an array or null'), offset);
     }
     var res = new WriteResult(null, offset);
     for (var i = 0; i < self.rws.length; i++) {

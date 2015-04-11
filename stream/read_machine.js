@@ -20,43 +20,8 @@
 
 'use strict';
 
-var TypedError = require('error/typed');
 var ConcatReadBuffer = require('./concat_read_buffer');
-
-var ShortReadError = TypedError({
-    type: 'short-read',
-    message: 'short read, {remaining} byte left over after consuming {offset}',
-    remaining: null,
-    buffer: null,
-    offset: null
-});
-
-var ZeroLengthChunkError = TypedError({
-    type: 'zero-length-chunk',
-    message: 'zero length chunk encountered'
-});
-
-var BrokenReaderStateError = TypedError({
-    type: 'broken-reader-state',
-    message: 'reader in invalid state {state} expecting {expecting} avail {aval}',
-    state: null,
-    expecting: null,
-    avail: null
-});
-
-var TruncatedReadError = TypedError({
-    type: 'truncated-read',
-    message: 'read truncated by end of stream with {length} bytes in buffer',
-    length: null,
-    buffer: null,
-    state: null,
-    expecting: null
-});
-
-var BadSizeRWError = TypedError({
-    type: 'bad-size-rw',
-    message: 'bad sizeRW, expected a fixed-width atom'
-});
+var errors = require('../errors');
 
 module.exports = ReadMachine;
 
@@ -71,7 +36,7 @@ function ReadMachine(sizeRW, chunkRW, emit) {
     }
     // istanbul ignore if
     if (typeof sizeRW.width !== 'number') {
-        throw BadSizeRWError();
+        throw errors.expected(sizeRW, 'atomic RW');
     }
     var self = this;
     self.sizeRW = sizeRW;
@@ -103,7 +68,7 @@ ReadMachine.prototype.handleChunk = function handleChunk(buf) {
 
             // istanbul ignore next
             default:
-                err = BrokenReaderStateError({
+                err = errors.BrokenReaderState({
                     state: self.state,
                     expecting: self.expecting,
                     avail: self.buffer.avail()
@@ -119,7 +84,7 @@ ReadMachine.prototype.pend = function pend() {
     var sizeRes = self.sizeRW.readFrom(self.buffer, 0);
     var err = sizeRes.err;
     if (!err && !sizeRes.value) {
-        err = ZeroLengthChunkError();
+        err = errors.ZeroLengthChunk();
     }
     if (err) {
         self.buffer.shift(self.sizeRW.width);
@@ -138,7 +103,7 @@ ReadMachine.prototype.seek = function seek() {
     var chunk = self.buffer.shift(self.expecting);
     // istanbul ignore if
     if (!chunk.length) {
-        return BrokenReaderStateError({
+        return errors.BrokenReaderState({
             state: self.state,
             expecting: self.expecting,
             avail: self.buffer.avail()
@@ -158,7 +123,7 @@ ReadMachine.prototype._readChunk = function _readChunk(chunk) {
 
     // istanbul ignore if
     if (!err && res.offset < chunk.length) {
-        err = ShortReadError({
+        err = errors.ShortRead({
             remaining: chunk.length - res.offset,
             buffer: chunk,
             offset: res.offset
@@ -183,7 +148,7 @@ ReadMachine.prototype.flush = function flush() {
         self.buffer.clear();
         self.expecting = 4;
         self.state = States.PendingLength;
-        return TruncatedReadError({
+        return errors.TruncatedRead({
             length: avail,
             state: self.state,
             expecting: self.expecting

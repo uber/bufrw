@@ -157,8 +157,8 @@ test('StructRW: writing with invalid field', testRW.cases(Thing.RW, [
         lengthTest: {
             value: Thing(8, 9),
             error: {
-                name: 'MissingFieldError',
-                type: 'missing.field',
+                name: 'BufrwMissingStructFieldError',
+                type: 'bufrw.missing.struct-field',
                 message: 'missing field baz on Thing',
                 struct: 'Thing',
                 field: 'baz'
@@ -168,8 +168,8 @@ test('StructRW: writing with invalid field', testRW.cases(Thing.RW, [
             value: Thing(8, 9),
             length: 10,
             error: {
-                name: 'MissingFieldError',
-                type: 'missing.field',
+                name: 'BufrwMissingStructFieldError',
+                type: 'bufrw.missing.struct-field',
                 message: 'missing field baz on Thing',
                 struct: 'Thing',
                 field: 'baz'

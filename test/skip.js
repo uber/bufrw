@@ -34,8 +34,8 @@ test('SkipRW: skip1', testRW.cases(skip1, [
         readTest: {
             bytes: [],
             error: {
-                name: 'ShortBufferError',
-                type: 'short-buffer',
+                name: 'BufrwShortBufferError',
+                type: 'bufrw.short-buffer',
                 message: 'expected at least 1 bytes, only have 0 @0',
                 offset: 0,
                 actual: 0,
@@ -54,8 +54,8 @@ test('SkipRW: skip5', testRW.cases(skip5, [
         readTest: {
             bytes: [1, 2, 3],
             error: {
-                name: 'ShortBufferError',
-                type: 'short-buffer',
+                name: 'BufrwShortBufferError',
+                type: 'bufrw.short-buffer',
                 message: 'expected at least 5 bytes, only have 3 @0',
                 offset: 0,
                 actual: 3,

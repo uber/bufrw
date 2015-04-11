@@ -20,20 +20,13 @@
 
 module.exports = RepeatRW;
 
-var TypedError = require('error/typed');
 var inherits = require('util').inherits;
 
 var LengthResult = require('./base').LengthResult;
 var WriteResult = require('./base').WriteResult;
 var ReadResult = require('./base').ReadResult;
 var BufferRW = require('./base').BufferRW;
-
-var InvalidArgumentError = TypedError({
-    type: 'invalid-argument',
-    message: 'invalid argument, not an array',
-    argType: null,
-    argConstructor: null
-});
+var errors = require('./errors');
 
 function RepeatRW(countrw, repeatedrw) {
     if (!(this instanceof RepeatRW)) {
@@ -47,10 +40,7 @@ inherits(RepeatRW, BufferRW);
 
 RepeatRW.prototype.byteLength = function byteLength(values) {
     if (!Array.isArray(values)) {
-        return LengthResult.error(InvalidArgumentError({
-            argType: typeof values,
-            argConstructor: values.constructor.name
-        }));
+        return LengthResult.error(errors.expected(values, 'an array'));
     }
     var self = this;
     var res = self.countrw.byteLength(values.length);
@@ -65,10 +55,7 @@ RepeatRW.prototype.byteLength = function byteLength(values) {
 
 RepeatRW.prototype.writeInto = function writeInto(values, buffer, offset) {
     if (!Array.isArray(values)) {
-        return WriteResult.error(InvalidArgumentError({
-            argType: typeof values,
-            argConstructor: values.constructor.name
-        }), offset);
+        return WriteResult.error(errors.expected(values, 'an array'), offset);
     }
     var self = this;
     var res = self.countrw.writeInto(values.length, buffer, offset);

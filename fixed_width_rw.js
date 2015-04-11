@@ -20,21 +20,13 @@
 
 module.exports = FixedWidthRW;
 
+var inherits = require('util').inherits;
+
 var LengthResult = require('./base').LengthResult;
 var WriteResult = require('./base').WriteResult;
 var ReadResult = require('./base').ReadResult;
 var BufferRW = require('./base').BufferRW;
-var TypedError = require('error/typed');
-var inherits = require('util').inherits;
-
-var FixedLengthMismatchError = TypedError({
-    type: 'fixed-length-mismatch',
-    message: 'supplied length {got} mismatches fixed length {expected}',
-    expected: null,
-    got: null
-});
-
-// TODO: could support string encoding like prefixed length does
+var errors = require('./errors');
 
 function FixedWidthRW(length, readFrom, writeInto) {
     if (!(this instanceof FixedWidthRW)) {
@@ -49,7 +41,7 @@ inherits(FixedWidthRW, BufferRW);
 FixedWidthRW.prototype.byteLength = function byteLength(slice) {
     var self = this;
     if (slice.length !== self.length) {
-        return LengthResult.error(FixedLengthMismatchError({
+        return LengthResult.error(errors.FixedLengthMismatch({
             expected: self.length,
             got: slice.length
         }));
@@ -61,7 +53,7 @@ FixedWidthRW.prototype.byteLength = function byteLength(slice) {
 FixedWidthRW.prototype.writeInto = function writeInto(slice, buffer, offset) {
     var self = this;
     if (slice.length !== self.length) {
-        return WriteResult.error(FixedLengthMismatchError({
+        return WriteResult.error(errors.FixedLengthMismatch({
             expected: self.length,
             got: slice.length
         }), offset);
