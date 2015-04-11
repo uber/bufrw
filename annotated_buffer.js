@@ -56,13 +56,40 @@ AnnotatedBuffer.prototype.toString = function toString(encoding, start, end) {
     return value;
 };
 
+AnnotatedBuffer.prototype.write = function write(string, offset, length, encoding) {
+    var self = this;
+    var result = self.buffer.write(string, offset, length, encoding);
+    self.annotations.push({
+        kind: 'write',
+        name: 'string',
+        value: string,
+        encoding: encoding,
+        start: offset,
+        end: offset + result
+    });
+    return result;
+};
+
 // -- bytes
+
+// istanbul ignore next
+AnnotatedBuffer.prototype.fill = function fill(value, start, end) {
+    var self = this;
+    var result = self.buffer.fill(value, start, end);
+    self.annotations.push({
+        kind: 'write',
+        name: 'string',
+        value: value,
+        start: start,
+        end: end
+    });
+    return result;
+};
 
 // istanbul ignore next
 AnnotatedBuffer.prototype.copy = function copy(targetBuffer, targetStart, sourceStart, sourceEnd) {
     var self = this;
     var copied = self.buffer.copy(targetBuffer, targetStart, sourceStart, sourceEnd);
-    // istanbul ignore next
     var start = sourceStart || 0;
     var end = sourceEnd || start + copied;
     self.annotations.push({
@@ -283,6 +310,176 @@ AnnotatedBuffer.prototype.readDoubleBE = function readDoubleBE(offset, noAssert)
         end: offset + 8
     });
     return value;
+};
+
+// -- atom writers
+
+AnnotatedBuffer.prototype.writeInt8 = function writeInt8(value, offset, noAssert) {
+    var self = this;
+    self.buffer.writeInt8(value, offset, noAssert);
+    self.annotations.push({
+        kind: 'write',
+        name: 'Int8',
+        value: value,
+        start: offset,
+        end: offset + 1
+    });
+};
+
+AnnotatedBuffer.prototype.writeUInt8 = function writeUInt8(value, offset, noAssert) {
+    var self = this;
+    self.buffer.writeUInt8(value, offset, noAssert);
+    self.annotations.push({
+        kind: 'write',
+        name: 'UInt8',
+        value: value,
+        start: offset,
+        end: offset + 1
+    });
+};
+
+AnnotatedBuffer.prototype.writeUInt16LE = function writeUInt16LE(value, offset, noAssert) {
+    var self = this;
+    self.buffer.writeUInt16LE(value, offset, noAssert);
+    self.annotations.push({
+        kind: 'write',
+        name: 'UInt16LE',
+        value: value,
+        start: offset,
+        end: offset + 2
+    });
+};
+
+AnnotatedBuffer.prototype.writeUInt16BE = function writeUInt16BE(value, offset, noAssert) {
+    var self = this;
+    self.buffer.writeUInt16BE(value, offset, noAssert);
+    self.annotations.push({
+        kind: 'write',
+        name: 'UInt16BE',
+        value: value,
+        start: offset,
+        end: offset + 2
+    });
+};
+
+AnnotatedBuffer.prototype.writeUInt32LE = function writeUInt32LE(value, offset, noAssert) {
+    var self = this;
+    self.buffer.writeUInt32LE(value, offset, noAssert);
+    self.annotations.push({
+        kind: 'write',
+        name: 'UInt32LE',
+        value: value,
+        start: offset,
+        end: offset + 4
+    });
+};
+
+AnnotatedBuffer.prototype.writeUInt32BE = function writeUInt32BE(value, offset, noAssert) {
+    var self = this;
+    self.buffer.writeUInt32BE(value, offset, noAssert);
+    self.annotations.push({
+        kind: 'write',
+        name: 'UInt32BE',
+        value: value,
+        start: offset,
+        end: offset + 4
+    });
+};
+
+AnnotatedBuffer.prototype.writeInt16LE = function writeInt16LE(value, offset, noAssert) {
+    var self = this;
+    self.buffer.writeInt16LE(value, offset, noAssert);
+    self.annotations.push({
+        kind: 'write',
+        name: 'Int16LE',
+        value: value,
+        start: offset,
+        end: offset + 2
+    });
+};
+
+AnnotatedBuffer.prototype.writeInt16BE = function writeInt16BE(value, offset, noAssert) {
+    var self = this;
+    self.buffer.writeInt16BE(value, offset, noAssert);
+    self.annotations.push({
+        kind: 'write',
+        name: 'Int16BE',
+        value: value,
+        start: offset,
+        end: offset + 2
+    });
+};
+
+AnnotatedBuffer.prototype.writeInt32LE = function writeInt32LE(value, offset, noAssert) {
+    var self = this;
+    self.buffer.writeInt32LE(value, offset, noAssert);
+    self.annotations.push({
+        kind: 'write',
+        name: 'Int32LE',
+        value: value,
+        start: offset,
+        end: offset + 4
+    });
+};
+
+AnnotatedBuffer.prototype.writeInt32BE = function writeInt32BE(value, offset, noAssert) {
+    var self = this;
+    self.buffer.writeInt32BE(value, offset, noAssert);
+    self.annotations.push({
+        kind: 'write',
+        name: 'Int32BE',
+        value: value,
+        start: offset,
+        end: offset + 4
+    });
+};
+
+AnnotatedBuffer.prototype.writeFloatLE = function writeFloatLE(value, offset, noAssert) {
+    var self = this;
+    self.buffer.writeFloatLE(value, offset, noAssert);
+    self.annotations.push({
+        kind: 'write',
+        name: 'FloatLE',
+        value: value,
+        start: offset,
+        end: offset + 4
+    });
+};
+
+AnnotatedBuffer.prototype.writeFloatBE = function writeFloatBE(value, offset, noAssert) {
+    var self = this;
+    self.buffer.writeFloatBE(value, offset, noAssert);
+    self.annotations.push({
+        kind: 'write',
+        name: 'FloatBE',
+        value: value,
+        start: offset,
+        end: offset + 4
+    });
+};
+
+AnnotatedBuffer.prototype.writeDoubleLE = function writeDoubleLE(value, offset, noAssert) {
+    var self = this;
+    self.buffer.writeDoubleLE(value, offset, noAssert);
+    self.annotations.push({
+        kind: 'write',
+        name: 'DoubleLE',
+        value: value,
+        start: offset,
+        end: offset + 8
+    });
+};
+
+AnnotatedBuffer.prototype.writeDoubleBE = function writeDoubleBE(value, offset, noAssert) {
+    var self = this;
+    self.buffer.writeDoubleBE(value, offset, noAssert);
+    self.annotations.push({
+        kind: 'write',
+        name: 'DoubleBE',
+        value: value,
+        start: offset,
+        end: offset + 8
+    });
 };
 
 // -- extras
