@@ -54,7 +54,7 @@ inherits(ChunkWriter, Transform);
 ChunkWriter.prototype._transform = function _transform(value, encoding, callback) {
     var self = this;
     var res = toBufferResult(self.chunkRW, value);
-    var err = res.error;
+    var err = res.err;
     var buffer = res.value;
     if (err) {
         callback(ChunkWriteError(err, {
