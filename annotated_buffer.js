@@ -40,6 +40,8 @@ Object.defineProperty(AnnotatedBuffer.prototype, 'length', {
     }
 });
 
+// -- strings
+
 AnnotatedBuffer.prototype.toString = function toString(encoding, start, end) {
     var self = this;
     var value = self.buffer.toString(encoding, start, end);
@@ -53,6 +55,8 @@ AnnotatedBuffer.prototype.toString = function toString(encoding, start, end) {
     });
     return value;
 };
+
+// -- bytes
 
 AnnotatedBuffer.prototype.copy = function copy(targetBuffer, targetStart, sourceStart, sourceEnd) {
     var self = this;
@@ -82,6 +86,8 @@ AnnotatedBuffer.prototype.slice = function slice(start, end) {
     });
     return value;
 };
+
+// -- atom readers
 
 AnnotatedBuffer.prototype.readInt8 = function readInt8(offset, noAssert) {
     var self = this;
@@ -264,6 +270,8 @@ AnnotatedBuffer.prototype.readDoubleBE = function readDoubleBE(offset, noAssert)
     });
     return value;
 };
+
+// -- extras
 
 // istanbul ignore next
 AnnotatedBuffer.prototype.hexdump = function hexdump(options) {
