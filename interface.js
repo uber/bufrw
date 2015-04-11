@@ -66,18 +66,23 @@ function intoBufferTuple(rw, buffer, value) {
     return intoBufferResult(rw, buffer, value).toTuple();
 }
 
+function checkAllReadFrom(res, buffer) {
+    if (!res.err && res.offset !== buffer.length) {
+        res.err = errors.ShortRead({
+            remaining: buffer.length - res.offset,
+            buffer: buffer,
+            offset: res.offset
+        });
+    }
+    return res;
+}
+
 function fromBufferResult(rw, buffer, offset) {
     offset = offset || 0;
     var res = rw.readFrom(buffer, offset);
+    res = checkAllReadFrom(res, buffer);
     offset = res.offset;
     var err = res.err;
-    if (!err && offset !== buffer.length) {
-        err = errors.ShortRead({
-            remaining: buffer.length - offset,
-            buffer: buffer,
-            offset: offset
-        });
-    }
     if (err) {
         if (err.offset === undefined) err.offset = offset;
         if (err.buffer === undefined) err.buffer = buffer;
