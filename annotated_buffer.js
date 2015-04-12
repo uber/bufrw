@@ -40,6 +40,8 @@ Object.defineProperty(AnnotatedBuffer.prototype, 'length', {
     }
 });
 
+// -- strings
+
 AnnotatedBuffer.prototype.toString = function toString(encoding, start, end) {
     var self = this;
     var value = self.buffer.toString(encoding, start, end);
@@ -53,6 +55,8 @@ AnnotatedBuffer.prototype.toString = function toString(encoding, start, end) {
     });
     return value;
 };
+
+// -- bytes
 
 AnnotatedBuffer.prototype.copy = function copy(targetBuffer, targetStart, sourceStart, sourceEnd) {
     var self = this;
@@ -82,6 +86,8 @@ AnnotatedBuffer.prototype.slice = function slice(start, end) {
     });
     return value;
 };
+
+// -- atom readers
 
 AnnotatedBuffer.prototype.readInt8 = function readInt8(offset, noAssert) {
     var self = this;
@@ -265,6 +271,8 @@ AnnotatedBuffer.prototype.readDoubleBE = function readDoubleBE(offset, noAssert)
     return value;
 };
 
+// -- extras
+
 // istanbul ignore next
 AnnotatedBuffer.prototype.hexdump = function hexdump(options) {
     var self = this;
@@ -304,7 +312,6 @@ AnnotatedBuffer.prototype.hexdump = function hexdump(options) {
                 if (options.highlight) {
                     desc = options.highlight(part.start, 0, desc);
                 }
-
             }
             return desc;
         }).join(' ');
@@ -316,16 +323,19 @@ AnnotatedBuffer.prototype.hexdump = function hexdump(options) {
             ann = self.annotations[++annI];
             colorI = (colorI + 1) % colors.length;
         }
-        if (!ann) return str;
-        if (i < ann.start) return str;
-        if (i >= ann.start && i < ann.end) {
-            str = stripColor(str);
-            str = color(str, colors[colorI]);
-            if (i === ann.start && options.boldStart) str = color(str, 'bold');
+
+        if (ann && i >= ann.start) {
+            if (i >= ann.start && i < ann.end) {
+                str = stripColor(str);
+                str = color(str, colors[colorI]);
+                if (i === ann.start && options.boldStart) str = color(str, 'bold');
+            }
         }
+
         if (options.highlight) {
             str = options.highlight(i, j, str);
         }
+
         return str;
     }
 };
