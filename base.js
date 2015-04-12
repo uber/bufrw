@@ -59,6 +59,13 @@ WriteResult.error = function error(err, offset) {
     return new WriteResult(err, offset);
 };
 
+// istanbul ignore next
+WriteResult.rangedError = function rangedError(err, start, end, value) {
+    err.offest = start;
+    err.endOffset = end;
+    return new WriteResult(err, start, value);
+};
+
 WriteResult.just = function just(offset) {
     return new WriteResult(null, offset);
 };
@@ -80,6 +87,13 @@ function ReadResult(err, offset, value) {
 
 ReadResult.error = function error(err, offset, value) {
     return new ReadResult(err, offset, value);
+};
+
+// istanbul ignore next
+ReadResult.rangedError = function rangedError(err, start, end, value) {
+    err.offest = start;
+    err.endOffset = end;
+    return new ReadResult(err, start, value);
 };
 
 ReadResult.just = function just(offset, value) {
