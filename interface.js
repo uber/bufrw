@@ -151,6 +151,12 @@ function checkAllWroteOver(res, buffer) {
 function intoBufferResult(rw, buffer, value) {
     var res = rw.writeInto(value, buffer, 0);
     res = checkAllWroteOver(res, buffer);
+    if (res.err) {
+        var annBuf = makeAnnotatedBuffer(buffer, 0, true);
+        var res2 = rw.writeInto(value, buffer, 0);
+        res2 = checkAllWroteOver(res2, buffer);
+        annotateError(res, res2, 0, annBuf);
+    }
     return genericResult(res.err, buffer, buffer, res.offset);
 }
 
