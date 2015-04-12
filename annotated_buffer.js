@@ -295,10 +295,8 @@ AnnotatedBuffer.prototype.hexdump = function hexdump(options) {
         annotateLine: annotateLine
     });
     if (options.boldStart === undefined) options.boldStart = true;
-    if (options.colored) {
-        options.decorateHexen = colorRegions;
-        options.decorateHuman = colorRegions;
-    }
+    options.decorateHexen = colorRegions;
+    options.decorateHuman = colorRegions;
     var colors = options.colors || ['magenta', 'cyan', 'yellow', 'green'];
     var colorI = 0;
     var annI = 0;
@@ -310,7 +308,9 @@ AnnotatedBuffer.prototype.hexdump = function hexdump(options) {
         for (var i = last; i <= annI; i++) {
             var ann = self.annotations[i];
             if (ann && ann.start >= start && ann.start < end) {
-                ann.color = colors[i % colors.length];
+                if (options.colored) {
+                    ann.color = colors[i % colors.length];
+                }
                 parts.push(ann);
                 last = i + 1;
             }
@@ -321,11 +321,16 @@ AnnotatedBuffer.prototype.hexdump = function hexdump(options) {
                 !Buffer.isBuffer(part.value)) {
                 desc += '(' + inspect(part.value) + ')';
             }
-            if (options.colored) {
+            if (part.color) {
                 desc = color(desc, part.color);
-                if (options.highlight) {
-                    desc = options.highlight(part.start, 0, desc);
-                }
+            } else if (part.start === part.end) {
+                desc += '@' + part.start.toString(16);
+            } else {
+                desc += '@[' + part.start.toString(16) + ',' +
+                               part.end.toString(16) + ']';
+            }
+            if (options.highlight) {
+                desc = options.highlight(part.start, 0, desc);
             }
             return desc;
         }).join(' ');
@@ -338,12 +343,12 @@ AnnotatedBuffer.prototype.hexdump = function hexdump(options) {
             colorI = (colorI + 1) % colors.length;
         }
 
-        if (ann && i >= ann.start) {
-            if (i >= ann.start && i < ann.end) {
-                str = stripColor(str);
-                str = color(str, colors[colorI]);
-                if (i === ann.start && options.boldStart) str = color(str, 'bold');
-            }
+        if (ann && options.colored &&
+            i >= ann.start &&
+            i < ann.end) {
+            str = stripColor(str);
+            str = color(str, colors[colorI]);
+            if (i === ann.start && options.boldStart) str = color(str, 'bold');
         }
 
         if (options.highlight) {

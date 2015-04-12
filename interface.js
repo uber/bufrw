@@ -159,7 +159,13 @@ function formatError(err, options) {
     options = options || {};
     var name = err.name || err.constructor.name;
     var str = util.format('%s: %s\n', name, err.message);
-    if (Buffer.isBuffer(err.buffer)) {
+    if (err.buffer && err.buffer.hexdump) {
+        str += err.buffer.hexdump({
+            colored: options.color,
+            boldStart: false,
+            highlight: options.color ? errorHighlighter(err, options) : null
+        });
+    } else if (Buffer.isBuffer(err.buffer)) {
         if (options.color) {
             str += formatBufferColored(err, options);
         } else {
