@@ -24,7 +24,31 @@ var hex = require('hexer');
 var util = require('util');
 var Result = require('./result');
 var errors = require('./errors');
+
+var AnnotatedBuffer = require('./annotated_buffer');
 var errorHighlighter = require('./error_highlighter');
+
+function makeAnnotatedBuffer(buffer, start, clear) {
+    // istanbul ignore if
+    if (start > 0) buffer = buffer.slice(start);
+    // istanbul ignore if
+    if (clear) buffer.fill(0);
+    return new AnnotatedBuffer(buffer);
+}
+
+function annotateError(res1, res2, start, annBuf) {
+    // istanbul ignore if
+    if (!res2.err ||
+        res2.offset !== res1.offset - start ||
+        res2.err.type !== res1.err.type ||
+        res2.err.message !== res1.err.message) {
+        res1.err = errors.UnstableRW(res1.err, {
+            otherMessage: res2.err && res2.err.message
+        });
+    } else {
+        res1.err.buffer = annBuf;
+    }
+}
 
 var emptyBuffer = Buffer(0);
 

@@ -21,6 +21,7 @@
 'use strict';
 
 var TypedError = require('error/typed');
+var WrappedError = require('error/wrapped');
 
 module.exports.expected = function expected(got, descr) {
     return module.exports.InvalidArgument({
@@ -115,6 +116,12 @@ module.exports.TruncatedRead = TypedError({
     buffer: null,
     state: null,
     expecting: null
+});
+
+module.exports.UnstableRW = WrappedError({
+    type: 'bufrw.unstable-rw',
+    message: 'Unstable RW error: {origMessage} (other: {otherMessage})',
+    otherMessage: null
 });
 
 module.exports.ZeroLengthChunk = TypedError({
