@@ -323,16 +323,18 @@ AnnotatedBuffer.prototype.hexdump = function hexdump(options) {
             ann = self.annotations[++annI];
             colorI = (colorI + 1) % colors.length;
         }
-        if (!ann) return str;
-        if (i < ann.start) return str;
-        if (i >= ann.start && i < ann.end) {
-            str = stripColor(str);
-            str = color(str, colors[colorI]);
-            if (i === ann.start && options.boldStart) str = color(str, 'bold');
+
+        if (ann && i >= ann.start) {
+            if (i >= ann.start && i < ann.end) {
+                str = stripColor(str);
+                str = color(str, colors[colorI]);
+                if (i === ann.start && options.boldStart) str = color(str, 'bold');
+            }
+            if (options.highlight) {
+                str = options.highlight(i, j, str);
+            }
         }
-        if (options.highlight) {
-            str = options.highlight(i, j, str);
-        }
+
         return str;
     }
 };
