@@ -20,12 +20,11 @@
 
 'use strict';
 
-var hex = require('hexer');
 var hexdiff = require('hexer/diff');
 var util = require('util');
+var formatError = require('./interface').formatError;
 var intoBufferResult = require('./interface').intoBufferResult;
 var fromBufferResult = require('./interface').fromBufferResult;
-var errorHighlighter = require('./error_highlighter');
 
 module.exports.cases = testCases;
 
@@ -166,27 +165,13 @@ RWTestCase.prototype.runReadTest = function runReadTest() {
 
 RWTestCase.prototype.dumpError = function dumpError(kind, err) {
     var self = this;
-    var highlight = errorHighlighter(err);
-    // istanbul ignore next
-    var errName = err.name || err.constructor.name;
-    var dump = util.format('%s error %s: %s\n',
-        kind, errName, err.message);
-    if (err.buffer && err.buffer.hexdump) {
-        dump += err.buffer.hexdump({
-            colored: true,
-            boldStart: false,
-            highlight: highlight
-        });
-    // istanbul ignore else
-    } else if (err.buffer) {
-        dump += hex(err.buffer, {
-            colored: true,
-            decorateHexen: highlight,
-            decorateHuman: highlight
-        });
-    }
-    dump.split(/\n/).forEach(function each(line) {
-        self.assert.comment(line);
+    var dump = kind + ' error ' + formatError(err, {
+        color: true
+    });
+    dump.split(/\n/).forEach(function each(line, i, lines) {
+        if (line.length || i < lines.length - 1) {
+            self.assert.comment(line);
+        }
     });
 };
 
