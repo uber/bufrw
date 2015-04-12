@@ -20,16 +20,16 @@
 
 module.exports = Result;
 
-function Result(error, value) {
+function Result(err, value) {
     var self = this;
+    self.err = err || null;
     self.value = value;
-    self.error = error || null;
 }
 
 Result.prototype.toValue = function toValue() {
     var self = this;
-    if (self.error) {
-        throw self.error;
+    if (self.err) {
+        throw self.err;
     } else {
         return self.value;
     }
@@ -38,12 +38,12 @@ Result.prototype.toValue = function toValue() {
 /* istanbul ignore next */
 Result.prototype.toCallback = function toCallback(callback) {
     var self = this;
-    callback(self.error, self.value);
+    callback(self.err, self.value);
 };
 
 // XXX to be phased out of use in favor of using Result return values.
 /* istanbul ignore next */
 Result.prototype.toTuple = function toTuple() {
     var self = this;
-    return [self.error, self.value];
+    return [self.err, self.value];
 };

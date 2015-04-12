@@ -106,7 +106,7 @@ RWTestCase.prototype.runWriteTest = function runWriteTest() {
     var got = Buffer(testCase.bytes ? testCase.bytes.length : testCase.length || 0);
     got.fill(0);
     var res = intoBufferResult(self.rw, got, val);
-    var err = res.error;
+    var err = res.err;
     if (err) {
         if (testCase.error) {
             self.assert.deepEqual(
@@ -139,7 +139,7 @@ RWTestCase.prototype.runReadTest = function runReadTest() {
     var buffer = Buffer(testCase.bytes);
     buffer = new AnnotatedBuffer(buffer);
     var res = fromBufferResult(self.rw, buffer);
-    var err = res.error;
+    var err = res.err;
     var got = res.value;
     if (err) {
         if (testCase.error) {
