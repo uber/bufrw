@@ -312,7 +312,6 @@ AnnotatedBuffer.prototype.hexdump = function hexdump(options) {
                 if (options.highlight) {
                     desc = options.highlight(part.start, 0, desc);
                 }
-
             }
             return desc;
         }).join(' ');
