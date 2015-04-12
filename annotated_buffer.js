@@ -58,6 +58,7 @@ AnnotatedBuffer.prototype.toString = function toString(encoding, start, end) {
 
 // -- bytes
 
+// istanbul ignore next
 AnnotatedBuffer.prototype.copy = function copy(targetBuffer, targetStart, sourceStart, sourceEnd) {
     var self = this;
     var copied = self.buffer.copy(targetBuffer, targetStart, sourceStart, sourceEnd);
@@ -74,6 +75,7 @@ AnnotatedBuffer.prototype.copy = function copy(targetBuffer, targetStart, source
     return copied;
 };
 
+// istanbul ignore next
 AnnotatedBuffer.prototype.slice = function slice(start, end) {
     var self = this;
     var value = self.buffer.slice(start, end);
@@ -89,6 +91,7 @@ AnnotatedBuffer.prototype.slice = function slice(start, end) {
 
 // -- atom readers
 
+// istanbul ignore next
 AnnotatedBuffer.prototype.readInt8 = function readInt8(offset, noAssert) {
     var self = this;
     var value = self.buffer.readInt8(offset, noAssert);
@@ -115,6 +118,7 @@ AnnotatedBuffer.prototype.readUInt8 = function readUInt8(offset, noAssert) {
     return value;
 };
 
+// istanbul ignore next
 AnnotatedBuffer.prototype.readUInt16LE = function readUInt16LE(offset, noAssert) {
     var self = this;
     var value = self.buffer.readUInt16LE(offset, noAssert);
@@ -141,6 +145,7 @@ AnnotatedBuffer.prototype.readUInt16BE = function readUInt16BE(offset, noAssert)
     return value;
 };
 
+// istanbul ignore next
 AnnotatedBuffer.prototype.readUInt32LE = function readUInt32LE(offset, noAssert) {
     var self = this;
     var value = self.buffer.readUInt32LE(offset, noAssert);
@@ -154,6 +159,7 @@ AnnotatedBuffer.prototype.readUInt32LE = function readUInt32LE(offset, noAssert)
     return value;
 };
 
+// istanbul ignore next
 AnnotatedBuffer.prototype.readUInt32BE = function readUInt32BE(offset, noAssert) {
     var self = this;
     var value = self.buffer.readUInt32BE(offset, noAssert);
@@ -167,6 +173,7 @@ AnnotatedBuffer.prototype.readUInt32BE = function readUInt32BE(offset, noAssert)
     return value;
 };
 
+// istanbul ignore next
 AnnotatedBuffer.prototype.readInt16LE = function readInt16LE(offset, noAssert) {
     var self = this;
     var value = self.buffer.readInt16LE(offset, noAssert);
@@ -180,6 +187,7 @@ AnnotatedBuffer.prototype.readInt16LE = function readInt16LE(offset, noAssert) {
     return value;
 };
 
+// istanbul ignore next
 AnnotatedBuffer.prototype.readInt16BE = function readInt16BE(offset, noAssert) {
     var self = this;
     var value = self.buffer.readInt16BE(offset, noAssert);
@@ -193,6 +201,7 @@ AnnotatedBuffer.prototype.readInt16BE = function readInt16BE(offset, noAssert) {
     return value;
 };
 
+// istanbul ignore next
 AnnotatedBuffer.prototype.readInt32LE = function readInt32LE(offset, noAssert) {
     var self = this;
     var value = self.buffer.readInt32LE(offset, noAssert);
@@ -206,6 +215,7 @@ AnnotatedBuffer.prototype.readInt32LE = function readInt32LE(offset, noAssert) {
     return value;
 };
 
+// istanbul ignore next
 AnnotatedBuffer.prototype.readInt32BE = function readInt32BE(offset, noAssert) {
     var self = this;
     var value = self.buffer.readInt32BE(offset, noAssert);
@@ -219,6 +229,7 @@ AnnotatedBuffer.prototype.readInt32BE = function readInt32BE(offset, noAssert) {
     return value;
 };
 
+// istanbul ignore next
 AnnotatedBuffer.prototype.readFloatLE = function readFloatLE(offset, noAssert) {
     var self = this;
     var value = self.buffer.readFloatLE(offset, noAssert);
@@ -232,6 +243,7 @@ AnnotatedBuffer.prototype.readFloatLE = function readFloatLE(offset, noAssert) {
     return value;
 };
 
+// istanbul ignore next
 AnnotatedBuffer.prototype.readFloatBE = function readFloatBE(offset, noAssert) {
     var self = this;
     var value = self.buffer.readFloatBE(offset, noAssert);
@@ -245,6 +257,7 @@ AnnotatedBuffer.prototype.readFloatBE = function readFloatBE(offset, noAssert) {
     return value;
 };
 
+// istanbul ignore next
 AnnotatedBuffer.prototype.readDoubleLE = function readDoubleLE(offset, noAssert) {
     var self = this;
     var value = self.buffer.readDoubleLE(offset, noAssert);
@@ -258,6 +271,7 @@ AnnotatedBuffer.prototype.readDoubleLE = function readDoubleLE(offset, noAssert)
     return value;
 };
 
+// istanbul ignore next
 AnnotatedBuffer.prototype.readDoubleBE = function readDoubleBE(offset, noAssert) {
     var self = this;
     var value = self.buffer.readDoubleBE(offset, noAssert);
