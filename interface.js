@@ -113,6 +113,12 @@ function fromBufferResult(rw, buffer, offset) {
     var start = offset || 0;
     var res = rw.readFrom(buffer, start);
     res = checkAllReadFrom(res, buffer);
+    if (res.err) {
+        var annBuf = makeAnnotatedBuffer(buffer, start, false);
+        var res2 = rw.readFrom(annBuf, 0);
+        res2 = checkAllReadFrom(res2, buffer);
+        annotateError(res, res2, start, annBuf);
+    }
     return genericResult(res.err, res.value, buffer, res.offset);
 }
 
