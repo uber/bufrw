@@ -25,7 +25,6 @@ var hexdiff = require('hexer/diff');
 var util = require('util');
 var intoBufferResult = require('./interface').intoBufferResult;
 var fromBufferResult = require('./interface').fromBufferResult;
-var AnnotatedBuffer = require('./annotated_buffer');
 var errorHighlighter = require('./error_highlighter');
 
 module.exports.cases = testCases;
@@ -124,6 +123,7 @@ RWTestCase.prototype.runWriteTest = function runWriteTest() {
         var buf = Buffer(testCase.bytes);
         // istanbul ignore if
         if (got.toString('hex') !== buf.toString('hex')) {
+            // TODO: re-run write with an annotated buffer
             self.assert.comment('expected v actual:\n' +
                 hexdiff(buf, got, {colored: true}));
             self.assert.fail(desc);
@@ -137,7 +137,6 @@ RWTestCase.prototype.runReadTest = function runReadTest() {
     var self = this;
     var testCase = self.testCase.readTest;
     var buffer = Buffer(testCase.bytes);
-    buffer = new AnnotatedBuffer(buffer);
     var res = fromBufferResult(self.rw, buffer);
     var err = res.err;
     var got = res.value;

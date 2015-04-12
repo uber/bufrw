@@ -140,7 +140,13 @@ readerTest('errors on truncated frame', frameRW, [
                 message: 'expected at least 1 bytes, only have 0 @[1:2]',
                 expected: 1,
                 actual: 0,
-                buffer: Buffer([2, 1]),
+                buffer: {
+                    buffer: Buffer([2, 1]),
+                    annotations: [
+                        { kind: 'read', name: 'UInt8', start: 0, end: 1, value: 2 },
+                        { kind: 'read', name: 'UInt8', start: 1, end: 2, value: 1 }
+                    ]
+                },
                 offset: 1,
                 endOffset: 2
             }, 'expected ShortBufferError');
