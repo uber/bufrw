@@ -330,9 +330,10 @@ AnnotatedBuffer.prototype.hexdump = function hexdump(options) {
                 str = color(str, colors[colorI]);
                 if (i === ann.start && options.boldStart) str = color(str, 'bold');
             }
-            if (options.highlight) {
-                str = options.highlight(i, j, str);
-            }
+        }
+
+        if (options.highlight) {
+            str = options.highlight(i, j, str);
         }
 
         return str;
