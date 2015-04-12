@@ -26,7 +26,7 @@ module.exports.expected = function expected(got, descr) {
     return module.exports.InvalidArgument({
         expected: descr,
         argType: typeof got,
-        argConstructor: got.constructor.name
+        argConstructor: got && got.constructor.name
     });
 };
 

@@ -23,6 +23,7 @@
 var testRW = require('../test_rw');
 var test = require('tape');
 
+var BufferRW = require('../base').BufferRW;
 var LengthResult = require('../base').LengthResult;
 var WriteResult = require('../base').WriteResult;
 var ReadResult = require('../base').ReadResult;
@@ -41,10 +42,26 @@ var brokenRW = {
 var atoms = require('../atoms');
 var SeriesRW = require('../series');
 
+function orFillZero(rw) {
+    return new BufferRW(
+        rw.byteLength.bind(rw),
+        rw.readFrom.bind(rw),
+        writeInto);
+    function writeInto(value, buffer, offset) {
+        if (value === null || value === undefined) {
+            var end = offset + rw.width;
+            buffer.fill(0, offset, end);
+            return WriteResult.just(end);
+        } else {
+            return rw.writeInto(value, buffer, offset);
+        }
+    }
+}
+
 var tinyShortWord = SeriesRW(
-    atoms.UInt8,
-    atoms.UInt16BE,
-    atoms.UInt32BE);
+    orFillZero(atoms.UInt8),
+    orFillZero(atoms.UInt16BE),
+    orFillZero(atoms.UInt32BE));
 
 test('SeriesRW: tinyShortWord', testRW.cases(tinyShortWord, [
     [[0, 0, 0], [0x00,
