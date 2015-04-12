@@ -323,9 +323,9 @@ AnnotatedBuffer.prototype.hexdump = function hexdump(options) {
             }
             if (options.colored) {
                 desc = color(desc, part.color);
-                if (options.highlight) {
-                    desc = options.highlight(part.start, 0, desc);
-                }
+            }
+            if (options.highlight) {
+                desc = options.highlight(part.start, 0, desc);
             }
             return desc;
         }).join(' ');
