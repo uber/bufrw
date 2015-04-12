@@ -66,23 +66,29 @@ function intoBufferTuple(rw, buffer, value) {
     return intoBufferResult(rw, buffer, value).toTuple();
 }
 
-function fromBufferResult(rw, buffer, offset) {
-    offset = offset || 0;
-    var res = rw.readFrom(buffer, offset);
-    offset = res.offset;
-    var err = res.err;
-    if (!err && offset !== buffer.length) {
-        err = errors.ShortRead({
-            remaining: buffer.length - offset,
+function checkAllReadFrom(res, buffer) {
+    if (!res.err && res.offset !== buffer.length) {
+        res.err = errors.ShortRead({
+            remaining: buffer.length - res.offset,
             buffer: buffer,
-            offset: offset
+            offset: res.offset
         });
     }
+    return res;
+}
+
+function genericResult(err, value, buffer, offset) {
     if (err) {
         if (err.offset === undefined) err.offset = offset;
         if (err.buffer === undefined) err.buffer = buffer;
     }
-    return new Result(err, res.value);
+    return new Result(err, value);
+}
+
+function fromBufferResult(rw, buffer, offset) {
+    var res = rw.readFrom(buffer, offset || 0);
+    res = checkAllReadFrom(res, buffer);
+    return genericResult(res.err, res.value, buffer, res.offset);
 }
 
 function byteLengthResult(rw, value) {
@@ -100,8 +106,7 @@ function toBufferResult(rw, value) {
     return intoBufferResult(rw, buffer, value);
 }
 
-function intoBufferResult(rw, buffer, value) {
-    var res = rw.writeInto(value, buffer, 0);
+function checkAllWroteOver(res, buffer) {
     if (!res.err && res.offset !== buffer.length) {
         res.err = errors.ShortWrite({
             remaining: buffer.length - res.offset,
@@ -109,12 +114,13 @@ function intoBufferResult(rw, buffer, value) {
             offset: res.offset
         });
     }
-    if (res.err) {
-        // istanbul ignore else
-        if (!Buffer.isBuffer(res.err.buffer)) res.err.buffer = buffer;
-        if (typeof res.err.offset !== 'number') res.err.offset = res.offset;
-    }
-    return new Result(res.err, buffer);
+    return res;
+}
+
+function intoBufferResult(rw, buffer, value) {
+    var res = rw.writeInto(value, buffer, 0);
+    res = checkAllWroteOver(res, buffer);
+    return genericResult(res.err, buffer, buffer, res.offset);
 }
 
 // istanbul ignore next TODO
