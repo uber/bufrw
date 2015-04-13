@@ -41,6 +41,10 @@ function SwitchRW(valrw, cases, opts) {
     self.cons = opts.cons || Pair;
     self.valKey = opts.valKey || '0';
     self.dataKey = opts.dataKey || '1';
+    // istanbul ignore if TODO
+    if (opts.structMode) {
+        self.readFrom = self.structReadFrom;
+    }
 }
 inherits(BufferRW, BufferRW);
 
@@ -58,7 +62,7 @@ SwitchRW.prototype.byteLength = function byteLength(obj) {
     if (vallen.err) return vallen;
     var caselen = datarw.byteLength(data);
     if (caselen.err) return caselen;
-    return new LengthResult(null, vallen.length + caselen.length);
+    return LengthResult.just(vallen.length + caselen.length);
 };
 
 SwitchRW.prototype.writeInto = function writeInto(obj, buffer, offset) {
@@ -94,7 +98,28 @@ SwitchRW.prototype.readFrom = function readFrom(buffer, offset) {
     offset = res.offset;
     var data = res.value;
     var obj = new self.cons(val, data);
-    return new ReadResult(null, offset, obj);
+    return ReadResult.just(offset, obj);
+};
+
+// istanbul ignore next TODO
+SwitchRW.prototype.structReadFrom = function readFrom(obj, buffer, offset) {
+    var self = this;
+    var res = self.valrw.readFrom(buffer, offset);
+    if (res.err) return res;
+    offset = res.offset;
+    var val = res.value;
+    var datarw = self.cases[val];
+    if (datarw === undefined) {
+        return ReadResult.error(errors.InvalidSwitchValue({
+            value: val
+        }), offset);
+    }
+    obj[self.valKey] = val;
+    res = datarw.readFrom(buffer, offset);
+    if (!res.err) {
+        obj[self.dataKey] = res.value;
+    }
+    return res;
 };
 
 function Pair(a, b) {
