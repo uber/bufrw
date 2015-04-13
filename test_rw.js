@@ -168,10 +168,8 @@ RWTestCase.prototype.dumpError = function dumpError(kind, err) {
     var dump = kind + ' error ' + formatError(err, {
         color: true
     });
-    dump.split(/\n/).forEach(function each(line, i, lines) {
-        if (line.length || i < lines.length - 1) {
-            self.assert.comment(line);
-        }
+    dump.split(/\n/).forEach(function each(line) {
+        self.assert.comment(line);
     });
 };
 

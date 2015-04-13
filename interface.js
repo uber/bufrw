@@ -171,7 +171,6 @@ function formatError(err, options) {
         } else {
             str += formatBufferUncolored(err, options);
         }
-        str += '\n';
     }
     return str;
 }
