@@ -76,6 +76,8 @@ module.exports.str1 = str1;
 module.exports.str2 = str2;
 module.exports.String = StringRW;
 
+module.exports.varint = require('./varint');
+
 module.exports.Series = require('./series');
 module.exports.Struct = require('./struct');
 module.exports.Switch = require('./switch');
