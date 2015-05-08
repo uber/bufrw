@@ -23,7 +23,10 @@
 var testRW = require('../test_rw');
 var test = require('tape');
 
+var StringRW = require('../string_rw');
 var varint = require('../varint');
+
+var strn = StringRW(varint.unsigned);
 
 test('Unsigned VarInt', testRW.cases(varint.unsigned, [
     [0, [0x00]],
@@ -80,4 +83,71 @@ test('Unsigned VarInt', testRW.cases(varint.unsigned, [
             }
         }
     }
+]));
+
+var bigTestStr =
+    '1234567890 1234567890 1234567890 1234567890\n' +
+    '1234567890 1234567890 1234567890 1234567890\n' +
+    '1234567890 1234567890 1234567890 1234567890\n' +
+    '1234567890 1234567890 1234567890 1234567890\n';
+
+var bigTestBytes = [0x80 | 0x01, 0x30]; // 4 * 44 = 0xb0
+var testSeq = [0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30];
+for (var i = 0; i < 4; i++) {
+    for (var j = 0; j < 4; j++) {
+        if (j > 0) bigTestBytes.push(0x20);             // ' '
+        bigTestBytes.push.apply(bigTestBytes, testSeq); // '1234567890'
+    }                                                   //
+    bigTestBytes.push(0x0a);                            // '\n'
+}
+
+test('strn', testRW.cases(strn, [
+    ['', [0x00]],
+    ['abc', [0x03, 0x61, 0x62, 0x63]],
+    [bigTestStr, bigTestBytes],
+
+    // undefined value length/write
+    {
+        lengthTest: {
+            length: 1,
+            value: undefined
+        },
+        writeTest: {
+            bytes: [0x00],
+            value: undefined
+        }
+    },
+
+    // null value length/write
+    {
+        lengthTest: {
+            length: 1,
+            value: null
+        },
+        writeTest: {
+            bytes: [0x00],
+            value: null
+        }
+    },
+
+    // invalid value length/write
+    {
+        lengthTest: {
+            value: {},
+            error: {
+                type: 'bufrw.invalid-argument',
+                name: 'BufrwInvalidArgumentError',
+                message: 'invalid argument, expected string, null, or undefined'
+            }
+        },
+        writeTest: {
+            value: {},
+            error: {
+                type: 'bufrw.invalid-argument',
+                name: 'BufrwInvalidArgumentError',
+                message: 'invalid argument, expected string, null, or undefined'
+            }
+        }
+    }
+
 ]));

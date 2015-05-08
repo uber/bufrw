@@ -34,12 +34,10 @@ function StringRW(sizerw, encoding) {
     }
     var self = this;
     self.encoding = encoding || 'utf8';
-    // istanbul ignore else
-    if (self.encoding === 'utf8') {
-        self.writeInto = self.writeUtf8Into;
-        self.readFrom = self.readUtf8From;
-    }
     VariableBufferRW.call(self, sizerw);
+    if (!self.sizerw.width) {
+        self.writeInto = self.writeVariableWidthInto;
+    }
 }
 inherits(StringRW, VariableBufferRW);
 
@@ -56,8 +54,7 @@ StringRW.prototype.byteLength = function byteLength(str) {
     return new LengthResult(null, len.length + length);
 };
 
-// istanbul ignore next
-StringRW.prototype.writeInto = function writeInto(str, buffer, offset) {
+StringRW.prototype.writeInto = function writeFixedWidthInto(str, buffer, offset) {
     var self = this;
     var start = offset + self.sizerw.width;
     var length = 0;
@@ -67,30 +64,28 @@ StringRW.prototype.writeInto = function writeInto(str, buffer, offset) {
         return WriteResult.error(errors.expected(str, 'string, null, or undefined'), offset);
     }
     var res = self.sizerw.writeInto(length, buffer, offset);
+    // istanbul ignore if
     if (res.err) return res;
     return new WriteResult(null, start + length);
 };
 
-StringRW.prototype.writeUtf8Into = function writeInto(str, buffer, offset) {
+StringRW.prototype.writeVariableWidthInto = function writeVariableWidthInto(str, buffer, offset) {
     var self = this;
-    var start = offset + self.sizerw.width;
-    var length = 0;
+    var size = 0;
     if (typeof str === 'string') {
-        // istanbul ignore else
-        if (buffer.parent) {
-            length = buffer.parent.utf8Write(str, buffer.offset + start, buffer.length - start);
-        } else {
-            length = buffer.write(str, start, self.encoding);
-        }
+        size = Buffer.byteLength(str, self.encoding);
     } else if (str !== null && str !== undefined) {
         return WriteResult.error(errors.expected(str, 'string, null, or undefined'), offset);
     }
-    var res = self.sizerw.writeInto(length, buffer, offset);
+    var res = self.sizerw.writeInto(size, buffer, offset);
     if (res.err) return res;
-    return new WriteResult(null, start + length);
+    offset = res.offset;
+    if (typeof str === 'string') {
+        res.offset += buffer.write(str, offset, self.encoding);
+    }
+    return res;
 };
 
-// istanbul ignore next
 StringRW.prototype.readFrom = function readFrom(buffer, offset) {
     var self = this;
     var res = self.sizerw.readFrom(buffer, offset);
@@ -103,27 +98,6 @@ StringRW.prototype.readFrom = function readFrom(buffer, offset) {
         offset = res.offset;
         var end = offset + length;
         var str = buffer.toString(self.encoding, offset, end);
-        return new ReadResult(null, end, str);
-    }
-};
-
-StringRW.prototype.readUtf8From = function readFrom(buffer, offset) {
-    var self = this;
-    var res = self.sizerw.readFrom(buffer, offset);
-    if (res.err) return res;
-    var length = res.value;
-    var remain = buffer.length - res.offset;
-    if (remain < length) {
-        return ReadResult.shortError(length, remain, offset, res.offset);
-    } else {
-        offset = res.offset;
-        var end = offset + length;
-        var str = '';
-        if (buffer.parent) {
-            str = buffer.parent.utf8Slice(buffer.offset + offset, buffer.offset + end);
-        } else {
-            str = buffer.toString(self.encoding, offset, end);
-        }
         return new ReadResult(null, end, str);
     }
 };
