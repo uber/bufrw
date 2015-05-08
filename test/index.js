@@ -31,5 +31,6 @@ require('./string_rw');
 require('./struct_rw');
 require('./switch_rw');
 require('./variable_buffer_rw');
+require('./varint');
 require('./stream');
 require('./test_rw');
