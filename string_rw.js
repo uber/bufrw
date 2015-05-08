@@ -35,6 +35,9 @@ function StringRW(sizerw, encoding) {
     var self = this;
     self.encoding = encoding || 'utf8';
     VariableBufferRW.call(self, sizerw);
+    if (!self.sizerw.width) {
+        self.writeInto = self.writeVariableWidthInto;
+    }
 }
 inherits(StringRW, VariableBufferRW);
 
@@ -51,7 +54,7 @@ StringRW.prototype.byteLength = function byteLength(str) {
     return new LengthResult(null, len.length + length);
 };
 
-StringRW.prototype.writeInto = function writeInto(str, buffer, offset) {
+StringRW.prototype.writeInto = function writeFixedWidthInto(str, buffer, offset) {
     var self = this;
     var start = offset + self.sizerw.width;
     var length = 0;
@@ -61,8 +64,26 @@ StringRW.prototype.writeInto = function writeInto(str, buffer, offset) {
         return WriteResult.error(errors.expected(str, 'string, null, or undefined'), offset);
     }
     var res = self.sizerw.writeInto(length, buffer, offset);
+    // istanbul ignore if
     if (res.err) return res;
     return new WriteResult(null, start + length);
+};
+
+StringRW.prototype.writeVariableWidthInto = function writeVariableWidthInto(str, buffer, offset) {
+    var self = this;
+    var size = 0;
+    if (typeof str === 'string') {
+        size = Buffer.byteLength(str, self.encoding);
+    } else if (str !== null && str !== undefined) {
+        return WriteResult.error(errors.expected(str, 'string, null, or undefined'), offset);
+    }
+    var res = self.sizerw.writeInto(size, buffer, offset);
+    if (res.err) return res;
+    offset = res.offset;
+    if (typeof str === 'string') {
+        res.offset += buffer.write(str, offset, self.encoding);
+    }
+    return res;
 };
 
 StringRW.prototype.readFrom = function readFrom(buffer, offset) {

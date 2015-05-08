@@ -69,14 +69,17 @@ module.exports.buf2 = buf2;
 module.exports.VariableBuffer = VariableBuffer;
 
 var StringRW = require('./string_rw');
+var varint = require('./varint');
 var str1 = StringRW(atoms.UInt8, 'utf8');
 var str2 = StringRW(atoms.UInt16BE, 'utf8');
+var strn = StringRW(varint.unsigned, 'utf8');
 
 module.exports.str1 = str1;
 module.exports.str2 = str2;
+module.exports.strn = strn;
 module.exports.String = StringRW;
 
-module.exports.varint = require('./varint');
+module.exports.varint = varint;
 
 module.exports.Series = require('./series');
 module.exports.Struct = require('./struct');

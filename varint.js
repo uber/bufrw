@@ -46,6 +46,7 @@ function unsignedVarIntByteLength(n) {
 }
 
 function writeUnsignedVarIntInto(n, buffer, offset) {
+    console.log('WRITE %s @%s', n, offset);
     if (typeof n !== 'number' || n < 0) {
         // TODO: integer check
         return WriteResult.error(errors.expected(n, 'unsigned integer'));
