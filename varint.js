@@ -39,9 +39,8 @@ function unsignedVarIntByteLength(n) {
         return LengthResult.error(errors.expected(n, 'unsigned integer'));
     }
     if (n === 0) LengthResult.just(1);
-    var nbits = 1;
-    if (n > 0) nbits = Math.log(n) / Math.log(2);
-    var needed = Math.ceil(nbits / 7);
+
+    var needed = Math.ceil(countBits(n) / 7);
     return LengthResult.just(needed);
 }
 
@@ -51,9 +50,7 @@ function writeUnsignedVarIntInto(n, buffer, offset) {
         return WriteResult.error(errors.expected(n, 'unsigned integer'));
     }
 
-    var nbits = 1;
-    if (n > 0) nbits = Math.log(n) / Math.log(2);
-    var needed = Math.ceil(nbits / 7);
+    var needed = Math.ceil(countBits(n) / 7);
     var start = offset;
     var end = offset + needed;
 
@@ -68,7 +65,8 @@ function writeUnsignedVarIntInto(n, buffer, offset) {
         n >>= 7;
         if (offset !== end) b |= 0x80;
         buffer.writeUInt8(b, --offset, true);
-    } while (n > 0);
+        if (n <= 0) break;
+    }
 
     return WriteResult.just(end);
 }
@@ -86,4 +84,10 @@ function readUnsignedVarIntFrom(buffer, offset) {
     }
     var got = offset - start;
     return ReadResult.shortError(got + 1, got, start, offset);
+}
+
+function countBits(n) {
+    var res = 1;
+    while (n >>= 1) res++;
+    return res;
 }

@@ -103,6 +103,7 @@ for (var i = 0; i < 4; i++) {
 
 test('strn', testRW.cases(strn, [
     ['', [0x00]],
+    ['/', [0x01, 0x2f]],
     ['abc', [0x03, 0x61, 0x62, 0x63]],
     [bigTestStr, bigTestBytes],
 
