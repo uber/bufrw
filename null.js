@@ -18,14 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-var LengthResult = require('./base').LengthResult;
 var WriteResult = require('./base').WriteResult;
 var ReadResult = require('./base').ReadResult;
-var BufferRW = require('./base').BufferRW;
-
-function nullByteLength() {
-    return new LengthResult(null, 0);
-}
+var AtomRW = require('./atoms').AtomRW;
 
 function nullWriteInto(val, buffer, offset) {
     return new WriteResult(null, offset);
@@ -35,6 +30,6 @@ function nullReadFrom(buffer, offset) {
     return new ReadResult(null, offset, null);
 }
 
-var NullRW = BufferRW(nullByteLength, nullReadFrom, nullWriteInto);
+var NullRW = AtomRW(0, nullReadFrom, nullWriteInto);
 
 module.exports = NullRW;
