@@ -101,6 +101,7 @@ readerTest('recognizes zero-sized chunks with an error', frameRW, [
     {
         error: function(err, assert) {
             assert.deepEqual(err, {
+                fullType: 'bufrw.zero-length-chunk',
                 type: 'bufrw.zero-length-chunk',
                 name: 'BufrwZeroLengthChunkError',
                 message: 'zero length chunk encountered'
@@ -135,6 +136,7 @@ readerTest('errors on truncated frame', frameRW, [
     {
         error: function(err, assert) {
             assert.deepEqual(err, {
+                fullType: 'bufrw.short-buffer',
                 type: 'bufrw.short-buffer',
                 name: 'BufrwShortBufferError',
                 message: 'expected at least 1 bytes, only have 0 @[1:2]',
@@ -155,6 +157,7 @@ readerTest('errors on truncated frame', frameRW, [
     {
         error: function(err, assert) {
             assert.deepEqual(err, {
+                fullType: 'bufrw.truncated-read',
                 type: 'bufrw.truncated-read',
                 name: 'BufrwTruncatedReadError',
                 message: 'read truncated by end of stream with 1 bytes in buffer',
