@@ -20,7 +20,13 @@
 
 'use strict';
 
-var hexdiff = require('hexer/diff');
+var canRequire = require('./lib/can-require.js');
+var hexdiff = null;
+// istanbul ignore if
+if (canRequire('hexer')) {
+    hexdiff = require('hexer/diff');
+}
+
 var util = require('util');
 var formatError = require('./interface').formatError;
 var intoBufferResult = require('./interface').intoBufferResult;
@@ -123,8 +129,11 @@ RWTestCase.prototype.runWriteTest = function runWriteTest() {
         // istanbul ignore if
         if (got.toString('hex') !== buf.toString('hex')) {
             // TODO: re-run write with an annotated buffer
-            self.assert.comment('expected v actual:\n' +
-                hexdiff(buf, got, {colored: true}));
+            // istanbul ignore if
+            if (hexdiff) {
+                self.assert.comment('expected v actual:\n' +
+                                    hexdiff(buf, got, {colored: true}));
+            }
             self.assert.fail(desc);
         } else {
             self.assert.pass(desc);
