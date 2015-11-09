@@ -20,7 +20,7 @@
 
 'use strict';
 
-var PassThrough = require('readable-stream').PassThrough;
+var PassThrough = require('stream').PassThrough;
 var util = require('util');
 
 var ChunkReader = require('../../stream/chunk_reader');

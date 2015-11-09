@@ -21,7 +21,7 @@
 'use strict';
 
 var inherits = require('util').inherits;
-var Transform = require('readable-stream').Transform;
+var Transform = require('stream').Transform;
 var ReadMachine = require('./read_machine');
 
 module.exports = ChunkReader;
