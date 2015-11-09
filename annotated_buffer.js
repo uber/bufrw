@@ -21,9 +21,9 @@
 'use strict';
 
 var color = require('ansi-color').set;
+var stripColor = require('./lib/strip_color.js');
 var extend = require('xtend');
 var hex = require('hexer');
-var stripColor = require('hexer/render').stripColor;
 var inspect = require('util').inspect;
 
 function AnnotatedBuffer(buffer) {
