@@ -20,10 +20,16 @@
 
 'use strict';
 
+var canRequire = require('./lib/can-require.js');
+var hex = null;
+// istanbul ignore if
+if (canRequire('hexer')) {
+    hex = require('hexer');
+}
+
 var color = require('ansi-color').set;
+var stripColor = require('./lib/strip_color.js');
 var extend = require('xtend');
-var hex = require('hexer');
-var stripColor = require('hexer/render').stripColor;
 var inspect = require('util').inspect;
 
 function AnnotatedBuffer(buffer) {
@@ -290,6 +296,12 @@ AnnotatedBuffer.prototype.readDoubleBE = function readDoubleBE(offset, noAssert)
 // istanbul ignore next
 AnnotatedBuffer.prototype.hexdump = function hexdump(options) {
     var self = this;
+
+    // istanbul ignore if
+    if (!hex) {
+        return self.buffer.toString('hex');
+    }
+
     options = extend(options, {
         emptyHuman: ' ',
         annotateLine: annotateLine

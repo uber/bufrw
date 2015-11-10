@@ -20,7 +20,13 @@
 
 'use strict';
 
-var hex = require('hexer');
+var canRequire = require('./lib/can-require.js');
+var hex = null;
+// istanbul ignore if
+if (canRequire('hexer')) {
+    hex = require('hexer');
+}
+
 var util = require('util');
 var Result = require('./result');
 var errors = require('./errors');
@@ -177,6 +183,11 @@ function formatError(err, options) {
 
 // istanbul ignore next TODO
 function formatBufferColored(err, options) {
+    // istanbul ignore else
+    if (!hex) {
+        return err.buffer.toString('hex');
+    }
+
     options = options || {};
     var opts = options.hexerOptions ? Object.create(options.hexerOptions) : {};
     if (opts.colored === undefined) {
@@ -190,6 +201,11 @@ function formatBufferColored(err, options) {
 
 // istanbul ignore next TODO
 function formatBufferUncolored(err, options) {
+    // istanbul ignore else
+    if (!hex) {
+        return err.buffer.toString('hex');
+    }
+
     options = options || {};
 
     var hasOffset = !(err.offset === undefined || err.offset === null);

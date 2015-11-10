@@ -21,7 +21,7 @@
 'use strict';
 
 var color = require('ansi-color').set;
-var render = require('hexer/render');
+var stripColor = require('./lib/strip_color.js');
 
 module.exports = errorHighlighter;
 
@@ -44,12 +44,12 @@ function errorHighlighter(err, options) {
     function decorateRangedError(totalOffset, screenOffset, str) {
         if (totalOffset === err.offset) {
             within = totalOffset !== err.endOffset-1;
-            return errColor(render.stripColor(str));
+            return errColor(stripColor(str));
         } else if (totalOffset === err.endOffset-1) {
             within = false;
-            return errColor(render.stripColor(str));
+            return errColor(stripColor(str));
         } else if (within) {
-            return errColor(render.stripColor(str));
+            return errColor(stripColor(str));
         } else {
             return str;
         }
@@ -57,7 +57,7 @@ function errorHighlighter(err, options) {
 
     function decorateError(totalOffset, screenOffset, str) {
         if (totalOffset === err.offset) {
-            return errColor(render.stripColor(str));
+            return errColor(stripColor(str));
         } else {
             return str;
         }
