@@ -134,3 +134,32 @@ module.exports.ZeroLengthChunk = TypedError({
     type: 'bufrw.zero-length-chunk',
     message: 'zero length chunk encountered'
 });
+
+module.exports.classify = classify;
+
+function classify(err) {
+    switch (err.type) {
+        case 'bufrw.broken-reader-state':
+        case 'bufrw.unstable-rw':
+            return 'Internal';
+
+        case 'bufrw.invalid-argument':
+        case 'bufrw.read.invalid-switch-value':
+        case 'bufrw.short-buffer':
+        case 'bufrw.short-read':
+        case 'bufrw.truncated-read':
+        case 'bufrw.zero-length-chunk':
+            return 'Read';
+
+        case 'bufrw.fixed-length-mismatch':
+        case 'bufrw.missing.struct-field':
+        case 'bufrw.range-error':
+        case 'bufrw.short-write':
+        case 'bufrw.write.invalid-switch-value':
+            return 'Write';
+
+        // istanbul ignore next
+        default:
+            return null;
+    }
+}
