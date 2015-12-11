@@ -20,18 +20,22 @@
 
 'use strict';
 
-require('./errors');
-require('./interface');
-require('./atoms');
-require('./fixed_width_rw');
-require('./null_rw');
-require('./repeat_rw');
-require('./series');
-require('./skip');
-require('./string_rw');
-require('./struct_rw');
-require('./switch_rw');
-require('./variable_buffer_rw');
-require('./varint');
-require('./stream');
-require('./test_rw');
+var test = require('tape');
+
+var errors = require('../errors');
+
+test('all errors should be classified', function t(assert) {
+    var keys = Object.keys(errors);
+    for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        if (key[0].toUpperCase() === key[0]) {
+            var Type = errors[key];
+            var err = new Type(new Error('e'));
+            assert.notEquals(
+                errors.classify(err), null,
+                'expected ' + err.type + ' to be classified');
+        }
+    }
+
+    assert.end();
+});
