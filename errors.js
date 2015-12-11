@@ -62,9 +62,15 @@ module.exports.InvalidArgument = TypedError({
     argConstructor: null
 });
 
-module.exports.InvalidSwitchValue = TypedError({
-    type: 'bufrw.invalid-switch-value',
-    message: 'invalid switch value {value}',
+module.exports.ReadInvalidSwitchValue = TypedError({
+    type: 'bufrw.read.invalid-switch-value',
+    message: 'read invalid switch value {value}',
+    value: null
+});
+
+module.exports.WriteInvalidSwitchValue = TypedError({
+    type: 'bufrw.write.invalid-switch-value',
+    message: 'write invalid switch value {value}',
     value: null
 });
 

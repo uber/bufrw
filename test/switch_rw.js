@@ -58,8 +58,8 @@ test('SwitchRW: numbers', testRW.cases(numbers, [
         lengthTest: {
             value: [42, 42],
             error: {
-                type: 'bufrw.invalid-switch-value',
-                message: 'invalid switch value 42',
+                type: 'bufrw.write.invalid-switch-value',
+                message: 'write invalid switch value 42',
                 value: 42
             }
         },
@@ -67,16 +67,16 @@ test('SwitchRW: numbers', testRW.cases(numbers, [
             value: [42, 42],
             length: 2,
             error: {
-                type: 'bufrw.invalid-switch-value',
-                message: 'invalid switch value 42',
+                type: 'bufrw.write.invalid-switch-value',
+                message: 'write invalid switch value 42',
                 value: 42
             }
         },
         readTest: {
             bytes: [42, 42],
             error: {
-                type: 'bufrw.invalid-switch-value',
-                message: 'invalid switch value 42',
+                type: 'bufrw.read.invalid-switch-value',
+                message: 'read invalid switch value 42',
                 value: 42
             }
         }
