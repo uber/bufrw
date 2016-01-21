@@ -32,14 +32,12 @@ function VariableBufferRW(sizerw) {
     if (!(this instanceof VariableBufferRW)) {
         return new VariableBufferRW(sizerw);
     }
-    var self = this;
-    self.sizerw = sizerw;
-    BufferRW.call(self);
+    this.sizerw = sizerw;
+    BufferRW.call(this);
 }
 inherits(VariableBufferRW, BufferRW);
 
 VariableBufferRW.prototype.byteLength = function byteLength(buf) {
-    var self = this;
     var length = 0;
     if (Buffer.isBuffer(buf)) {
         length = buf.length;
@@ -48,14 +46,13 @@ VariableBufferRW.prototype.byteLength = function byteLength(buf) {
     } else {
         return LengthResult.error(errors.expected(buf, 'buffer, null, or undefined'));
     }
-    var len = self.sizerw.byteLength(length);
+    var len = this.sizerw.byteLength(length);
     if (len.err) return len;
     return new LengthResult(null, len.length + length);
 };
 
 VariableBufferRW.prototype.writeInto = function writeInto(buf, buffer, offset) {
-    var self = this;
-    var start = offset + self.sizerw.width;
+    var start = offset + this.sizerw.width;
     var length = 0;
     if (Buffer.isBuffer(buf)) {
         length = buf.copy(buffer, start);
@@ -64,14 +61,13 @@ VariableBufferRW.prototype.writeInto = function writeInto(buf, buffer, offset) {
     } else {
         return WriteResult.error(errors.expected(buf, 'buffer, null, or undefined'), offset);
     }
-    var res = self.sizerw.writeInto(length, buffer, offset);
+    var res = this.sizerw.writeInto(length, buffer, offset);
     if (res.err) return res;
     return new WriteResult(null, start + length);
 };
 
 VariableBufferRW.prototype.readFrom = function readFrom(buffer, offset) {
-    var self = this;
-    var res = self.sizerw.readFrom(buffer, offset);
+    var res = this.sizerw.readFrom(buffer, offset);
     if (res.err) return res;
     var length = res.value;
     var remain = buffer.length - res.offset;
