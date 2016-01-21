@@ -31,29 +31,25 @@ function SkipRW(length, fill) {
     if (!(this instanceof SkipRW)) {
         return new SkipRW(length, fill);
     }
-    var self = this;
-    self.fill = fill || 0;
-    FixedWidthRW.call(self, length);
+    this.fill = fill || 0;
+    FixedWidthRW.call(this, length);
 }
 inherits(SkipRW, FixedWidthRW);
 
 SkipRW.prototype.byteLength = function byteLength() {
-    var self = this;
-    return new LengthResult(null, self.length);
+    return new LengthResult(null, this.length);
 };
 
 SkipRW.prototype.writeInto = function writeInto(val, buffer, offset) {
-    var self = this;
-    var end = offset + self.length;
-    buffer.fill(self.fill, offset, end);
+    var end = offset + this.length;
+    buffer.fill(this.fill, offset, end);
     return new WriteResult(null, end);
 };
 
 SkipRW.prototype.readFrom = function readFrom(buffer, offset) {
-    var self = this;
-    var end = offset + self.length;
+    var end = offset + this.length;
     if (end > buffer.length) {
-        return ReadResult.shortError(self.length, buffer.length - offset, offset);
+        return ReadResult.shortError(this.length, buffer.length - offset, offset);
     } else {
         return new ReadResult(null, end, null);
     }
