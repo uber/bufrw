@@ -28,11 +28,14 @@ var ReadResult = require('./base').ReadResult;
 var BufferRW = require('./base').BufferRW;
 var errors = require('./errors');
 
-function VariableBufferRW(sizerw) {
+function VariableBufferRW(sizerw, lazy) {
     if (!(this instanceof VariableBufferRW)) {
-        return new VariableBufferRW(sizerw);
+        return new VariableBufferRW(sizerw, lazy);
     }
     this.sizerw = sizerw;
+    if (lazy) {
+        this.readFrom = this.lazyReadFrom;
+    }
     BufferRW.call(this);
 }
 inherits(VariableBufferRW, BufferRW);
@@ -66,7 +69,8 @@ VariableBufferRW.prototype.writeInto = function writeInto(buf, buffer, offset) {
     return new WriteResult(null, start + length);
 };
 
-VariableBufferRW.prototype.readFrom = function readFrom(buffer, offset) {
+VariableBufferRW.prototype.readFrom =
+VariableBufferRW.prototype.eagerReadFrom = function eagerReadFrom(buffer, offset) {
     var res = this.sizerw.readFrom(buffer, offset);
     if (res.err) return res;
     var length = res.value;
@@ -78,5 +82,20 @@ VariableBufferRW.prototype.readFrom = function readFrom(buffer, offset) {
         var buf = Buffer(length);
         buffer.copy(buf, 0, offset);
         return new ReadResult(null, offset + length, buf);
+    }
+};
+
+VariableBufferRW.prototype.lazyReadFrom = function lazyReadFrom(buffer, offset) {
+    var res = this.sizerw.readFrom(buffer, offset);
+    if (res.err) return res;
+    var length = res.value;
+    var remain = buffer.length - res.offset;
+    if (remain < length) {
+        return ReadResult.shortError(length, remain, offset, res.offset);
+    } else {
+        offset = res.offset;
+        var end = offset + length;
+        var buf = buffer.slice(offset, end);
+        return new ReadResult(null, end, buf);
     }
 };

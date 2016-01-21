@@ -41,9 +41,7 @@ var brokenRW = {
 var atoms = require('../atoms');
 var VariableBufferRW = require('../variable_buffer_rw');
 
-var buf1 = VariableBufferRW(atoms.UInt8);
-
-test('VariableBufferRW: simple buf~1', testRW.cases(buf1, [
+var normalTestCases = [
     {
         lengthTest: {length: 1, value: undefined},
         writeTest: {bytes: [0x00], value: undefined}
@@ -90,9 +88,14 @@ test('VariableBufferRW: simple buf~1', testRW.cases(buf1, [
             }
         }
     }
-]));
+];
 
-test('VariableBufferRW: passes sizerw error thru', testRW.cases(VariableBufferRW(brokenRW), [
+test('VariableBufferRW: eager buf~1',
+    testRW.cases(VariableBufferRW(atoms.UInt8), normalTestCases));
+test('VariableBufferRW: lazy buf~1',
+    testRW.cases(VariableBufferRW(atoms.UInt8, true), normalTestCases));
+
+var brokenTestCases = [
     {
         lengthTest: {
             value: Buffer([2]),
@@ -108,4 +111,9 @@ test('VariableBufferRW: passes sizerw error thru', testRW.cases(VariableBufferRW
             error: {message: 'bork'}
         }
     }
-]));
+];
+
+test('VariableBufferRW: eager passes sizerw error thru',
+    testRW.cases(VariableBufferRW(brokenRW), brokenTestCases));
+test('VariableBufferRW: lazy passes sizerw error thru',
+    testRW.cases(VariableBufferRW(brokenRW, true), brokenTestCases));
