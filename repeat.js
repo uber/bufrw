@@ -32,9 +32,8 @@ function RepeatRW(countrw, repeatedrw) {
     if (!(this instanceof RepeatRW)) {
         return new RepeatRW(countrw, repeatedrw);
     }
-    var self = this;
-    self.countrw = countrw;
-    self.repeatedrw = repeatedrw;
+    this.countrw = countrw;
+    this.repeatedrw = repeatedrw;
 }
 inherits(RepeatRW, BufferRW);
 
@@ -42,11 +41,10 @@ RepeatRW.prototype.byteLength = function byteLength(values) {
     if (!Array.isArray(values)) {
         return LengthResult.error(errors.expected(values, 'an array'));
     }
-    var self = this;
-    var res = self.countrw.byteLength(values.length);
+    var res = this.countrw.byteLength(values.length);
     if (res.err) return res;
     for (var i = 0; i < values.length; i++) {
-        var partres = self.repeatedrw.byteLength(values[i]);
+        var partres = this.repeatedrw.byteLength(values[i]);
         if (partres.err) return partres;
         res.length += partres.length;
     }
@@ -57,12 +55,11 @@ RepeatRW.prototype.writeInto = function writeInto(values, buffer, offset) {
     if (!Array.isArray(values)) {
         return WriteResult.error(errors.expected(values, 'an array'), offset);
     }
-    var self = this;
-    var res = self.countrw.writeInto(values.length, buffer, offset);
+    var res = this.countrw.writeInto(values.length, buffer, offset);
     if (res.err) return res;
     offset = res.offset;
     for (var i = 0; i < values.length; i++) {
-        res = self.repeatedrw.writeInto(values[i], buffer, offset);
+        res = this.repeatedrw.writeInto(values[i], buffer, offset);
         if (res.err) return res;
         offset = res.offset;
     }
@@ -70,14 +67,13 @@ RepeatRW.prototype.writeInto = function writeInto(values, buffer, offset) {
 };
 
 RepeatRW.prototype.readFrom = function readFrom(buffer, offset) {
-    var self = this;
-    var res = self.countrw.readFrom(buffer, offset);
+    var res = this.countrw.readFrom(buffer, offset);
     if (res.err) return res;
     offset = res.offset;
     var count = res.value;
     var values = new Array(count);
     for (var i = 0; i < count; i++) {
-        res = self.repeatedrw.readFrom(buffer, offset);
+        res = this.repeatedrw.readFrom(buffer, offset);
         if (res.err) return res;
         offset = res.offset;
         values[i] = res.value;
