@@ -90,8 +90,10 @@ var normalTestCases = [
     }
 ];
 
-test('VariableBufferRW: simple buf~1',
+test('VariableBufferRW: eager buf~1',
     testRW.cases(VariableBufferRW(atoms.UInt8), normalTestCases));
+test('VariableBufferRW: lazy buf~1',
+    testRW.cases(VariableBufferRW(atoms.UInt8, true), normalTestCases));
 
 var brokenTestCases = [
     {
@@ -111,5 +113,7 @@ var brokenTestCases = [
     }
 ];
 
-test('VariableBufferRW: passes sizerw error thru',
+test('VariableBufferRW: eager passes sizerw error thru',
     testRW.cases(VariableBufferRW(brokenRW), brokenTestCases));
+test('VariableBufferRW: lazy passes sizerw error thru',
+    testRW.cases(VariableBufferRW(brokenRW, true), brokenTestCases));
