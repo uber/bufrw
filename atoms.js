@@ -30,36 +30,32 @@ function AtomRW(width, readAtomFrom, writeAtomInto) {
     if (!(this instanceof AtomRW)) {
         return new AtomRW(width, readAtomFrom, writeAtomInto);
     }
-    var self = this;
-    self.width = width;
-    self.readAtomFrom = readAtomFrom;
-    self.writeAtomInto = writeAtomInto;
-    BufferRW.call(self);
+    this.width = width;
+    this.readAtomFrom = readAtomFrom;
+    this.writeAtomInto = writeAtomInto;
+    BufferRW.call(this);
 }
 inherits(AtomRW, BufferRW);
 
 AtomRW.prototype.byteLength = function byteLength() {
-    var self = this;
-    return new LengthResult(null, self.width);
+    return new LengthResult(null, this.width);
 };
 
 AtomRW.prototype.readFrom = function readFrom(buffer, offset) {
-    var self = this;
     var remain = buffer.length - offset;
-    if (remain < self.width) {
-        return ReadResult.shortError(self.width, remain, offset);
+    if (remain < this.width) {
+        return ReadResult.shortError(this.width, remain, offset);
     }
-    return self.readAtomFrom(buffer, offset);
+    return this.readAtomFrom(buffer, offset);
 };
 
 AtomRW.prototype.writeInto = function writeInto(value, buffer, offset) {
-    var self = this;
     var remain = buffer.length - offset;
     // istanbul ignore next
-    if (remain < self.width) {
-        return WriteResult.shortError(self.width, remain, offset);
+    if (remain < this.width) {
+        return WriteResult.shortError(this.width, remain, offset);
     }
-    return self.writeAtomInto(value, buffer, offset);
+    return this.writeAtomInto(value, buffer, offset);
 };
 
 // jshint maxparams:5
@@ -67,30 +63,28 @@ function IntegerRW(width, min, max, readAtomFrom, writeAtomInto) {
     if (!(this instanceof IntegerRW)) {
         return new IntegerRW(width, min, max, readAtomFrom, writeAtomInto);
     }
-    var self = this;
-    AtomRW.call(self, width, readAtomFrom, writeAtomInto);
-    self.min = min;
-    self.max = max;
+    AtomRW.call(this, width, readAtomFrom, writeAtomInto);
+    this.min = min;
+    this.max = max;
 }
 inherits(IntegerRW, AtomRW);
 
 IntegerRW.prototype.writeInto = function writeInto(value, buffer, offset) {
-    var self = this;
     if (typeof value !== 'number') {
         return WriteResult.error(errors.expected(value, 'a number'));
     }
-    if (value < self.min || value > self.max) {
+    if (value < this.min || value > this.max) {
         return WriteResult.error(errors.RangeError({
             value: value,
-            min: self.min,
-            max: self.max
+            min: this.min,
+            max: this.max
         }), offset);
     }
     var remain = buffer.length - offset;
-    if (remain < self.width) {
-        return WriteResult.shortError(self.width, remain, offset);
+    if (remain < this.width) {
+        return WriteResult.shortError(this.width, remain, offset);
     }
-    return self.writeAtomInto(value, buffer, offset);
+    return this.writeAtomInto(value, buffer, offset);
 };
 
 var Int8 = IntegerRW(1, -0x80, 0x7f,
