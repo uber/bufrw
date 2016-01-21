@@ -26,13 +26,11 @@ function ConcatReadBuffer() {
     if (!(this instanceof ConcatReadBuffer)) {
         return new ConcatReadBuffer();
     }
-    var self = this;
-    self.buffer = emptyBuffer;
+    this.buffer = emptyBuffer;
 }
 
 ConcatReadBuffer.prototype.avail = function avail() {
-    var self = this;
-    return self.buffer.length;
+    return this.buffer.length;
 };
 
 ConcatReadBuffer.prototype.free = function free() {
@@ -40,30 +38,27 @@ ConcatReadBuffer.prototype.free = function free() {
 };
 
 ConcatReadBuffer.prototype.clear = function clear() {
-    var self = this;
-    self.buffer = emptyBuffer;
+    this.buffer = emptyBuffer;
 };
 
 ConcatReadBuffer.prototype.push = function push(chunk) {
-    var self = this;
-    if (self.buffer.length) {
-        self.buffer = Buffer.concat([self.buffer, chunk], self.buffer.length + chunk.length);
+    if (this.buffer.length) {
+        this.buffer = Buffer.concat([this.buffer, chunk], this.buffer.length + chunk.length);
     } else {
-        self.buffer = chunk;
+        this.buffer = chunk;
     }
 };
 
 ConcatReadBuffer.prototype.shift = function shift(n) {
-    var self = this;
     var chunk;
-    if (self.buffer.length < n) {
+    if (this.buffer.length < n) {
         chunk = emptyBuffer;
-    } else if (self.buffer.length > n) {
-        chunk = self.buffer.slice(0, n);
-        self.buffer = self.buffer.slice(n);
+    } else if (this.buffer.length > n) {
+        chunk = this.buffer.slice(0, n);
+        this.buffer = this.buffer.slice(n);
     } else {
-        chunk = self.buffer;
-        self.buffer = emptyBuffer;
+        chunk = this.buffer;
+        this.buffer = emptyBuffer;
     }
     return chunk;
 };
@@ -71,20 +66,17 @@ ConcatReadBuffer.prototype.shift = function shift(n) {
 
 // istanbul ignore next
 ConcatReadBuffer.prototype.readUInt8 = function readUInt8(offset, noAssert) {
-    var self = this;
-    return self.buffer.readUInt8(offset, noAssert);
+    return this.buffer.readUInt8(offset, noAssert);
 };
 
 // istanbul ignore next
 ConcatReadBuffer.prototype.readUInt16BE = function readUInt16BE(offset, noAssert) {
-    var self = this;
-    return self.buffer.readUInt16BE(offset, noAssert);
+    return this.buffer.readUInt16BE(offset, noAssert);
 };
 
 // istanbul ignore next
 ConcatReadBuffer.prototype.readUInt32BE = function readUInt32BE(offset, noAssert) {
-    var self = this;
-    return self.buffer.readUInt32BE(offset, noAssert);
+    return this.buffer.readUInt32BE(offset, noAssert);
 };
 
 // TODO: complete Buffer API aping
