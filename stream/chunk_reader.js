@@ -30,11 +30,11 @@ function ChunkReader(sizeRW, chunkRW, options) {
     if (!(this instanceof ChunkReader)) {
         return new ChunkReader(sizeRW, chunkRW, options);
     }
-    options = options || {};
     var self = this;
+    options = options || {};
     Transform.call(self, options);
-    self._readableState.objectMode = true;
-    self.mach = ReadMachine(sizeRW, chunkRW, emit);
+    this._readableState.objectMode = true;
+    this.mach = ReadMachine(sizeRW, chunkRW, emit);
     function emit(value) {
         self.push(value);
     }
@@ -43,13 +43,11 @@ function ChunkReader(sizeRW, chunkRW, options) {
 inherits(ChunkReader, Transform);
 
 ChunkReader.prototype._transform = function _transform(buf, encoding, callback) {
-    var self = this;
-    var err = self.mach.handleChunk(buf);
+    var err = this.mach.handleChunk(buf);
     callback(err);
 };
 
 ChunkReader.prototype._flush = function _flush(callback) {
-    var self = this;
-    var err = self.mach.flush();
+    var err = this.mach.flush();
     callback(err);
 };

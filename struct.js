@@ -36,40 +36,40 @@ function StructRW(cons, fields, opts) {
         fields = cons;
         cons = null;
     }
-    var self = this;
+    var i;
     opts = opts || {};
-    self.cons = cons || Object;
-    self.fields = [];
+    this.cons = cons || Object;
+    this.fields = [];
     // TODO: useful to have a StructRWField prototype?
     if (Array.isArray(fields)) {
-        self.fields.push.apply(self.fields, fields);
+        this.fields.push.apply(this.fields, fields);
     } else {
-        Object.keys(fields).forEach(function eachFieldName(fieldName) {
+        var fieldNames = Object.keys(fields);
+        for (i = 0; i < fieldNames.length; ++i) {
             var field = {};
-            field.name = fieldName;
+            field.name = fieldNames[i];
             field.rw = fields[field.name];
-            self.fields.push(field);
-        });
-    }
-    self.namedFields = {};
-    self.fields.forEach(function eachField(field) {
-        if (field.name) {
-            self.namedFields[field.name] = field;
+            this.fields.push(field);
         }
-    });
+    }
+    this.namedFields = {};
+    for (i = 0; i < this.fields.length; ++i) {
+        if (this.fields[i].name) {
+            this.namedFields[this.fields[i].name] = this.fields[i];
+        }
+    }
 }
 inherits(StructRW, BufferRW);
 
 StructRW.prototype.byteLength = function byteLength(obj) {
-    var self = this;
     var length = 0;
-    for (var i = 0; i < self.fields.length; i++) {
-        var field = self.fields[i];
+    for (var i = 0; i < this.fields.length; i++) {
+        var field = this.fields[i];
 
         if (field.name && !obj.hasOwnProperty(field.name)) {
             return LengthResult.error(errors.MissingStructField({
                 field: field.name,
-                struct: self.cons.name
+                struct: this.cons.name
             }));
         }
 
@@ -88,15 +88,14 @@ StructRW.prototype.byteLength = function byteLength(obj) {
 };
 
 StructRW.prototype.writeInto = function writeInto(obj, buffer, offset) {
-    var self = this;
     var res = new WriteResult(null, offset);
-    for (var i = 0; i < self.fields.length; i++) {
-        var field = self.fields[i];
+    for (var i = 0; i < this.fields.length; i++) {
+        var field = this.fields[i];
 
         if (field.name && !obj.hasOwnProperty(field.name)) {
             return WriteResult.error(errors.MissingStructField({
                 field: field.name,
-                struct: self.cons.name
+                struct: this.cons.name
             }));
         }
 
@@ -114,10 +113,9 @@ StructRW.prototype.writeInto = function writeInto(obj, buffer, offset) {
 };
 
 StructRW.prototype.readFrom = function readFrom(buffer, offset) {
-    var self = this;
-    var obj = new self.cons();
-    for (var i = 0; i < self.fields.length; i++) {
-        var field = self.fields[i];
+    var obj = new this.cons();
+    for (var i = 0; i < this.fields.length; i++) {
+        var field = this.fields[i];
         var res;
         if (field.call) {
             if (!field.call.readFrom) continue;

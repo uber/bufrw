@@ -29,16 +29,14 @@ function BufferRW(byteLength, readFrom, writeInto) {
     if (!(this instanceof BufferRW)) {
         return new BufferRW(byteLength, readFrom, writeInto);
     }
-    var self = this;
-    if (typeof byteLength === 'function') self.byteLength = byteLength;
-    if (typeof readFrom === 'function') self.readFrom = readFrom;
-    if (typeof writeInto === 'function') self.writeInto = writeInto;
+    if (typeof byteLength === 'function') this.byteLength = byteLength;
+    if (typeof readFrom === 'function') this.readFrom = readFrom;
+    if (typeof writeInto === 'function') this.writeInto = writeInto;
 }
 
 function LengthResult(err, length) {
-    var self = this;
-    self.err = err || null;
-    self.length = length || 0;
+    this.err = err || null;
+    this.length = length || 0;
 }
 
 LengthResult.error = function error(err, length) {
@@ -50,9 +48,8 @@ LengthResult.just = function just(length) {
 };
 
 function WriteResult(err, offset) {
-    var self = this;
-    self.err = err || null;
-    self.offset = offset || 0;
+    this.err = err || null;
+    this.offset = offset || 0;
 }
 
 WriteResult.error = function error(err, offset) {
@@ -79,10 +76,9 @@ WriteResult.shortError = function shortError(expected, actual, offset) {
 };
 
 function ReadResult(err, offset, value) {
-    var self = this;
-    self.err = err || null;
-    self.offset = offset || 0;
-    self.value = value === undefined ? null : value;
+    this.err = err || null;
+    this.offset = offset || 0;
+    this.value = value === undefined ? null : value;
 }
 
 ReadResult.error = function error(err, offset, value) {

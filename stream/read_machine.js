@@ -39,14 +39,13 @@ function ReadMachine(sizeRW, chunkRW, emit) {
     if (typeof sizeRW.width !== 'number') {
         throw errors.expected(sizeRW, 'atomic RW');
     }
-    var self = this;
-    self.sizeRW = sizeRW;
-    self.chunkRW = chunkRW;
-    self.buffer = new ConcatReadBuffer();
-    self.expecting = self.sizeRW.width;
-    self.state = States.PendingLength;
+    this.sizeRW = sizeRW;
+    this.chunkRW = chunkRW;
+    this.buffer = new ConcatReadBuffer();
+    this.expecting = this.sizeRW.width;
+    this.state = States.PendingLength;
     // istanbul ignore else
-    if (typeof emit === 'function') self.emit = emit;
+    if (typeof emit === 'function') this.emit = emit;
 }
 
 // istanbul ignore next
@@ -54,25 +53,24 @@ ReadMachine.prototype.emit = function emit() {
 };
 
 ReadMachine.prototype.handleChunk = function handleChunk(buf) {
-    var self = this;
-    self.buffer.push(buf);
+    this.buffer.push(buf);
     var err = null;
-    while (self.buffer.avail() >= self.expecting) {
-        switch (self.state) {
+    while (this.buffer.avail() >= this.expecting) {
+        switch (this.state) {
             case States.PendingLength:
-                err = self.pend();
+                err = this.pend();
                 break;
 
             case States.Seeking:
-                err = self.seek();
+                err = this.seek();
                 break;
 
             // istanbul ignore next
             default:
                 err = errors.BrokenReaderState({
-                    state: self.state,
-                    expecting: self.expecting,
-                    avail: self.buffer.avail()
+                    state: this.state,
+                    expecting: this.expecting,
+                    avail: this.buffer.avail()
                 });
         }
         if (err) break;
@@ -81,58 +79,55 @@ ReadMachine.prototype.handleChunk = function handleChunk(buf) {
 };
 
 ReadMachine.prototype.pend = function pend() {
-    var self = this;
-    var sizeRes = self.sizeRW.readFrom(self.buffer, 0);
+    var sizeRes = this.sizeRW.readFrom(this.buffer, 0);
     var err = sizeRes.err;
     if (!err && !sizeRes.value) {
         err = errors.ZeroLengthChunk();
     }
     if (err) {
-        self.buffer.shift(self.sizeRW.width);
-        self.expecting = self.sizeRW.width;
-        self.state = States.PendingLength;
+        this.buffer.shift(this.sizeRW.width);
+        this.expecting = this.sizeRW.width;
+        this.state = States.PendingLength;
         return err;
     } else {
-        self.expecting = sizeRes.value;
-        self.state = States.Seeking;
+        this.expecting = sizeRes.value;
+        this.state = States.Seeking;
         return null;
     }
 };
 
 ReadMachine.prototype.seek = function seek() {
-    var self = this;
-    var chunk = self.buffer.shift(self.expecting);
+    var chunk = this.buffer.shift(this.expecting);
     // istanbul ignore if
     if (!chunk.length) {
         return errors.BrokenReaderState({
-            state: self.state,
-            expecting: self.expecting,
-            avail: self.buffer.avail()
+            state: this.state,
+            expecting: this.expecting,
+            avail: this.buffer.avail()
         });
     }
-    self.expecting = self.sizeRW.width;
-    self.state = States.PendingLength;
+    this.expecting = this.sizeRW.width;
+    this.state = States.PendingLength;
 
-    var res = fromBufferResult(self.chunkRW, chunk, 0);
+    var res = fromBufferResult(this.chunkRW, chunk, 0);
     if (res.err) {
         return res.err;
     } else {
-        self.emit(res.value);
+        this.emit(res.value);
         return null;
     }
 };
 
 ReadMachine.prototype.flush = function flush() {
-    var self = this;
-    var avail = self.buffer.avail();
+    var avail = this.buffer.avail();
     if (avail) {
-        self.buffer.clear();
-        self.expecting = 4;
-        self.state = States.PendingLength;
+        this.buffer.clear();
+        this.expecting = 4;
+        this.state = States.PendingLength;
         return errors.TruncatedRead({
             length: avail,
-            state: self.state,
-            expecting: self.expecting
+            state: this.state,
+            expecting: this.expecting
         });
     } else {
         return null;

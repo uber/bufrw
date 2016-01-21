@@ -35,8 +35,7 @@ function SeriesRW(rws) {
     if (!(this instanceof SeriesRW)) {
         return new SeriesRW(rws);
     }
-    var self = this;
-    self.rws = rws;
+    this.rws = rws;
 }
 inherits(SeriesRW, BufferRW);
 
@@ -44,10 +43,9 @@ SeriesRW.prototype.byteLength = function byteLength(values) {
     if (!Array.isArray(values) && values !== null) {
         return LengthResult.error(errors.expected(values, 'an array or null'));
     }
-    var self = this;
     var length = 0;
-    for (var i = 0; i < self.rws.length; i++) {
-        var res = self.rws[i].byteLength(values && values[i]);
+    for (var i = 0; i < this.rws.length; i++) {
+        var res = this.rws[i].byteLength(values && values[i]);
         if (res.err) return res;
         length += res.length;
     }
@@ -55,13 +53,12 @@ SeriesRW.prototype.byteLength = function byteLength(values) {
 };
 
 SeriesRW.prototype.writeInto = function writeInto(values, buffer, offset) {
-    var self = this;
     if (!Array.isArray(values) && values !== null) {
         return WriteResult.error(errors.expected(values, 'an array or null'), offset);
     }
     var res = new WriteResult(null, offset);
-    for (var i = 0; i < self.rws.length; i++) {
-        res = self.rws[i].writeInto(values && values[i], buffer, offset);
+    for (var i = 0; i < this.rws.length; i++) {
+        res = this.rws[i].writeInto(values && values[i], buffer, offset);
         if (res.err) return res;
         offset = res.offset;
     }
@@ -69,10 +66,9 @@ SeriesRW.prototype.writeInto = function writeInto(values, buffer, offset) {
 };
 
 SeriesRW.prototype.readFrom = function readFrom(buffer, offset) {
-    var self = this;
-    var values = new Array(self.rws.length);
-    for (var i = 0; i < self.rws.length; i++) {
-        var res = self.rws[i].readFrom(buffer, offset);
+    var values = new Array(this.rws.length);
+    for (var i = 0; i < this.rws.length; i++) {
+        var res = this.rws[i].readFrom(buffer, offset);
         if (res.err) return res;
         offset = res.offset;
         values[i] = res.value;

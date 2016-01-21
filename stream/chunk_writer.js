@@ -42,18 +42,16 @@ function ChunkWriter(chunkRW, options) {
     if (!(this instanceof ChunkWriter)) {
         return new ChunkWriter(chunkRW, options);
     }
-    var self = this;
-    Transform.call(self, options);
-    self._writableState.objectMode = true;
-    self._readableState.objectMode = false;
-    self.chunkRW = chunkRW;
+    Transform.call(this, options);
+    this._writableState.objectMode = true;
+    this._readableState.objectMode = false;
+    this.chunkRW = chunkRW;
 }
 
 inherits(ChunkWriter, Transform);
 
 ChunkWriter.prototype._transform = function _transform(value, encoding, callback) {
-    var self = this;
-    var res = toBufferResult(self.chunkRW, value);
+    var res = toBufferResult(this.chunkRW, value);
     var err = res.err;
     var buffer = res.value;
     if (err) {
@@ -62,7 +60,7 @@ ChunkWriter.prototype._transform = function _transform(value, encoding, callback
             value: value
         }));
     } else {
-        self.push(buffer);
+        this.push(buffer);
         callback();
     }
 };

@@ -33,25 +33,22 @@ var extend = require('xtend');
 var inspect = require('util').inspect;
 
 function AnnotatedBuffer(buffer) {
-    var self = this;
-    self.buffer = buffer;
-    self.annotations = [];
+    this.buffer = buffer;
+    this.annotations = [];
 }
 
 Object.defineProperty(AnnotatedBuffer.prototype, 'length', {
     enumerable: true,
     get: function getLength() {
-        var self = this;
-        return self.buffer.length;
+        return this.buffer.length;
     }
 });
 
 // -- strings
 
 AnnotatedBuffer.prototype.toString = function toString(encoding, start, end) {
-    var self = this;
-    var value = self.buffer.toString(encoding, start, end);
-    self.annotations.push({
+    var value = this.buffer.toString(encoding, start, end);
+    this.annotations.push({
         kind: 'read',
         name: 'string',
         value: value,
@@ -66,15 +63,14 @@ AnnotatedBuffer.prototype.toString = function toString(encoding, start, end) {
 
 // istanbul ignore next
 AnnotatedBuffer.prototype.copy = function copy(targetBuffer, targetStart, sourceStart, sourceEnd) {
-    var self = this;
-    var copied = self.buffer.copy(targetBuffer, targetStart, sourceStart, sourceEnd);
+    var copied = this.buffer.copy(targetBuffer, targetStart, sourceStart, sourceEnd);
     // istanbul ignore next
     var start = sourceStart || 0;
     var end = sourceEnd || start + copied;
-    self.annotations.push({
+    this.annotations.push({
         kind: 'read',
         name: 'copy',
-        value: self.buffer.slice(start, end),
+        value: this.buffer.slice(start, end),
         start: start,
         end: end
     });
@@ -83,9 +79,8 @@ AnnotatedBuffer.prototype.copy = function copy(targetBuffer, targetStart, source
 
 // istanbul ignore next
 AnnotatedBuffer.prototype.slice = function slice(start, end) {
-    var self = this;
-    var value = self.buffer.slice(start, end);
-    self.annotations.push({
+    var value = this.buffer.slice(start, end);
+    this.annotations.push({
         kind: 'read',
         name: 'slice',
         value: value,
@@ -99,9 +94,8 @@ AnnotatedBuffer.prototype.slice = function slice(start, end) {
 
 // istanbul ignore next
 AnnotatedBuffer.prototype.readInt8 = function readInt8(offset, noAssert) {
-    var self = this;
-    var value = self.buffer.readInt8(offset, noAssert);
-    self.annotations.push({
+    var value = this.buffer.readInt8(offset, noAssert);
+    this.annotations.push({
         kind: 'read',
         name: 'Int8',
         value: value,
@@ -112,9 +106,8 @@ AnnotatedBuffer.prototype.readInt8 = function readInt8(offset, noAssert) {
 };
 
 AnnotatedBuffer.prototype.readUInt8 = function readUInt8(offset, noAssert) {
-    var self = this;
-    var value = self.buffer.readUInt8(offset, noAssert);
-    self.annotations.push({
+    var value = this.buffer.readUInt8(offset, noAssert);
+    this.annotations.push({
         kind: 'read',
         name: 'UInt8',
         value: value,
@@ -126,9 +119,8 @@ AnnotatedBuffer.prototype.readUInt8 = function readUInt8(offset, noAssert) {
 
 // istanbul ignore next
 AnnotatedBuffer.prototype.readUInt16LE = function readUInt16LE(offset, noAssert) {
-    var self = this;
-    var value = self.buffer.readUInt16LE(offset, noAssert);
-    self.annotations.push({
+    var value = this.buffer.readUInt16LE(offset, noAssert);
+    this.annotations.push({
         kind: 'read',
         name: 'UInt16LE',
         value: value,
@@ -139,9 +131,8 @@ AnnotatedBuffer.prototype.readUInt16LE = function readUInt16LE(offset, noAssert)
 };
 
 AnnotatedBuffer.prototype.readUInt16BE = function readUInt16BE(offset, noAssert) {
-    var self = this;
-    var value = self.buffer.readUInt16BE(offset, noAssert);
-    self.annotations.push({
+    var value = this.buffer.readUInt16BE(offset, noAssert);
+    this.annotations.push({
         kind: 'read',
         name: 'UInt16BE',
         value: value,
@@ -153,9 +144,8 @@ AnnotatedBuffer.prototype.readUInt16BE = function readUInt16BE(offset, noAssert)
 
 // istanbul ignore next
 AnnotatedBuffer.prototype.readUInt32LE = function readUInt32LE(offset, noAssert) {
-    var self = this;
-    var value = self.buffer.readUInt32LE(offset, noAssert);
-    self.annotations.push({
+    var value = this.buffer.readUInt32LE(offset, noAssert);
+    this.annotations.push({
         kind: 'read',
         name: 'UInt32LE',
         value: value,
@@ -167,9 +157,8 @@ AnnotatedBuffer.prototype.readUInt32LE = function readUInt32LE(offset, noAssert)
 
 // istanbul ignore next
 AnnotatedBuffer.prototype.readUInt32BE = function readUInt32BE(offset, noAssert) {
-    var self = this;
-    var value = self.buffer.readUInt32BE(offset, noAssert);
-    self.annotations.push({
+    var value = this.buffer.readUInt32BE(offset, noAssert);
+    this.annotations.push({
         kind: 'read',
         name: 'UInt32BE',
         value: value,
@@ -181,9 +170,8 @@ AnnotatedBuffer.prototype.readUInt32BE = function readUInt32BE(offset, noAssert)
 
 // istanbul ignore next
 AnnotatedBuffer.prototype.readInt16LE = function readInt16LE(offset, noAssert) {
-    var self = this;
-    var value = self.buffer.readInt16LE(offset, noAssert);
-    self.annotations.push({
+    var value = this.buffer.readInt16LE(offset, noAssert);
+    this.annotations.push({
         kind: 'read',
         name: 'Int16LE',
         value: value,
@@ -195,9 +183,8 @@ AnnotatedBuffer.prototype.readInt16LE = function readInt16LE(offset, noAssert) {
 
 // istanbul ignore next
 AnnotatedBuffer.prototype.readInt16BE = function readInt16BE(offset, noAssert) {
-    var self = this;
-    var value = self.buffer.readInt16BE(offset, noAssert);
-    self.annotations.push({
+    var value = this.buffer.readInt16BE(offset, noAssert);
+    this.annotations.push({
         kind: 'read',
         name: 'Int16BE',
         value: value,
@@ -209,9 +196,8 @@ AnnotatedBuffer.prototype.readInt16BE = function readInt16BE(offset, noAssert) {
 
 // istanbul ignore next
 AnnotatedBuffer.prototype.readInt32LE = function readInt32LE(offset, noAssert) {
-    var self = this;
-    var value = self.buffer.readInt32LE(offset, noAssert);
-    self.annotations.push({
+    var value = this.buffer.readInt32LE(offset, noAssert);
+    this.annotations.push({
         kind: 'read',
         name: 'Int32LE',
         value: value,
@@ -223,9 +209,8 @@ AnnotatedBuffer.prototype.readInt32LE = function readInt32LE(offset, noAssert) {
 
 // istanbul ignore next
 AnnotatedBuffer.prototype.readInt32BE = function readInt32BE(offset, noAssert) {
-    var self = this;
-    var value = self.buffer.readInt32BE(offset, noAssert);
-    self.annotations.push({
+    var value = this.buffer.readInt32BE(offset, noAssert);
+    this.annotations.push({
         kind: 'read',
         name: 'Int32BE',
         value: value,
@@ -237,9 +222,8 @@ AnnotatedBuffer.prototype.readInt32BE = function readInt32BE(offset, noAssert) {
 
 // istanbul ignore next
 AnnotatedBuffer.prototype.readFloatLE = function readFloatLE(offset, noAssert) {
-    var self = this;
-    var value = self.buffer.readFloatLE(offset, noAssert);
-    self.annotations.push({
+    var value = this.buffer.readFloatLE(offset, noAssert);
+    this.annotations.push({
         kind: 'read',
         name: 'FloatLE',
         value: value,
@@ -251,9 +235,8 @@ AnnotatedBuffer.prototype.readFloatLE = function readFloatLE(offset, noAssert) {
 
 // istanbul ignore next
 AnnotatedBuffer.prototype.readFloatBE = function readFloatBE(offset, noAssert) {
-    var self = this;
-    var value = self.buffer.readFloatBE(offset, noAssert);
-    self.annotations.push({
+    var value = this.buffer.readFloatBE(offset, noAssert);
+    this.annotations.push({
         kind: 'read',
         name: 'FloatBE',
         value: value,
@@ -265,9 +248,8 @@ AnnotatedBuffer.prototype.readFloatBE = function readFloatBE(offset, noAssert) {
 
 // istanbul ignore next
 AnnotatedBuffer.prototype.readDoubleLE = function readDoubleLE(offset, noAssert) {
-    var self = this;
-    var value = self.buffer.readDoubleLE(offset, noAssert);
-    self.annotations.push({
+    var value = this.buffer.readDoubleLE(offset, noAssert);
+    this.annotations.push({
         kind: 'read',
         name: 'DoubleLE',
         value: value,
@@ -279,9 +261,8 @@ AnnotatedBuffer.prototype.readDoubleLE = function readDoubleLE(offset, noAssert)
 
 // istanbul ignore next
 AnnotatedBuffer.prototype.readDoubleBE = function readDoubleBE(offset, noAssert) {
-    var self = this;
-    var value = self.buffer.readDoubleBE(offset, noAssert);
-    self.annotations.push({
+    var value = this.buffer.readDoubleBE(offset, noAssert);
+    this.annotations.push({
         kind: 'read',
         name: 'DoubleBE',
         value: value,
@@ -299,7 +280,7 @@ AnnotatedBuffer.prototype.hexdump = function hexdump(options) {
 
     // istanbul ignore if
     if (!hex) {
-        return self.buffer.toString('hex');
+        return this.buffer.toString('hex');
     }
 
     options = extend(options, {
@@ -313,7 +294,7 @@ AnnotatedBuffer.prototype.hexdump = function hexdump(options) {
     var colorI = 0;
     var annI = 0;
     var last = 0;
-    return hex(self.buffer, options);
+    return hex(this.buffer, options);
 
     function annotateLine(start, end) {
         var parts = [];

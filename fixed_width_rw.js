@@ -32,41 +32,37 @@ function FixedWidthRW(length, readFrom, writeInto) {
     if (!(this instanceof FixedWidthRW)) {
         return new FixedWidthRW(length, readFrom, writeInto);
     }
-    var self = this;
-    self.length = length;
-    BufferRW.call(self, null, readFrom, writeInto);
+    this.length = length;
+    BufferRW.call(this, null, readFrom, writeInto);
 }
 inherits(FixedWidthRW, BufferRW);
 
 FixedWidthRW.prototype.byteLength = function byteLength(slice) {
-    var self = this;
-    if (slice.length !== self.length) {
+    if (slice.length !== this.length) {
         return LengthResult.error(errors.FixedLengthMismatch({
-            expected: self.length,
+            expected: this.length,
             got: slice.length
         }));
     } else {
-        return new LengthResult(null, self.length);
+        return new LengthResult(null, this.length);
     }
 };
 
 FixedWidthRW.prototype.writeInto = function writeInto(slice, buffer, offset) {
-    var self = this;
-    if (slice.length !== self.length) {
+    if (slice.length !== this.length) {
         return WriteResult.error(errors.FixedLengthMismatch({
-            expected: self.length,
+            expected: this.length,
             got: slice.length
         }), offset);
     }
     slice.copy(buffer, offset);
-    return new WriteResult(null, offset + self.length);
+    return new WriteResult(null, offset + this.length);
 };
 
 FixedWidthRW.prototype.readFrom = function readFrom(buffer, offset) {
-    var self = this;
-    var end = offset + self.length;
+    var end = offset + this.length;
     if (end > buffer.length) {
-        return ReadResult.shortError(self.length, buffer.length - offset, offset);
+        return ReadResult.shortError(this.length, buffer.length - offset, offset);
     } else {
         var res = new ReadResult(null, end, buffer.slice(offset, end));
         return res;
