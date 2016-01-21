@@ -70,59 +70,55 @@ function testCases(rw, cases) {
 }
 
 function RWTestCase(assert, rw, testCase) {
-    var self = this;
-    self.assert = assert;
-    self.rw = rw;
-    self.testCase = testCase;
+    this.assert = assert;
+    this.rw = rw;
+    this.testCase = testCase;
 }
 
 RWTestCase.prototype.run = function run() {
-    var self = this;
-    if (self.testCase.lengthTest) self.runLengthTest();
-    if (self.testCase.writeTest) self.runWriteTest();
-    if (self.testCase.readTest) self.runReadTest();
+    if (this.testCase.lengthTest) this.runLengthTest();
+    if (this.testCase.writeTest) this.runWriteTest();
+    if (this.testCase.readTest) this.runReadTest();
 };
 
 RWTestCase.prototype.runLengthTest = function runLengthTest() {
-    var self = this;
-    var testCase = self.testCase.lengthTest;
+    var testCase = this.testCase.lengthTest;
     var val = testCase.value;
-    var res = self.rw.byteLength(val);
+    var res = this.rw.byteLength(val);
     if (res.err) {
         if (testCase.error) {
-            self.assert.deepEqual(
+            this.assert.deepEqual(
                 copyErr(res.err, testCase.error),
                 testCase.error, 'expected length error');
         } else {
-            self.assert.ifError(res.err, 'no length error');
+            this.assert.ifError(res.err, 'no length error');
         }
     } else if (testCase.error) {
-        self.assert.fail('expected length error');
+        this.assert.fail('expected length error');
     } else {
-        self.assert.deepEqual(res && res.length, testCase.length, util.format('length: %j', val));
+        this.assert.deepEqual(res && res.length, testCase.length, util.format('length: %j', val));
     }
 };
 
 RWTestCase.prototype.runWriteTest = function runWriteTest() {
-    var self = this;
-    var testCase = self.testCase.writeTest;
+    var testCase = this.testCase.writeTest;
     var val = testCase.value;
     var got = Buffer(testCase.bytes ? testCase.bytes.length : testCase.length || 0);
     got.fill(0);
-    var res = intoBufferResult(self.rw, got, val);
+    var res = intoBufferResult(this.rw, got, val);
     var err = res.err;
     if (err) {
         if (testCase.error) {
-            self.assert.deepEqual(
+            this.assert.deepEqual(
                 copyErr(err, testCase.error),
                 testCase.error, 'expected write error');
         } else {
-            self.assert.ifError(err, 'no write error');
+            this.assert.ifError(err, 'no write error');
             // istanbul ignore else
-            if (err) self.dumpError('write', err);
+            if (err) this.dumpError('write', err);
         }
     } else if (testCase.error) {
-        self.assert.fail('expected write error');
+        this.assert.fail('expected write error');
     } else {
         var desc = util.format('write: %j', val);
         var buf = Buffer(testCase.bytes);
@@ -131,55 +127,54 @@ RWTestCase.prototype.runWriteTest = function runWriteTest() {
             // TODO: re-run write with an annotated buffer
             // istanbul ignore if
             if (hexdiff) {
-                self.assert.comment('expected v actual:\n' +
+                this.assert.comment('expected v actual:\n' +
                                     hexdiff(buf, got, {colored: true}));
             }
-            self.assert.fail(desc);
+            this.assert.fail(desc);
         } else {
-            self.assert.pass(desc);
+            this.assert.pass(desc);
         }
     }
 };
 
 RWTestCase.prototype.runReadTest = function runReadTest() {
-    var self = this;
-    var testCase = self.testCase.readTest;
+    var testCase = this.testCase.readTest;
     var buffer = Buffer(testCase.bytes);
-    var res = fromBufferResult(self.rw, buffer);
+    var res = fromBufferResult(this.rw, buffer);
     var err = res.err;
     var got = res.value;
     if (err) {
         if (testCase.error) {
-            self.assert.deepEqual(
+            this.assert.deepEqual(
                 copyErr(err, testCase.error),
                 testCase.error, 'expected read error');
         } else {
-            self.assert.ifError(err, 'no read error');
+            this.assert.ifError(err, 'no read error');
             // istanbul ignore else
-            if (err) self.dumpError('read', err);
+            if (err) this.dumpError('read', err);
         }
     } else if (testCase.error) {
-        self.assert.fail('expected read error');
+        this.assert.fail('expected read error');
     } else {
         var val = testCase.value;
-        self.assert.deepEqual(got, val, util.format('read: %j', val));
+        this.assert.deepEqual(got, val, util.format('read: %j', val));
         if (typeof val === 'object') {
             var gotConsName = got && got.constructor && got.constructor.name;
             var valConsName = val && val.constructor && val.constructor.name;
-            self.assert.equal(gotConsName, valConsName,
+            this.assert.equal(gotConsName, valConsName,
                 'expected ' + valConsName + ' constructor');
         }
     }
 };
 
 RWTestCase.prototype.dumpError = function dumpError(kind, err) {
-    var self = this;
     var dump = kind + ' error ' + formatError(err, {
         color: true
     });
-    dump.split(/\n/).forEach(function each(line) {
-        self.assert.comment(line);
-    });
+    var lines = dump.split(/\n/);
+    for (var i = 0; i < lines.length; ++i) {
+        this.assert.comment(lines[i]);
+    }
 };
 
 function copyErr(err, tmpl) {
