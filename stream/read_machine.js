@@ -22,7 +22,8 @@
 
 var ConcatReadBuffer = require('./concat_read_buffer');
 var errors = require('../errors');
-var fromBufferResult = require('../interface').fromBufferResult;
+var iface = require('../interface');
+var ReadResult = require('../base').ReadResult;
 
 module.exports = ReadMachine;
 
@@ -78,8 +79,9 @@ ReadMachine.prototype.handleChunk = function handleChunk(buf) {
     return err;
 };
 
+var pendReadRes = new ReadResult();
 ReadMachine.prototype.pend = function pend() {
-    var sizeRes = this.sizeRW.readFrom(this.buffer, 0);
+    var sizeRes = this.sizeRW.poolReadFrom(pendReadRes, this.buffer, 0);
     var err = sizeRes.err;
     if (!err && !sizeRes.value) {
         err = errors.ZeroLengthChunk();
@@ -96,6 +98,8 @@ ReadMachine.prototype.pend = function pend() {
     }
 };
 
+var seekReadRes = new ReadResult();
+var seekReadRes2 = new ReadResult();
 ReadMachine.prototype.seek = function seek() {
     var chunk = this.buffer.shift(this.expecting);
     // istanbul ignore if
@@ -109,12 +113,18 @@ ReadMachine.prototype.seek = function seek() {
     this.expecting = this.sizeRW.width;
     this.state = States.PendingLength;
 
-    var res = fromBufferResult(this.chunkRW, chunk, 0);
-    if (res.err) {
-        return res.err;
+    // pooled inline of fromBufferResult
+    this.chunkRW.poolReadFrom(seekReadRes, chunk, 0);
+    iface.checkAllReadFrom(seekReadRes, chunk);
+    if (seekReadRes.err) {
+        var annBuf = iface.makeAnnotatedBuffer(chunk, 0, false);
+        this.chunkRW.poolReadFrom(seekReadRes2, annBuf, 0);
+        iface.checkAllReadFrom(seekReadRes2, chunk);
+        iface.annotateError(seekReadRes, seekReadRes2, 0, annBuf);
+        return seekReadRes.err;
     } else {
-        this.emit(res.value);
-        return null;
+        this.emit(seekReadRes.value);
+        return;
     }
 };
 

@@ -277,3 +277,7 @@ module.exports.fromBufferResult = fromBufferResult;
 module.exports.byteLengthResult = byteLengthResult;
 module.exports.toBufferResult = toBufferResult;
 module.exports.intoBufferResult = intoBufferResult;
+
+module.exports.makeAnnotatedBuffer = makeAnnotatedBuffer;
+module.exports.checkAllReadFrom = checkAllReadFrom;
+module.exports.annotateError = annotateError;
