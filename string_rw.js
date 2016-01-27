@@ -95,7 +95,7 @@ StringRW.prototype.poolReadFrom = function poolReadFrom(destResult, buffer, offs
     var length = res.value;
     var remain = buffer.length - res.offset;
     if (remain < length) {
-        return ReadResult.shortError(destResult, length, remain, offset, res.offset);
+        return ReadResult.poolShortError(destResult, length, remain, offset, res.offset);
     } else {
         offset = res.offset;
         var end = offset + length;

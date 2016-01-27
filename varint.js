@@ -56,7 +56,7 @@ function writeUnsignedVarIntInto(destResult, n, buffer, offset) {
 
     if (end > buffer.length) {
         var remain = buffer.length - offset;
-        return WriteResult.shortError(destResult, needed, remain, offset);
+        return WriteResult.poolShortError(destResult, needed, remain, offset);
     }
 
     offset = end;
@@ -83,7 +83,7 @@ function readUnsignedVarIntFrom(destResult, buffer, offset) {
         }
     }
     var got = offset - start;
-    return ReadResult.shortError(destResult, got + 1, got, start, offset);
+    return ReadResult.poolShortError(destResult, got + 1, got, start, offset);
 }
 
 function countBits(n) {

@@ -82,11 +82,11 @@ LengthResult.prototype.copyFrom = function copyFrom(srcRes) {
 };
 
 LengthResult.error = function error(err, length) {
-    throw new Error('deprecated');
+    return new LengthError(err, length);
 };
 
 LengthResult.just = function just(length) {
-    throw new Error('deprecated');
+    return new LengthError(null, length);
 };
 
 function WriteResult(err, offset) {
@@ -106,11 +106,11 @@ WriteResult.prototype.copyFrom = function copyFrom(srcResult) {
 };
 
 WriteResult.error = function error(err, offset) {
-    throw new Error('deprecated');
+    return new WriteResult(err, offset);
 };
 
 // istanbul ignore next
-WriteResult.rangedError = function rangedError(destResult, err, start, end, value) {
+WriteResult.poolRangedError = function poolRangedError(destResult, err, start, end, value) {
     assert(typeof destResult === 'object' && destResult.constructor.name === 'WriteResult');
 
     err.offest = start;
@@ -118,11 +118,20 @@ WriteResult.rangedError = function rangedError(destResult, err, start, end, valu
     return destResult.reset(err, null);
 };
 
+WriteResult.rangedError = function rangedError(err, start, end, value) {
+    return WriteResult.poolRangedError(new WriteResult(), start, end, value);
+}
+
 WriteResult.just = function just(offset) {
-    throw new Error('deprecated');
+    return new WriteResult(null, offset);
 };
 
-WriteResult.shortError = function shortError(destResult, expected, actual, offset) {
+
+WriteResult.shortError = function shortError(expected, actual, offset) {
+    return WriteResult.poolShortError(new WriteResult(), expected, actual, offset);
+}
+
+WriteResult.poolShortError = function poolShortError(destResult, expected, actual, offset) {
     assert(typeof destResult === 'object' && destResult.constructor.name === 'WriteResult');
 
     return destResult.reset(new errors.ShortBuffer({
@@ -153,11 +162,11 @@ ReadResult.prototype.reset = function reset(err, offset, value) {
 };
 
 ReadResult.error = function error(err, offset, value) {
-    throw new Error('deprecated');
+    return new ReadResult(err, offset, value);
 };
 
 // istanbul ignore next
-ReadResult.rangedError = function rangedError(destResult, err, start, end, value) {
+ReadResult.poolRangedError = function poolRangedError(destResult, err, start, end, value) {
     assert(typeof destResult === 'object' && destResult.constructor.name === 'ReadResult');
 
     err.offest = start;
@@ -165,11 +174,19 @@ ReadResult.rangedError = function rangedError(destResult, err, start, end, value
     return destResult.reset(err, start, value);
 };
 
+ReadResult.rangedError = function rangedError(err, start, end, value) {
+    return poolRangedError(new ReadResult(), err, start, end, value);
+};
+
 ReadResult.just = function just(offset, value) {
-    throw new Error('deprecated');
+    return new ReadResult(null, offset, value);
 };
 
 ReadResult.shortError = function shortError(destResult, expected, actual, offset, endOffset) {
+    return ReadResult.poolShortError(new ReadResult(), expected, actual, offset, endOffset);
+};
+
+ReadResult.poolShortError = function poolShortError(destResult, expected, actual, offset, endOffset) {
     assert(typeof destResult === 'object' && destResult.constructor.name === 'ReadResult');
     var err;
 

@@ -65,7 +65,7 @@ FixedWidthRW.prototype.poolWriteInto = function poolWriteInto(destResult, slice,
 FixedWidthRW.prototype.poolReadFrom = function poolReadFrom(destResult, buffer, offset) {
     var end = offset + this.length;
     if (end > buffer.length) {
-        return ReadResult.shortError(destResult, this.length, buffer.length - offset, offset);
+        return ReadResult.poolShortError(destResult, this.length, buffer.length - offset, offset);
     } else {
         //var res = new ReadResult(null, end, buffer.slice(offset, end));
         return destResult.reset(null, end, buffer.slice(offset, end));

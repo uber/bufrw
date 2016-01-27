@@ -44,7 +44,7 @@ AtomRW.prototype.poolByteLength = function byteLength(destResult) {
 AtomRW.prototype.poolReadFrom = function readFrom(destResult, buffer, offset) {
     var remain = buffer.length - offset;
     if (remain < this.width) {
-        return ReadResult.shortError(destResult, this.width, remain, offset);
+        return ReadResult.poolShortError(destResult, this.width, remain, offset);
     }
     return this.readAtomFrom(destResult, buffer, offset);
 };
@@ -53,7 +53,7 @@ AtomRW.prototype.poolWriteInto = function writeInto(destResult, value, buffer, o
     var remain = buffer.length - offset;
     // istanbul ignore next
     if (remain < this.width) {
-        WriteResult.shortError(destResult, this.width, remain, offset);
+        WriteResult.poolShortError(destResult, this.width, remain, offset);
     }
     return this.writeAtomInto(destResult, value, buffer, offset);
 };
@@ -82,7 +82,7 @@ IntegerRW.prototype.poolWriteInto = function poolWriteInto(destResult, value, bu
     }
     var remain = buffer.length - offset;
     if (remain < this.width) {
-        return WriteResult.shortError(destResult, this.width, remain, offset);
+        return WriteResult.poolShortError(destResult, this.width, remain, offset);
     }
     return this.writeAtomInto(destResult, value, buffer, offset);
 };

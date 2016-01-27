@@ -77,7 +77,7 @@ VariableBufferRW.prototype.eagerPoolReadFrom = function eagerPoolReadFrom(destRe
     var length = destResult.value;
     var remain = buffer.length - destResult.offset;
     if (remain < length) {
-        return ReadResult.shortError(destResult, length, remain, offset, destResult.offset);
+        return ReadResult.poolShortError(destResult, length, remain, offset, destResult.offset);
     } else {
         offset = destResult.offset;
         var buf = Buffer(length);
@@ -92,7 +92,7 @@ VariableBufferRW.prototype.lazyPoolReadFrom = function lazyPoolReadFrom(destResu
     var length = destResult.value;
     var remain = buffer.length - destResult.offset;
     if (remain < length) {
-        return ReadResult.shortError(destResult, length, remain, offset, destResult.offset);
+        return ReadResult.poolShortError(destResult, length, remain, offset, destResult.offset);
     } else {
         offset = destResult.offset;
         var end = offset + length;
