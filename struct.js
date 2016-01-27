@@ -61,73 +61,82 @@ function StructRW(cons, fields, opts) {
 }
 inherits(StructRW, BufferRW);
 
-StructRW.prototype.byteLength = function byteLength(obj) {
+StructRW.prototype.poolByteLength = function poolByteLength(destResult, obj) {
     var length = 0;
     for (var i = 0; i < this.fields.length; i++) {
         var field = this.fields[i];
 
         if (field.name && !obj.hasOwnProperty(field.name)) {
-            return LengthResult.error(errors.MissingStructField({
+            return destResult.reset(errors.MissingStructField({
                 field: field.name,
                 struct: this.cons.name
-            }));
+            }), null);
         }
 
         var value = field.name && obj && obj[field.name];
         var res;
         if (field.call) {
-            if (!field.call.byteLength) continue;
-            res = field.call.byteLength(obj);
+            if (!field.call.poolByteLength) continue;
+            field.call.poolByteLength(destResult, obj);
         } else {
-            res = field.rw.byteLength(value);
+            field.rw.poolByteLength(destResult, value);
         }
-        if (res.err) return res;
-        length += res.length;
+        if (destResult.err) return destResult;
+        length += destResult.length;
     }
-    return new LengthResult(null, length);
+    return destResult.reset(null, length);
 };
 
-StructRW.prototype.writeInto = function writeInto(obj, buffer, offset) {
-    var res = new WriteResult(null, offset);
+StructRW.prototype.poolWriteInto = function poolWriteInto(destResult, obj, buffer, offset) {
+    destResult.reset(null, offset);
     for (var i = 0; i < this.fields.length; i++) {
         var field = this.fields[i];
 
         if (field.name && !obj.hasOwnProperty(field.name)) {
-            return WriteResult.error(errors.MissingStructField({
+            return destResult.reset(errors.MissingStructField({
                 field: field.name,
                 struct: this.cons.name
-            }));
+            }), null);
         }
 
         var value = field.name && obj[field.name];
+        console.log('field ' + i + ' offset ' + offset + ' value ' + value);
         if (field.call) {
-            if (!field.call.writeInto) continue;
-            res = field.call.writeInto(obj, buffer, offset);
+            console.log('in field.call');
+            if (!field.call.poolWriteInto) continue;
+            field.call.poolWriteInto(destResult, obj, buffer, offset);
+            console.log('after field.call');
         } else {
-            res = field.rw.writeInto(value, buffer, offset);
+            field.rw.poolWriteInto(destResult, value, buffer, offset);
         }
-        if (res.err) return res;
-        offset = res.offset;
+        if (destResult.err) return destResult;
+        offset = destResult.offset;
     }
-    return res;
+    return destResult;
 };
 
-StructRW.prototype.readFrom = function readFrom(buffer, offset) {
-    var obj = new this.cons();
+var readRes = new ReadResult();
+StructRW.prototype.poolReadFrom = function poolReadFrom(destResult, buffer, offset) {
+    if (typeof destResult.value === 'object' && destResult.value !== null) {
+        if (destResult.value.constructor !== this.cons) {
+            destResult.value = new this.cons();
+        }
+    } else {
+        destResult.value = new this.cons();
+    }
     for (var i = 0; i < this.fields.length; i++) {
         var field = this.fields[i];
-        var res;
         if (field.call) {
-            if (!field.call.readFrom) continue;
-            res = field.call.readFrom(obj, buffer, offset);
+            if (!field.call.poolReadFrom) continue;
+            field.call.poolReadFrom(readRes, destResult.value, buffer, offset);
         } else {
-            res = field.rw.readFrom(buffer, offset);
+            field.rw.poolReadFrom(readRes, buffer, offset);
         }
-        if (res.err) return res;
-        offset = res.offset;
+        if (readRes.err) return destResult.copyFrom(readRes);
+        offset = readRes.offset;
         if (field.name) {
-            obj[field.name] = res.value;
+            destResult.value[field.name] = readRes.value;
         }
     }
-    return new ReadResult(null, offset, obj);
+    return destResult.reset(null, offset, destResult.value);
 };

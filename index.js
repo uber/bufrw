@@ -77,7 +77,7 @@ var strn = StringRW(varint.unsigned, 'utf8');
 module.exports.str1 = str1;
 module.exports.str2 = str2;
 module.exports.strn = strn;
-module.exports.String = StringRW;
+module.exports.StringRW = StringRW;
 
 module.exports.varint = varint;
 

@@ -112,7 +112,8 @@ function genericResult(err, value, buffer, offset) {
         if (err.offset === undefined) err.offset = offset;
         if (err.buffer === undefined) err.buffer = buffer;
     }
-    return new Result(err, value);
+    var ret = new Result(err, value);
+    return ret;
 }
 
 function fromBufferResult(rw, buffer, offset) {

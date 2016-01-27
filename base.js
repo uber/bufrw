@@ -17,6 +17,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+'use strict';
+
+var assert = require('assert');
 
 var errors = require('./errors');
 
@@ -25,26 +28,65 @@ module.exports.LengthResult = LengthResult;
 module.exports.WriteResult = WriteResult;
 module.exports.ReadResult = ReadResult;
 
-function BufferRW(byteLength, readFrom, writeInto) {
+function BufferRW(poolByteLength, poolReadFrom, poolWriteInto) {
     if (!(this instanceof BufferRW)) {
-        return new BufferRW(byteLength, readFrom, writeInto);
+        return new BufferRW(poolByteLength, poolReadFrom, poolWriteInto);
     }
-    if (typeof byteLength === 'function') this.byteLength = byteLength;
-    if (typeof readFrom === 'function') this.readFrom = readFrom;
-    if (typeof writeInto === 'function') this.writeInto = writeInto;
+
+    if (typeof poolByteLength === 'function') this.poolByteLength = poolByteLength;
+    if (typeof poolReadFrom === 'function') this.poolReadFrom = poolReadFrom;
+    if (typeof poolWriteInto === 'function') this.poolWriteInto = poolWriteInto;
+
+    assert(typeof this.poolByteLength === 'function', 'rw must implement `poolByteLength`');
+    assert(typeof this.poolReadFrom === 'function', 'rw must implement `poolReadFrom`');
+    assert(typeof this.poolWriteInto === 'function', 'rw must implement `poolWriteInto`');
+
+    assert(this.byteLength === BufferRW.prototype.byteLength, 'rw must not override `byteLength`; implement `poolByteLength`');
+    assert(this.readFrom === BufferRW.prototype.readFrom, 'rw must not override `readFrom`; implement `poolReadFrom`');
+    assert(this.writeInto === BufferRW.prototype.writeInto, 'rw must not override `writeInto`; implement `poolWriteInto`');
 }
+
+BufferRW.prototype.readFrom = function readFrom(buffer, offset) {
+    var readResult = new ReadResult();
+    this.poolReadFrom(readResult, buffer, offset);
+    return readResult;
+};
+
+BufferRW.prototype.writeInto = function writeInto(value, buffer, offset) {
+    var writeResult = new WriteResult();
+    this.poolWriteInto(writeResult, value, buffer, offset);
+    return writeResult;
+};
+
+BufferRW.prototype.byteLength = function byteLength(arg1, arg2, arg3) {
+    var lengthResult = new LengthResult();
+    this.poolByteLength(lengthResult, arg1, arg2, arg3);
+    return lengthResult;
+};
 
 function LengthResult(err, length) {
     this.err = err || null;
     this.length = length || 0;
 }
 
+LengthResult.prototype.reset = function reset(err, length) {
+    this.err = err;
+    this.length = length;
+    return this;
+}
+
+LengthResult.prototype.copyFrom = function copyFrom(srcRes) {
+    this.err = srcRes.err;
+    this.length = srcRes.length;
+    return this;
+};
+
 LengthResult.error = function error(err, length) {
-    return new LengthResult(err, length);
+    throw new Error('deprecated');
 };
 
 LengthResult.just = function just(length) {
-    return new LengthResult(null, length);
+    throw new Error('deprecated');
 };
 
 function WriteResult(err, offset) {
@@ -52,23 +94,38 @@ function WriteResult(err, offset) {
     this.offset = offset || 0;
 }
 
+WriteResult.prototype.reset = function reset(err, offset) {
+    this.err = err;
+    this.offset = offset;
+    return this;
+};
+
+WriteResult.prototype.copyFrom = function copyFrom(srcResult) {
+    this.err = srcResult.err;
+    this.offset = srcResult.offset;
+};
+
 WriteResult.error = function error(err, offset) {
-    return new WriteResult(err, offset);
+    throw new Error('deprecated');
 };
 
 // istanbul ignore next
-WriteResult.rangedError = function rangedError(err, start, end, value) {
+WriteResult.rangedError = function rangedError(destResult, err, start, end, value) {
+    assert(typeof destResult === 'object' && destResult.constructor.name === 'WriteResult');
+
     err.offest = start;
     err.endOffset = end;
-    return new WriteResult(err, start, value);
+    return destResult.reset(err, null);
 };
 
 WriteResult.just = function just(offset) {
-    return new WriteResult(null, offset);
+    throw new Error('deprecated');
 };
 
-WriteResult.shortError = function shortError(expected, actual, offset) {
-    return new WriteResult(new errors.ShortBuffer({
+WriteResult.shortError = function shortError(destResult, expected, actual, offset) {
+    assert(typeof destResult === 'object' && destResult.constructor.name === 'WriteResult');
+
+    return destResult.reset(new errors.ShortBuffer({
         expected: expected,
         actual: actual,
         offset: offset
@@ -81,34 +138,55 @@ function ReadResult(err, offset, value) {
     this.value = value === undefined ? null : value;
 }
 
+ReadResult.prototype.copyFrom = function copyFrom(srcResult) {
+    this.err = srcResult.err;
+    this.offset = srcResult.offset;
+    this.value = srcResult.value;
+    return this;
+};
+
+ReadResult.prototype.reset = function reset(err, offset, value) {
+    this.err = err;
+    this.offset = offset;
+    this.value = value;
+    return this;
+};
+
 ReadResult.error = function error(err, offset, value) {
-    return new ReadResult(err, offset, value);
+    throw new Error('deprecated');
 };
 
 // istanbul ignore next
-ReadResult.rangedError = function rangedError(err, start, end, value) {
+ReadResult.rangedError = function rangedError(destResult, err, start, end, value) {
+    assert(typeof destResult === 'object' && destResult.constructor.name === 'ReadResult');
+
     err.offest = start;
     err.endOffset = end;
-    return new ReadResult(err, start, value);
+    return destResult.reset(err, start, value);
 };
 
 ReadResult.just = function just(offset, value) {
-    return new ReadResult(null, offset, value);
+    throw new Error('deprecated');
 };
 
-ReadResult.shortError = function shortError(expected, actual, offset, endOffset) {
+ReadResult.shortError = function shortError(destResult, expected, actual, offset, endOffset) {
+    assert(typeof destResult === 'object' && destResult.constructor.name === 'ReadResult');
+    var err;
+
     if (endOffset === undefined) {
-        return new ReadResult(new errors.ShortBuffer({
+        err = new errors.ShortBuffer({
             expected: expected,
             actual: actual,
             offset: offset
-        }), offset);
+        }); 
     } else {
-        return new ReadResult(new errors.ShortBufferRanged({
+        err = new errors.ShortBufferRanged({
             expected: expected,
             actual: actual,
             offset: offset,
             endOffset: endOffset
-        }), offset);
+        });
     }
+
+    return destResult.reset(err, offset);
 };

@@ -34,27 +34,29 @@ function VariableBufferRW(sizerw, lazy) {
     }
     this.sizerw = sizerw;
     if (lazy) {
-        this.readFrom = this.lazyReadFrom;
+        this.poolReadFrom = this.lazyPoolReadFrom;
+    } else {
+        this.poolReadFrom = this.eagerPoolReadFrom;
     }
     BufferRW.call(this);
 }
 inherits(VariableBufferRW, BufferRW);
 
-VariableBufferRW.prototype.byteLength = function byteLength(buf) {
+VariableBufferRW.prototype.poolByteLength = function poolByteLength(destResult, buf) {
     var length = 0;
     if (Buffer.isBuffer(buf)) {
         length = buf.length;
     } else if (buf === null || buf === undefined) {
         length = 0;
     } else {
-        return LengthResult.error(errors.expected(buf, 'buffer, null, or undefined'));
+        return destResult.reset(errors.expected(buf, 'buffer, null, or undefined'), null);
     }
-    var len = this.sizerw.byteLength(length);
-    if (len.err) return len;
-    return new LengthResult(null, len.length + length);
+    this.sizerw.poolByteLength(destResult, length);
+    if (destResult.err) return destResult;
+    return destResult.reset(null, destResult.length + length);
 };
 
-VariableBufferRW.prototype.writeInto = function writeInto(buf, buffer, offset) {
+VariableBufferRW.prototype.poolWriteInto = function poolWriteInto(destResult, buf, buffer, offset) {
     var start = offset + this.sizerw.width;
     var length = 0;
     if (Buffer.isBuffer(buf)) {
@@ -62,40 +64,39 @@ VariableBufferRW.prototype.writeInto = function writeInto(buf, buffer, offset) {
     } else if (buf === null || buf === undefined) {
         length = 0;
     } else {
-        return WriteResult.error(errors.expected(buf, 'buffer, null, or undefined'), offset);
+        return destResult.reset(errors.expected(buf, 'buffer, null, or undefined'), offset);
     }
-    var res = this.sizerw.writeInto(length, buffer, offset);
-    if (res.err) return res;
-    return new WriteResult(null, start + length);
+    this.sizerw.poolWriteInto(destResult, length, buffer, offset);
+    if (destResult.err) return destResult;
+    return destResult.reset(null, start + length);
 };
 
-VariableBufferRW.prototype.readFrom =
-VariableBufferRW.prototype.eagerReadFrom = function eagerReadFrom(buffer, offset) {
-    var res = this.sizerw.readFrom(buffer, offset);
-    if (res.err) return res;
-    var length = res.value;
-    var remain = buffer.length - res.offset;
+VariableBufferRW.prototype.eagerPoolReadFrom = function eagerPoolReadFrom(destResult, buffer, offset) {
+    this.sizerw.poolReadFrom(destResult, buffer, offset);
+    if (destResult.err) return destResult;
+    var length = destResult.value;
+    var remain = buffer.length - destResult.offset;
     if (remain < length) {
-        return ReadResult.shortError(length, remain, offset, res.offset);
+        return ReadResult.shortError(destResult, length, remain, offset, destResult.offset);
     } else {
-        offset = res.offset;
+        offset = destResult.offset;
         var buf = Buffer(length);
         buffer.copy(buf, 0, offset);
-        return new ReadResult(null, offset + length, buf);
+        return destResult.reset(null, offset + length, buf);
     }
 };
 
-VariableBufferRW.prototype.lazyReadFrom = function lazyReadFrom(buffer, offset) {
-    var res = this.sizerw.readFrom(buffer, offset);
-    if (res.err) return res;
-    var length = res.value;
-    var remain = buffer.length - res.offset;
+VariableBufferRW.prototype.lazyPoolReadFrom = function lazyPoolReadFrom(destResult, buffer, offset) {
+    this.sizerw.poolReadFrom(destResult, buffer, offset);
+    if (destResult.err) return destResult;
+    var length = destResult.value;
+    var remain = buffer.length - destResult.offset;
     if (remain < length) {
-        return ReadResult.shortError(length, remain, offset, res.offset);
+        return ReadResult.shortError(destResult, length, remain, offset, destResult.offset);
     } else {
-        offset = res.offset;
+        offset = destResult.offset;
         var end = offset + length;
         var buf = buffer.slice(offset, end);
-        return new ReadResult(null, end, buf);
+        return destResult.reset(null, end, buf);
     }
 };

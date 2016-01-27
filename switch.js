@@ -42,75 +42,82 @@ function SwitchRW(valrw, cases, opts) {
     this.dataKey = opts.dataKey || '1';
     // istanbul ignore if TODO
     if (opts.structMode) {
-        this.readFrom = this.structReadFrom;
+        this.poolReadFrom = this.structReadFrom;
     }
-}
-inherits(BufferRW, BufferRW);
 
-SwitchRW.prototype.byteLength = function byteLength(obj) {
+    BufferRW.call(this);
+}
+inherits(SwitchRW, BufferRW);
+
+SwitchRW.prototype.poolByteLength = function poolByteLength(destResult, obj) {
     var val = obj[this.valKey];
     var data = obj[this.dataKey];
     var datarw = this.cases[val];
     if (datarw === undefined) {
-        return LengthResult.error(errors.WriteInvalidSwitchValue({
+        return destResult.reset(errors.WriteInvalidSwitchValue({
             value: val
         }));
     }
-    var vallen = this.valrw.byteLength(val);
-    if (vallen.err) return vallen;
-    var caselen = datarw.byteLength(data);
-    if (caselen.err) return caselen;
-    return LengthResult.just(vallen.length + caselen.length);
+    this.valrw.poolByteLength(destResult, val);
+    if (destResult.err) return destResult;
+    var vallen = destResult.length;
+
+    datarw.poolByteLength(destResult, data);
+    if (destResult.err) return destResult;
+    var caselen = destResult.length;
+
+    return destResult.reset(null, caselen + vallen);
 };
 
-SwitchRW.prototype.writeInto = function writeInto(obj, buffer, offset) {
+SwitchRW.prototype.poolWriteInto = function poolWriteInto(destResult, obj, buffer, offset) {
     var val = obj[this.valKey];
     var data = obj[this.dataKey];
     var datarw = this.cases[val];
     if (datarw === undefined) {
-        return WriteResult.error(errors.WriteInvalidSwitchValue({
+        return destResult.reset(errors.WriteInvalidSwitchValue({
             value: val
         }), offset);
     }
-    var res = this.valrw.writeInto(val, buffer, offset);
+    var res = this.valrw.poolWriteInto(destResult, val, buffer, offset);
     if (res.err) return res;
-    res = datarw.writeInto(data, buffer, res.offset);
+    res = datarw.poolWriteInto(destResult, data, buffer, res.offset);
     return res;
 };
 
-SwitchRW.prototype.readFrom = function readFrom(buffer, offset) {
-    var res = this.valrw.readFrom(buffer, offset);
+SwitchRW.prototype.poolReadFrom = function poolReadFrom(destResult, buffer, offset) {
+    var res = this.valrw.poolReadFrom(destResult, buffer, offset);
     if (res.err) return res;
     offset = res.offset;
     var val = res.value;
     var datarw = this.cases[val];
     if (datarw === undefined) {
-        return ReadResult.error(errors.ReadInvalidSwitchValue({
+        return destResult.reset(errors.ReadInvalidSwitchValue({
             value: val
         }), offset);
     }
-    res = datarw.readFrom(buffer, offset);
+    res = datarw.poolReadFrom(destResult, buffer, offset);
     if (res.err) return res;
     offset = res.offset;
     var data = res.value;
     var obj = new this.cons(val, data);
-    return ReadResult.just(offset, obj);
+    return destResult.reset(null, offset, obj);
 };
 
 // istanbul ignore next TODO
-SwitchRW.prototype.structReadFrom = function readFrom(obj, buffer, offset) {
-    var res = this.valrw.readFrom(buffer, offset);
+SwitchRW.prototype.poolStructReadFrom = 
+function poolStructReadFrom(destResult, obj, buffer, offset) {
+    var res = this.valrw.poolReadFrom(destResult, buffer, offset);
     if (res.err) return res;
     offset = res.offset;
     var val = res.value;
     var datarw = this.cases[val];
     if (datarw === undefined) {
-        return ReadResult.error(errors.ReadInvalidSwitchValue({
+        return destResult.reset(errors.ReadInvalidSwitchValue({
             value: val
         }), offset);
     }
     obj[this.valKey] = val;
-    res = datarw.readFrom(buffer, offset);
+    res = datarw.poolReadFrom(destResult, buffer, offset);
     if (!res.err) {
         obj[this.dataKey] = res.value;
     }

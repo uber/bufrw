@@ -36,42 +36,45 @@ function SeriesRW(rws) {
         return new SeriesRW(rws);
     }
     this.rws = rws;
+    BufferRW.call(this);
 }
 inherits(SeriesRW, BufferRW);
 
-SeriesRW.prototype.byteLength = function byteLength(values) {
+SeriesRW.prototype.poolByteLength = function poolByteLength(destResult, values) {
     if (!Array.isArray(values) && values !== null) {
-        return LengthResult.error(errors.expected(values, 'an array or null'));
+        return destResult.reset(errors.expected(values, 'an array or null'));
     }
     var length = 0;
     for (var i = 0; i < this.rws.length; i++) {
-        var res = this.rws[i].byteLength(values && values[i]);
-        if (res.err) return res;
-        length += res.length;
+        this.rws[i].poolByteLength(destResult, values && values[i]);
+        if (destResult.err) return destResult;
+        length += destResult.length;
     }
-    return new LengthResult(null, length);
+    return destResult.reset(null, length);
 };
 
-SeriesRW.prototype.writeInto = function writeInto(values, buffer, offset) {
+SeriesRW.prototype.poolWriteInto = function poolWriteInto(destResult, values, buffer, offset) {
     if (!Array.isArray(values) && values !== null) {
-        return WriteResult.error(errors.expected(values, 'an array or null'), offset);
+        return destResult.reset(errors.expected(values, 'an array or null'), offset);
     }
-    var res = new WriteResult(null, offset);
     for (var i = 0; i < this.rws.length; i++) {
-        res = this.rws[i].writeInto(values && values[i], buffer, offset);
-        if (res.err) return res;
-        offset = res.offset;
+        this.rws[i].poolWriteInto(destResult, values && values[i], buffer, offset);
+        if (destResult.err) return destResult;
+        offset = destResult.offset;
     }
-    return res;
+    return destResult;
 };
 
-SeriesRW.prototype.readFrom = function readFrom(buffer, offset) {
-    var values = new Array(this.rws.length);
-    for (var i = 0; i < this.rws.length; i++) {
-        var res = this.rws[i].readFrom(buffer, offset);
-        if (res.err) return res;
-        offset = res.offset;
-        values[i] = res.value;
+var readResult = new ReadResult();
+SeriesRW.prototype.poolReadFrom = function poolReadFrom(destResult, buffer, offset) {
+    if (!Array.isArray(destResult.value)) {
+        destResult.value = new Array(this.rws.length);
     }
-    return new ReadResult(null, offset, values);
+    for (var i = 0; i < this.rws.length; i++) {
+        this.rws[i].poolReadFrom(readResult, buffer, offset);
+        if (readResult.err) return destResult.copyFrom(readResult);
+        offset = readResult.offset;
+        destResult.value[i] = readResult.value;
+    }
+    return destResult.reset(null, offset, destResult.value);
 };

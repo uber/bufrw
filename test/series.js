@@ -28,32 +28,34 @@ var LengthResult = require('../base').LengthResult;
 var WriteResult = require('../base').WriteResult;
 var ReadResult = require('../base').ReadResult;
 var brokenRW = {
-    byteLength: function() {
-        return new LengthResult(new Error('boom'));
+    poolByteLength: function(destResult) {
+        return destResult.reset(new Error('boom'));
     },
-    writeInto: function(val, buffer, offset) {
-        return new WriteResult(new Error('bang'), offset);
+    poolWriteInto: function(destResult, val, buffer, offset) {
+        return destResult.reset(new Error('bang'), offset);
     },
-    readFrom: function(buffer, offset) {
-        return new ReadResult(new Error('bork'), offset);
+    poolReadFrom: function(destResult, buffer, offset) {
+        return destResult.reset(new Error('bork'), offset);
     },
 };
+
+brokenRW.prototype = BufferRW.prototype;
 
 var atoms = require('../atoms');
 var SeriesRW = require('../series');
 
 function orFillZero(rw) {
     return new BufferRW(
-        rw.byteLength.bind(rw),
-        rw.readFrom.bind(rw),
+        rw.poolByteLength.bind(rw),
+        rw.poolReadFrom.bind(rw),
         writeInto);
-    function writeInto(value, buffer, offset) {
+    function writeInto(destResult, value, buffer, offset) {
         if (value === null || value === undefined) {
             var end = offset + rw.width;
             buffer.fill(0, offset, end);
-            return WriteResult.just(end);
+            return destResult.reset(null, end);
         } else {
-            return rw.writeInto(value, buffer, offset);
+            return rw.poolWriteInto(destResult, value, buffer, offset);
         }
     }
 }
