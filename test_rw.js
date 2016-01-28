@@ -31,7 +31,6 @@ var util = require('util');
 var formatError = require('./interface').formatError;
 var intoBufferResult = require('./interface').intoBufferResult;
 var fromBufferResult = require('./interface').fromBufferResult;
-var LengthResult = require('./base').LengthResult;
 
 module.exports.cases = testCases;
 

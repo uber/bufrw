@@ -26,9 +26,6 @@ var test = require('tape');
 var atoms = require('../atoms');
 var RepeatRW = require('../repeat');
 
-var LengthResult = require('../base').LengthResult;
-var WriteResult = require('../base').WriteResult;
-var ReadResult = require('../base').ReadResult;
 var brokenRW = {
     poolByteLength: function(destResult) {
         return destResult.reset(new Error('boom'));

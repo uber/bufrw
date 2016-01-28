@@ -22,8 +22,6 @@ module.exports = StructRW;
 
 var inherits = require('util').inherits;
 
-var LengthResult = require('./base').LengthResult;
-var WriteResult = require('./base').WriteResult;
 var ReadResult = require('./base').ReadResult;
 var BufferRW = require('./base').BufferRW;
 var errors = require('./errors');
@@ -74,7 +72,6 @@ StructRW.prototype.poolByteLength = function poolByteLength(destResult, obj) {
         }
 
         var value = field.name && obj && obj[field.name];
-        var res;
         if (field.call) {
             if (!field.call.poolByteLength) continue;
             field.call.poolByteLength(destResult, obj);

@@ -73,7 +73,7 @@ LengthResult.prototype.reset = function reset(err, length) {
     this.err = err;
     this.length = length;
     return this;
-}
+};
 
 LengthResult.prototype.copyFrom = function copyFrom(srcRes) {
     this.err = srcRes.err;
@@ -82,11 +82,11 @@ LengthResult.prototype.copyFrom = function copyFrom(srcRes) {
 };
 
 LengthResult.error = function error(err, length) {
-    return new LengthError(err, length);
+    return new LengthResult(err, length);
 };
 
 LengthResult.just = function just(length) {
-    return new LengthError(null, length);
+    return new LengthResult(null, length);
 };
 
 function WriteResult(err, offset) {
@@ -110,17 +110,18 @@ WriteResult.error = function error(err, offset) {
 };
 
 // istanbul ignore next
+/*jshint maxparams:6*/
 WriteResult.poolRangedError = function poolRangedError(destResult, err, start, end, value) {
     assert(typeof destResult === 'object' && destResult.constructor.name === 'WriteResult');
 
     err.offest = start;
     err.endOffset = end;
-    return destResult.reset(err, null);
+    return destResult.reset(err, start, value);
 };
 
 WriteResult.rangedError = function rangedError(err, start, end, value) {
     return WriteResult.poolRangedError(new WriteResult(), start, end, value);
-}
+};
 
 WriteResult.just = function just(offset) {
     return new WriteResult(null, offset);
@@ -129,7 +130,7 @@ WriteResult.just = function just(offset) {
 
 WriteResult.shortError = function shortError(expected, actual, offset) {
     return WriteResult.poolShortError(new WriteResult(), expected, actual, offset);
-}
+};
 
 WriteResult.poolShortError = function poolShortError(destResult, expected, actual, offset) {
     assert(typeof destResult === 'object' && destResult.constructor.name === 'WriteResult');
@@ -175,7 +176,7 @@ ReadResult.poolRangedError = function poolRangedError(destResult, err, start, en
 };
 
 ReadResult.rangedError = function rangedError(err, start, end, value) {
-    return poolRangedError(new ReadResult(), err, start, end, value);
+    return ReadResult.poolRangedError(new ReadResult(), err, start, end, value);
 };
 
 ReadResult.just = function just(offset, value) {

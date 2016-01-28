@@ -25,8 +25,6 @@ var test = require('tape');
 
 var bufrw = require('../');
 var LengthResult = require('../base').LengthResult;
-var ReadResult = require('../base').ReadResult;
-var WriteResult = require('../base').WriteResult;
 var UInt8 = require('../atoms').UInt8;
 var UInt16BE = require('../atoms').UInt16BE;
 var DoubleBE = require('../atoms').DoubleBE;

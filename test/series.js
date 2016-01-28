@@ -24,9 +24,6 @@ var testRW = require('../test_rw');
 var test = require('tape');
 
 var BufferRW = require('../base').BufferRW;
-var LengthResult = require('../base').LengthResult;
-var WriteResult = require('../base').WriteResult;
-var ReadResult = require('../base').ReadResult;
 var brokenRW = {
     poolByteLength: function(destResult) {
         return destResult.reset(new Error('boom'));

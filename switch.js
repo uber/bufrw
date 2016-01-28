@@ -22,9 +22,6 @@ module.exports = SwitchRW;
 
 var inherits = require('util').inherits;
 
-var LengthResult = require('./base').LengthResult;
-var WriteResult = require('./base').WriteResult;
-var ReadResult = require('./base').ReadResult;
 var BufferRW = require('./base').BufferRW;
 var errors = require('./errors');
 

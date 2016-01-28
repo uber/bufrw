@@ -24,10 +24,6 @@ var testRW = require('../test_rw');
 var TypedError = require('error/typed');
 var test = require('tape');
 
-var LengthResult = require('../base').LengthResult;
-var WriteResult = require('../base').WriteResult;
-var ReadResult = require('../base').ReadResult;
-
 var BufferRW = require('../base').BufferRW;
 
 var BangError = TypedError({

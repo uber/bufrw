@@ -21,6 +21,7 @@
     "noempty": true,
     "maxdepth": 4,
     "maxparams": 4,
+    "proto": true,
     "globals": {
         "console": true,
         "Buffer": true,

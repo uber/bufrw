@@ -22,8 +22,6 @@ module.exports = SkipRW;
 
 var inherits = require('util').inherits;
 
-var LengthResult = require('./base').LengthResult;
-var WriteResult = require('./base').WriteResult;
 var ReadResult = require('./base').ReadResult;
 var FixedWidthRW = require('./fixed_width_rw');
 
