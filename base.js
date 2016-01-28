@@ -37,6 +37,7 @@ function BufferRW(byteLength, readFrom, writeInto, isPooled) {
         assert(typeof byteLength === 'function', 'expected byteLength to be function');
         assert(typeof readFrom === 'function', 'expected readFrom to be function');
         assert(typeof writeInto === 'function', 'expected writeInto to be function');
+        // istanbul ignore else
         if (isPooled) {
             this.poolByteLength = byteLength;
             this.poolReadFrom = readFrom;
@@ -89,16 +90,19 @@ BufferRW.prototype.byteLength = function byteLength(arg1, arg2, arg3) {
     return lengthResult;
 };
 
+// istanbul ignore next
 BufferRW.prototype.poolReadFrom = function poolReadFrom(destResult, arg1, arg2, arg3) {
     var res = this.readFrom(arg1, arg2, arg3);
     return destResult.copyFrom(res);
 };
 
+// istanbul ignore next
 BufferRW.prototype.poolWriteInto = function poolWriteInto(destResult, value, buffer, offset) {
     var res = this.writeInto(value, buffer, offset);
     return destResult.copyFrom(res);
 };
 
+// istanbul ignore next
 BufferRW.prototype.poolByteLength = function poolByteLength(destResult, arg1, arg2, arg3) {
     var res = this.byteLength(arg1, arg2, arg3);
     return destResult.copyFrom(res);
@@ -115,16 +119,19 @@ LengthResult.prototype.reset = function reset(err, length) {
     return this;
 };
 
+// istanbul ignore next
 LengthResult.prototype.copyFrom = function copyFrom(srcRes) {
     this.err = srcRes.err;
     this.length = srcRes.length;
     return this;
 };
 
+// istanbul ignore next
 LengthResult.error = function error(err, length) {
     return new LengthResult(err, length);
 };
 
+// istanbul ignore next
 LengthResult.just = function just(length) {
     return new LengthResult(null, length);
 };
@@ -140,11 +147,13 @@ WriteResult.prototype.reset = function reset(err, offset) {
     return this;
 };
 
+// istanbul ignore next
 WriteResult.prototype.copyFrom = function copyFrom(srcResult) {
     this.err = srcResult.err;
     this.offset = srcResult.offset;
 };
 
+// istanbul ignore next
 WriteResult.error = function error(err, offset) {
     return new WriteResult(err, offset);
 };
@@ -159,19 +168,23 @@ WriteResult.poolRangedError = function poolRangedError(destResult, err, start, e
     return destResult.reset(err, start, value);
 };
 
+// istanbul ignore next
 WriteResult.rangedError = function rangedError(err, start, end, value) {
     return WriteResult.poolRangedError(new WriteResult(), start, end, value);
 };
 
+// istanbul ignore next
 WriteResult.just = function just(offset) {
     return new WriteResult(null, offset);
 };
 
 
+// istanbul ignore next
 WriteResult.shortError = function shortError(expected, actual, offset) {
     return WriteResult.poolShortError(new WriteResult(), expected, actual, offset);
 };
 
+// istanbul ignore next
 WriteResult.poolShortError = function poolShortError(destResult, expected, actual, offset) {
     assert(typeof destResult === 'object' && destResult.constructor.name === 'WriteResult');
 
@@ -188,6 +201,7 @@ function ReadResult(err, offset, value) {
     this.value = value === undefined ? null : value;
 }
 
+// istanbul ignore next
 ReadResult.prototype.copyFrom = function copyFrom(srcResult) {
     this.err = srcResult.err;
     this.offset = srcResult.offset;
@@ -195,6 +209,7 @@ ReadResult.prototype.copyFrom = function copyFrom(srcResult) {
     return this;
 };
 
+// istanbul ignore next
 ReadResult.prototype.reset = function reset(err, offset, value) {
     this.err = err;
     this.offset = offset;
@@ -202,6 +217,7 @@ ReadResult.prototype.reset = function reset(err, offset, value) {
     return this;
 };
 
+// istanbul ignore next
 ReadResult.error = function error(err, offset, value) {
     return new ReadResult(err, offset, value);
 };
@@ -215,14 +231,17 @@ ReadResult.poolRangedError = function poolRangedError(destResult, err, start, en
     return destResult.reset(err, start, value);
 };
 
+// istanbul ignore next
 ReadResult.rangedError = function rangedError(err, start, end, value) {
     return ReadResult.poolRangedError(new ReadResult(), err, start, end, value);
 };
 
+// istanbul ignore next
 ReadResult.just = function just(offset, value) {
     return new ReadResult(null, offset, value);
 };
 
+// istanbul ignore next
 ReadResult.shortError = function shortError(destResult, expected, actual, offset, endOffset) {
     return ReadResult.poolShortError(new ReadResult(), expected, actual, offset, endOffset);
 };

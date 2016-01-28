@@ -112,6 +112,7 @@ StructRW.prototype.poolWriteInto = function poolWriteInto(destResult, obj, buffe
 var readRes = new ReadResult();
 StructRW.prototype.poolReadFrom = function poolReadFrom(destResult, buffer, offset) {
     if (typeof destResult.value === 'object' && destResult.value !== null) {
+        // istanbul ignore next
         if (destResult.value.constructor !== this.cons) {
             destResult.value = new this.cons();
         }
