@@ -97,12 +97,9 @@ StructRW.prototype.poolWriteInto = function poolWriteInto(destResult, obj, buffe
         }
 
         var value = field.name && obj[field.name];
-        console.log('field ' + i + ' offset ' + offset + ' value ' + value);
         if (field.call) {
-            console.log('in field.call');
             if (!field.call.poolWriteInto) continue;
             field.call.poolWriteInto(destResult, obj, buffer, offset);
-            console.log('after field.call');
         } else {
             field.rw.poolWriteInto(destResult, value, buffer, offset);
         }
