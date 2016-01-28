@@ -34,6 +34,9 @@ function BufferRW(byteLength, readFrom, writeInto, isPooled) {
     }
 
     if (byteLength && readFrom && writeInto) {
+        assert(typeof byteLength === 'function', 'expected byteLength to be function');
+        assert(typeof readFrom === 'function', 'expected readFrom to be function');
+        assert(typeof writeInto === 'function', 'expected writeInto to be function');
         if (isPooled) {
             this.poolByteLength = byteLength;
             this.poolReadFrom = readFrom;
@@ -43,25 +46,62 @@ function BufferRW(byteLength, readFrom, writeInto, isPooled) {
             this.readFrom = readFrom;
             this.writeInto = writeInto;
         }
+    } else {
+        // Args weren't specified. Expect either pool methods or regular
+        // methods to be overriden.
+
+        assert(
+            this.poolReadFrom !== BufferRW.prototype.poolReadFrom ||
+            this.readFrom !== BufferRW.prototype.readFrom,
+            'expected either poolReadFrom or readFrom to be overriden'
+        );
+        assert(
+            this.poolWriteInto !== BufferRW.prototype.poolWriteInto ||
+            this.writeInto !== BufferRW.prototype.writeInto,
+            'expected either poolWriteInto or writeInto to be overriden'
+        );
+        assert(
+            this.poolByteLength !== BufferRW.prototype.poolByteLength ||
+            this.byteLength !== BufferRW.prototype.byteLength,
+            'expected either poolByteLength or byteLength to be overriden'
+        );
     }
 }
 
 BufferRW.prototype.readFrom = function readFrom(buffer, offset) {
+    assert(this.poolReadFrom !== BufferRW.prototype.poolReadFrom, 'poolReadFrom is overridden');
     var readResult = new ReadResult();
     this.poolReadFrom(readResult, buffer, offset);
     return readResult;
 };
 
 BufferRW.prototype.writeInto = function writeInto(value, buffer, offset) {
+    assert(this.poolWriteInto !== BufferRW.prototype.poolWriteInto, 'poolWriteInto is overridden');
     var writeResult = new WriteResult();
     this.poolWriteInto(writeResult, value, buffer, offset);
     return writeResult;
 };
 
 BufferRW.prototype.byteLength = function byteLength(arg1, arg2, arg3) {
+    assert(this.poolbyteLength !== BufferRW.prototype.poolByteLength, 'poolByteLength is overridden');
     var lengthResult = new LengthResult();
     this.poolByteLength(lengthResult, arg1, arg2, arg3);
     return lengthResult;
+};
+
+BufferRW.prototype.poolReadFrom = function poolReadFrom(destResult, buffer, offset) {
+    var res = this.readFrom(buffer, offset);
+    return destResult.copyFrom(res);
+};
+
+BufferRW.prototype.poolWriteInto = function poolWriteInto(destResult, value, buffer, offset) {
+    var res = this.writeInto(value, buffer, offset);
+    return destResult.copyFrom(res);
+};
+
+BufferRW.prototype.poolByteLength = function poolByteLength(destResult, arg1, arg2, arg3) {
+    var res = this.byteLength(arg1, arg2, arg3);
+    return destResult.copyFrom(res);
 };
 
 function LengthResult(err, length) {
