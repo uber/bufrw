@@ -30,7 +30,8 @@ var errors = require('./errors');
 module.exports.unsigned = BufferRW(
     unsignedVarIntByteLength,
     readUnsignedVarIntFrom,
-    writeUnsignedVarIntInto);
+    writeUnsignedVarIntInto,
+    true);
 
 function unsignedVarIntByteLength(destResult, n) {
     if (typeof n !== 'number' || n < 0) {

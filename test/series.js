@@ -45,7 +45,8 @@ function orFillZero(rw) {
     return new BufferRW(
         rw.poolByteLength.bind(rw),
         rw.poolReadFrom.bind(rw),
-        writeInto);
+        writeInto,
+        true);
     function writeInto(destResult, value, buffer, offset) {
         if (value === null || value === undefined) {
             var end = offset + rw.width;

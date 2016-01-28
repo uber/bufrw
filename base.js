@@ -28,22 +28,22 @@ module.exports.LengthResult = LengthResult;
 module.exports.WriteResult = WriteResult;
 module.exports.ReadResult = ReadResult;
 
-function BufferRW(poolByteLength, poolReadFrom, poolWriteInto) {
+function BufferRW(byteLength, readFrom, writeInto, isPooled) {
     if (!(this instanceof BufferRW)) {
-        return new BufferRW(poolByteLength, poolReadFrom, poolWriteInto);
+        return new BufferRW(byteLength, readFrom, writeInto, isPooled);
     }
 
-    if (typeof poolByteLength === 'function') this.poolByteLength = poolByteLength;
-    if (typeof poolReadFrom === 'function') this.poolReadFrom = poolReadFrom;
-    if (typeof poolWriteInto === 'function') this.poolWriteInto = poolWriteInto;
-
-    assert(typeof this.poolByteLength === 'function', 'rw must implement `poolByteLength`');
-    assert(typeof this.poolReadFrom === 'function', 'rw must implement `poolReadFrom`');
-    assert(typeof this.poolWriteInto === 'function', 'rw must implement `poolWriteInto`');
-
-    assert(this.byteLength === BufferRW.prototype.byteLength, 'rw must not override `byteLength`; implement `poolByteLength`');
-    assert(this.readFrom === BufferRW.prototype.readFrom, 'rw must not override `readFrom`; implement `poolReadFrom`');
-    assert(this.writeInto === BufferRW.prototype.writeInto, 'rw must not override `writeInto`; implement `poolWriteInto`');
+    if (byteLength && readFrom && writeInto) {
+        if (isPooled) {
+            this.poolByteLength = byteLength;
+            this.poolReadFrom = readFrom;
+            this.poolWriteInto = writeInto;
+        } else {
+            this.byteLength = byteLength;
+            this.readFrom = readFrom;
+            this.writeInto = writeInto;
+        }
+    }
 }
 
 BufferRW.prototype.readFrom = function readFrom(buffer, offset) {
