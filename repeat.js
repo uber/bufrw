@@ -76,7 +76,19 @@ RepeatRW.prototype.poolReadFrom = function poolReadFrom(destResult, buffer, offs
         res = this.repeatedrw.poolReadFrom(destResult, buffer, offset);
         if (res.err) return res;
         offset = res.offset;
-        values[i] = res.value;
+
+        if (Array.isArray(res.value)) values[i] = res.value.slice(0);
+        else if (typeof res.value === 'object') values[i] = shallowCopy(res.value);
+        else values[i] = res.value;
     }
     return destResult.reset(null, offset, values);
 };
+
+function shallowCopy(obj) {
+    var keys = Object.keys(obj);
+    var i;
+    var dest = {};
+    for (i = 0; i < keys.length; i++) {
+        dest[i] = obj[i];
+    }
+}
