@@ -27,20 +27,19 @@ var atoms = require('../atoms');
 var SwitchRW = require('../switch');
 var Pair = SwitchRW.Pair;
 
-var LengthResult = require('../base').LengthResult;
-var WriteResult = require('../base').WriteResult;
-var ReadResult = require('../base').ReadResult;
 var brokenRW = {
-    byteLength: function() {
-        return new LengthResult(new Error('boom'));
+    poolByteLength: function(destResult) {
+        return destResult.reset(new Error('boom'));
     },
-    writeInto: function(val, buffer, offset) {
-        return new WriteResult(new Error('bang'), offset);
+    poolWriteInto: function(destResult, val, buffer, offset) {
+        return destResult.reset(new Error('bang'), offset);
     },
-    readFrom: function(buffer, offset) {
-        return new ReadResult(new Error('bork'), offset);
+    poolReadFrom: function(destResult, buffer, offset) {
+        return destResult.reset(new Error('bork'), offset);
     },
 };
+
+brokenRW.prototype = require('../base').BufferRW.prototype;
 
 var numbers = SwitchRW(atoms.UInt8, {
     0: atoms.UInt8,

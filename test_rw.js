@@ -107,6 +107,7 @@ RWTestCase.prototype.runWriteTest = function runWriteTest() {
     got.fill(0);
     var res = intoBufferResult(this.rw, got, val);
     var err = res.err;
+
     if (err) {
         if (testCase.error) {
             this.assert.deepEqual(

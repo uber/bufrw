@@ -22,9 +22,6 @@ module.exports = RepeatRW;
 
 var inherits = require('util').inherits;
 
-var LengthResult = require('./base').LengthResult;
-var WriteResult = require('./base').WriteResult;
-var ReadResult = require('./base').ReadResult;
 var BufferRW = require('./base').BufferRW;
 var errors = require('./errors');
 
@@ -34,49 +31,66 @@ function RepeatRW(countrw, repeatedrw) {
     }
     this.countrw = countrw;
     this.repeatedrw = repeatedrw;
+
+    BufferRW.call(this);
 }
 inherits(RepeatRW, BufferRW);
 
-RepeatRW.prototype.byteLength = function byteLength(values) {
+RepeatRW.prototype.poolByteLength = function poolByteLength(destResult, values) {
     if (!Array.isArray(values)) {
-        return LengthResult.error(errors.expected(values, 'an array'));
+        return destResult.reset(errors.expected(values, 'an array'));
     }
-    var res = this.countrw.byteLength(values.length);
+    var res = this.countrw.poolByteLength(destResult, values.length);
     if (res.err) return res;
+    var length = res.length;
     for (var i = 0; i < values.length; i++) {
-        var partres = this.repeatedrw.byteLength(values[i]);
+        var partres = this.repeatedrw.poolByteLength(destResult, values[i]);
         if (partres.err) return partres;
-        res.length += partres.length;
+        length += res.length;
     }
-    return res;
+    return destResult.reset(null, length);
 };
 
-RepeatRW.prototype.writeInto = function writeInto(values, buffer, offset) {
+RepeatRW.prototype.poolWriteInto = function poolWriteInto(destResult, values, buffer, offset) {
     if (!Array.isArray(values)) {
-        return WriteResult.error(errors.expected(values, 'an array'), offset);
+        return destResult.reset(errors.expected(values, 'an array'), offset);
     }
-    var res = this.countrw.writeInto(values.length, buffer, offset);
+    var res = this.countrw.poolWriteInto(destResult, values.length, buffer, offset);
     if (res.err) return res;
     offset = res.offset;
     for (var i = 0; i < values.length; i++) {
-        res = this.repeatedrw.writeInto(values[i], buffer, offset);
+        res = this.repeatedrw.poolWriteInto(destResult, values[i], buffer, offset);
         if (res.err) return res;
         offset = res.offset;
     }
     return res;
 };
 
-RepeatRW.prototype.readFrom = function readFrom(buffer, offset) {
-    var res = this.countrw.readFrom(buffer, offset);
+RepeatRW.prototype.poolReadFrom = function poolReadFrom(destResult, buffer, offset) {
+    var res = this.countrw.poolReadFrom(destResult, buffer, offset);
     if (res.err) return res;
     offset = res.offset;
     var count = res.value;
     var values = new Array(count);
     for (var i = 0; i < count; i++) {
-        res = this.repeatedrw.readFrom(buffer, offset);
+        res = this.repeatedrw.poolReadFrom(destResult, buffer, offset);
         if (res.err) return res;
         offset = res.offset;
-        values[i] = res.value;
+
+        // istanbul ignore if
+        if (Array.isArray(res.value)) values[i] = res.value.slice(0);
+        else if (typeof res.value === 'object') values[i] = shallowCopy(res.value);
+        else values[i] = res.value;
     }
-    return new ReadResult(null, offset, values);
+    return destResult.reset(null, offset, values);
 };
+
+// istanbul ignore next
+function shallowCopy(obj) {
+    var keys = Object.keys(obj);
+    var i;
+    var dest = {};
+    for (i = 0; i < keys.length; i++) {
+        dest[i] = obj[i];
+    }
+}

@@ -22,8 +22,6 @@ module.exports = SkipRW;
 
 var inherits = require('util').inherits;
 
-var LengthResult = require('./base').LengthResult;
-var WriteResult = require('./base').WriteResult;
 var ReadResult = require('./base').ReadResult;
 var FixedWidthRW = require('./fixed_width_rw');
 
@@ -36,21 +34,21 @@ function SkipRW(length, fill) {
 }
 inherits(SkipRW, FixedWidthRW);
 
-SkipRW.prototype.byteLength = function byteLength() {
-    return new LengthResult(null, this.length);
+SkipRW.prototype.poolByteLength = function poolByteLength(destResult) {
+    return destResult.reset(null, this.length);
 };
 
-SkipRW.prototype.writeInto = function writeInto(val, buffer, offset) {
+SkipRW.prototype.poolWriteInto = function poolWriteInto(destResult, val, buffer, offset) {
     var end = offset + this.length;
     buffer.fill(this.fill, offset, end);
-    return new WriteResult(null, end);
+    return destResult.reset(null, end);
 };
 
-SkipRW.prototype.readFrom = function readFrom(buffer, offset) {
+SkipRW.prototype.poolReadFrom = function poolReadFrom(destResult, buffer, offset) {
     var end = offset + this.length;
     if (end > buffer.length) {
-        return ReadResult.shortError(this.length, buffer.length - offset, offset);
+        return ReadResult.poolShortError(destResult, this.length, buffer.length - offset, offset);
     } else {
-        return new ReadResult(null, end, null);
+        return destResult.reset(null, end, null);
     }
 };

@@ -17,63 +17,68 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+'use strict';
 
 module.exports = StringRW;
 
 var inherits = require('util').inherits;
 
-var LengthResult = require('./base').LengthResult;
-var WriteResult = require('./base').WriteResult;
 var ReadResult = require('./base').ReadResult;
 var errors = require('./errors');
-var VariableBufferRW = require('./variable_buffer_rw');
+var BufferRW = require('./base').BufferRW;
 
 function StringRW(sizerw, encoding) {
     if (!(this instanceof StringRW)) {
         return new StringRW(sizerw, encoding);
     }
+    this.sizerw = sizerw;
     this.encoding = encoding || 'utf8';
-    VariableBufferRW.call(this, sizerw);
     if (!this.sizerw.width) {
-        this.writeInto = this.writeVariableWidthInto;
+        this.poolWriteInto = this.poolWriteVariableWidthInto;
+    } else {
+        this.poolWriteInto = this.poolWriteFixedWidthInto;
     }
-}
-inherits(StringRW, VariableBufferRW);
 
-StringRW.prototype.byteLength = function byteLength(str) {
+    BufferRW.call(this);
+}
+inherits(StringRW, BufferRW);
+
+StringRW.prototype.poolByteLength = function poolByteLength(destResult, str) {
     var length = 0;
     if (typeof str === 'string') {
         length = Buffer.byteLength(str, this.encoding);
     } else if (str !== null && str !== undefined) {
-        return LengthResult.error(errors.expected(str, 'string, null, or undefined'));
+        return destResult.reset(errors.expected(str, 'string, null, or undefined'), null);
     }
-    var len = this.sizerw.byteLength(length);
-    if (len.err) return len;
-    return new LengthResult(null, len.length + length);
+    this.sizerw.poolByteLength(destResult, length);
+    if (destResult.err) return destResult;
+    return destResult.reset(null, destResult.length + length);
 };
 
-StringRW.prototype.writeInto = function writeFixedWidthInto(str, buffer, offset) {
+StringRW.prototype.poolWriteFixedWidthInto = 
+function poolWriteFixedWidthInto(destResult, str, buffer, offset) {
     var start = offset + this.sizerw.width;
     var length = 0;
     if (typeof str === 'string') {
         length = buffer.write(str, start, this.encoding);
     } else if (str !== null && str !== undefined) {
-        return WriteResult.error(errors.expected(str, 'string, null, or undefined'), offset);
+        return destResult.reset(errors.expected(str, 'string, null, or undefined'), offset);
     }
-    var res = this.sizerw.writeInto(length, buffer, offset);
+    this.sizerw.poolWriteInto(destResult, length, buffer, offset);
     // istanbul ignore if
-    if (res.err) return res;
-    return new WriteResult(null, start + length);
+    if (destResult.err) return destResult;
+    return destResult.reset(null, start + length);
 };
 
-StringRW.prototype.writeVariableWidthInto = function writeVariableWidthInto(str, buffer, offset) {
+StringRW.prototype.poolWriteVariableWidthInto = 
+function poolWriteVariableWidthInto(destResult, str, buffer, offset) {
     var size = 0;
     if (typeof str === 'string') {
         size = Buffer.byteLength(str, this.encoding);
     } else if (str !== null && str !== undefined) {
-        return WriteResult.error(errors.expected(str, 'string, null, or undefined'), offset);
+        return destResult.reset(errors.expected(str, 'string, null, or undefined'), offset);
     }
-    var res = this.sizerw.writeInto(size, buffer, offset);
+    var res = this.sizerw.poolWriteInto(destResult, size, buffer, offset);
     if (res.err) return res;
     offset = res.offset;
     if (typeof str === 'string') {
@@ -82,17 +87,17 @@ StringRW.prototype.writeVariableWidthInto = function writeVariableWidthInto(str,
     return res;
 };
 
-StringRW.prototype.readFrom = function readFrom(buffer, offset) {
-    var res = this.sizerw.readFrom(buffer, offset);
+StringRW.prototype.poolReadFrom = function poolReadFrom(destResult, buffer, offset) {
+    var res = this.sizerw.poolReadFrom(destResult, buffer, offset);
     if (res.err) return res;
     var length = res.value;
     var remain = buffer.length - res.offset;
     if (remain < length) {
-        return ReadResult.shortError(length, remain, offset, res.offset);
+        return ReadResult.poolShortError(destResult, length, remain, offset, res.offset);
     } else {
         offset = res.offset;
         var end = offset + length;
         var str = buffer.toString(this.encoding, offset, end);
-        return new ReadResult(null, end, str);
+        return destResult.reset(null, end, str);
     }
 };

@@ -23,34 +23,40 @@
 var test = require('tape');
 
 var iface = require('../interface');
-var LengthResult = require('../base').LengthResult;
-var WriteResult = require('../base').WriteResult;
-var ReadResult = require('../base').ReadResult;
+var BufferRW = require('../base').BufferRW;
 
 var byteRW = {
-    byteLength: function() {return LengthResult.just(1);},
-    writeInto: function(b, buffer, offset) {
+    poolByteLength: function(destResult) {return destResult.reset(null, 1);},
+    poolWriteInto: function(destResult, b, buffer, offset) {
         buffer[offset] = b;
-        return WriteResult.just(++offset);
+        return destResult.reset(null, ++offset);
     },
-    readFrom: function(buffer, offset) {
+    poolReadFrom: function(destResult, buffer, offset) {
         var b = buffer[offset];
-        return ReadResult.just(++offset, b);
+        return destResult.reset(null, ++offset, b);
     },
 };
+
+byteRW.__proto__ = BufferRW.prototype;
 
 var lengthErrorRW = {
-    byteLength: function() {return new LengthResult(new Error('boom'));}
+    poolByteLength: function(destResult) {return destResult.reset(new Error('boom'));}
 };
+
+lengthErrorRW.__proto__ = BufferRW.prototype;
 
 var writeErrorRW = {
-    byteLength: function() {return new LengthResult.just(0);},
-    writeInto: function() {return new WriteResult.error(new Error('bang'));}
+    poolByteLength: function(destResult) {return destResult.reset(null, 0);},
+    poolWriteInto: function(destResult) {return destResult.reset(new Error('bang'));}
 };
 
+writeErrorRW.__proto__ = BufferRW.prototype;
+
 var readErrorRW = {
-    readFrom: function() {return new ReadResult.error(new Error('zot'));}
+    poolReadFrom: function(destResult) {return destResult.reset(new Error('zot'));}
 };
+
+readErrorRW.__proto__ = BufferRW.prototype;
 
 test('byteLength', function t(assert) {
     assert.deepEqual(

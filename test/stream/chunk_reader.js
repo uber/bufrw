@@ -28,19 +28,19 @@ var ChunkReader = require('../../stream/chunk_reader');
 var testExpectations = require('../lib/test_expectations');
 var byteLength = require('../../interface').byteLength;
 var intoBuffer = require('../../interface').intoBuffer;
-var ReadResult = require('../../base').ReadResult;
 var UInt8 = require('../../atoms').UInt8;
 var StringRW = require('../../string_rw');
 var SeriesRW = require('../../series');
+var BufferRW = require('../../base').BufferRW;
 
 var str1 = StringRW(UInt8);
 var frameRW = SeriesRW(UInt8, str1);
 var readErrorRW = {
-    width: 1,
-    readFrom: function() {
-        return ReadResult.error(new Error('boom'));
-    }
+    poolReadFrom: function(destResult) {return destResult.reset(new Error('boom'), 0);},
+    width: 1
 };
+
+readErrorRW.__proto__ = BufferRW.prototype;
 
 var buffers = [];
 var expectedFrames = [];

@@ -18,16 +18,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-var WriteResult = require('./base').WriteResult;
-var ReadResult = require('./base').ReadResult;
 var AtomRW = require('./atoms').AtomRW;
 
-function nullWriteInto(val, buffer, offset) {
-    return new WriteResult(null, offset);
+function nullWriteInto(destResult, val, buffer, offset) {
+    //return new WriteResult(null, offset);
+    return destResult.reset(null, offset);
 }
 
-function nullReadFrom(buffer, offset) {
-    return new ReadResult(null, offset, null);
+function nullReadFrom(destResult, buffer, offset) {
+    //return new ReadResult(null, offset, null);
+    return destResult.reset(null, offset, null);
 }
 
 var NullRW = AtomRW(0, nullReadFrom, nullWriteInto);

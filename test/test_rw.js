@@ -24,9 +24,7 @@ var testRW = require('../test_rw');
 var TypedError = require('error/typed');
 var test = require('tape');
 
-var LengthResult = require('../base').LengthResult;
-var WriteResult = require('../base').WriteResult;
-var ReadResult = require('../base').ReadResult;
+var BufferRW = require('../base').BufferRW;
 
 var BangError = TypedError({
     type: 'bang',
@@ -34,28 +32,32 @@ var BangError = TypedError({
 });
 
 var dummyRW = {
-    byteLength: function() {
-        return new LengthResult.just(0);
+    poolByteLength: function(destResult) {
+        return destResult.reset(null, 0);
     },
-    writeInto: function(val, buffer, offset) {
-        return new WriteResult.just(offset);
+    poolWriteInto: function(destResult, val, buffer, offset) {
+        return destResult.reset(null, offset);
     },
-    readFrom: function(buffer, offset) {
-        return new ReadResult.just(offset, null);
+    poolReadFrom: function(destResult, buffer, offset) {
+        return destResult.reset(null, offset, null);
     },
 };
 
+dummyRW.__proto__ = BufferRW.prototype;
+
 var brokenRW = {
-    byteLength: function() {
-        return new LengthResult(new Error('boom'));
+    poolByteLength: function(destResult) {
+        return destResult.reset(new Error('boom'));
     },
-    writeInto: function(val, buffer, offset) {
-        return new WriteResult(BangError(), offset);
+    poolWriteInto: function(destResult, val, buffer, offset) {
+        return destResult.reset(new BangError(), offset);
     },
-    readFrom: function(buffer, offset) {
-        return new ReadResult(new Error('bork'), offset);
+    poolReadFrom: function(destResult, buffer, offset) {
+        return destResult.reset(new Error('bork'), offset);
     },
 };
+
+brokenRW.__proto__ = BufferRW.prototype;
 
 test('testRW: checks cases', function t(assert) {
     assert.throws(function badTest() {

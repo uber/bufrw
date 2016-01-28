@@ -23,20 +23,20 @@
 var testRW = require('../test_rw');
 var test = require('tape');
 
-var LengthResult = require('../base').LengthResult;
-var WriteResult = require('../base').WriteResult;
-var ReadResult = require('../base').ReadResult;
+var BufferRW = require('../base').BufferRW;
 var brokenRW = {
-    byteLength: function() {
-        return new LengthResult(new Error('boom'));
+    poolByteLength: function(destResult) {
+        return destResult.reset(new Error('boom'));
     },
-    writeInto: function(val, buffer, offset) {
-        return new WriteResult(new Error('bang'), offset);
+    poolWriteInto: function(destResult, val, buffer, offset) {
+        return destResult.reset(new Error('bang'), offset);
     },
-    readFrom: function(buffer, offset) {
-        return new ReadResult(new Error('bork'), offset);
+    poolReadFrom: function(destResult, buffer, offset) {
+        return destResult.reset(new Error('bork'), offset);
     },
 };
+
+brokenRW.prototype = BufferRW.prototype;
 
 var atoms = require('../atoms');
 var VariableBufferRW = require('../variable_buffer_rw');

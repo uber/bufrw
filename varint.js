@@ -20,7 +20,6 @@
 
 'use strict';
 
-var LengthResult = require('./base').LengthResult;
 var WriteResult = require('./base').WriteResult;
 var ReadResult = require('./base').ReadResult;
 var BufferRW = require('./base').BufferRW;
@@ -31,23 +30,24 @@ var errors = require('./errors');
 module.exports.unsigned = BufferRW(
     unsignedVarIntByteLength,
     readUnsignedVarIntFrom,
-    writeUnsignedVarIntInto);
+    writeUnsignedVarIntInto,
+    true);
 
-function unsignedVarIntByteLength(n) {
+function unsignedVarIntByteLength(destResult, n) {
     if (typeof n !== 'number' || n < 0) {
         // TODO: integer check
-        return LengthResult.error(errors.expected(n, 'unsigned integer'));
+        return destResult.reset(errors.expected(n, 'unsigned integer'));
     }
-    if (n === 0) LengthResult.just(1);
+    if (n === 0) return destResult.reset(null, 1);
 
     var needed = Math.ceil(countBits(n) / 7);
-    return LengthResult.just(needed);
+    return destResult.reset(null, needed);
 }
 
-function writeUnsignedVarIntInto(n, buffer, offset) {
+function writeUnsignedVarIntInto(destResult, n, buffer, offset) {
     if (typeof n !== 'number' || n < 0) {
         // TODO: integer check
-        return WriteResult.error(errors.expected(n, 'unsigned integer'));
+        return destResult.reset(errors.expected(n, 'unsigned integer'), null);
     }
 
     var needed = Math.ceil(countBits(n) / 7);
@@ -56,7 +56,7 @@ function writeUnsignedVarIntInto(n, buffer, offset) {
 
     if (end > buffer.length) {
         var remain = buffer.length - offset;
-        return WriteResult.shortError(needed, remain, offset);
+        return WriteResult.poolShortError(destResult, needed, remain, offset);
     }
 
     offset = end;
@@ -68,10 +68,10 @@ function writeUnsignedVarIntInto(n, buffer, offset) {
         if (n <= 0) break;
     }
 
-    return WriteResult.just(end);
+    return destResult.reset(null, end);
 }
 
-function readUnsignedVarIntFrom(buffer, offset) {
+function readUnsignedVarIntFrom(destResult, buffer, offset) {
     var start = offset;
     var n = 0;
     while (offset < buffer.length) {
@@ -79,11 +79,11 @@ function readUnsignedVarIntFrom(buffer, offset) {
         if (n !== 0) n <<= 7;
         n += b & 0x7f;
         if (!(b & 0x80)) {
-            return ReadResult.just(offset, n);
+            return destResult.reset(null, offset, n);
         }
     }
     var got = offset - start;
-    return ReadResult.shortError(got + 1, got, start, offset);
+    return ReadResult.poolShortError(destResult, got + 1, got, start, offset);
 }
 
 function countBits(n) {

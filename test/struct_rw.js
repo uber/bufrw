@@ -25,8 +25,6 @@ var test = require('tape');
 
 var bufrw = require('../');
 var LengthResult = require('../base').LengthResult;
-var ReadResult = require('../base').ReadResult;
-var WriteResult = require('../base').WriteResult;
 var UInt8 = require('../atoms').UInt8;
 var UInt16BE = require('../atoms').UInt16BE;
 var DoubleBE = require('../atoms').DoubleBE;
@@ -75,37 +73,38 @@ function Frame(mess) {
     self.mess = mess || '';
 }
 
+var lengthRes = new LengthResult();
 Frame.rw = StructRW(Frame, [
     {call: {
-        byteLength: function(frame) {
-            var res = str1.byteLength(frame.mess);
+        poolByteLength: function(destResult, frame) {
+            var res = str1.poolByteLength(destResult, frame.mess);
             if (res.err) return res;
             frame.size = res.length + UInt16BE.width;
             if (frame.size > 10) {
-                return LengthResult.error(new Error('arbitrary length limit'));
+                return destResult.reset(new Error('arbitrary length limit'), null);
             } else {
-                return LengthResult.just(0);
+                return destResult.reset(null, 0);
             }
         },
-        writeInto: function(frame, buffer, offset) {
-            var res = str1.byteLength(frame.mess);
+        poolWriteInto: function(destResult, frame, buffer, offset) {
+            var res = str1.poolByteLength(lengthRes, frame.mess);
             if (res.err) return res;
             frame.size = res.length + UInt16BE.width;
             if (buffer.length - offset < frame.size) {
-                return WriteResult.error(new Error('not enough room'));
+                return destResult.reset(new Error('not enough room'), null);
             } else {
-                return WriteResult.just(0);
+                return destResult.reset(null, 0);
             }
         }
     }},
     {name: 'size', rw: UInt16BE},
     {name: 'mess', rw: str1},
     {call: {
-        readFrom: function(frame, buffer, offset) {
+        poolReadFrom: function(destResult, frame, buffer, offset) {
             if (offset < buffer.length) {
-                return ReadResult.error(new Error('frame data past message'));
+                return destResult.reset(new Error('frame data past message'), offset);
             } else {
-                return ReadResult.just(offset);
+                return destResult.reset(null, offset);
             }
         }
     }}

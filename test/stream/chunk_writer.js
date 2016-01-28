@@ -28,22 +28,23 @@ var ChunkWriter = require('../../stream/chunk_writer.js');
 var testExpectations = require('../lib/test_expectations');
 var byteLength = require('../../interface').byteLength;
 var intoBuffer = require('../../interface').intoBuffer;
-var LengthResult = require('../../base').LengthResult;
-var WriteResult = require('../../base').WriteResult;
 var UInt8 = require('../../atoms').UInt8;
 var StringRW = require('../../string_rw');
 var SeriesRW = require('../../series');
+var BufferRW = require('../../base').BufferRW;
 
 var str1 = StringRW(UInt8);
 var frameRW = SeriesRW(UInt8, str1);
 var writeErrorRW = {
-    byteLength: function() {
-        return LengthResult.just(0);
+    poolByteLength: function(destResult) {
+        return destResult.reset(null, 0);
     },
-    writeInto: function() {
-        return WriteResult.error(new Error('boom'));
+    poolWriteInto: function(destResult) {
+        return destResult.reset(new Error('boom'), 0);
     }
 };
+
+writeErrorRW.__proto__ = BufferRW.prototype;
 
 var frames = [];
 var expectedBuffers = [];
