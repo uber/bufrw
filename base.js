@@ -68,10 +68,10 @@ function BufferRW(byteLength, readFrom, writeInto, isPooled) {
     }
 }
 
-BufferRW.prototype.readFrom = function readFrom(buffer, offset) {
+BufferRW.prototype.readFrom = function readFrom(arg1, arg2, arg3) {
     assert(this.poolReadFrom !== BufferRW.prototype.poolReadFrom, 'poolReadFrom is overridden');
     var readResult = new ReadResult();
-    this.poolReadFrom(readResult, buffer, offset);
+    this.poolReadFrom(readResult, arg1, arg2, arg3);
     return readResult;
 };
 
@@ -89,8 +89,8 @@ BufferRW.prototype.byteLength = function byteLength(arg1, arg2, arg3) {
     return lengthResult;
 };
 
-BufferRW.prototype.poolReadFrom = function poolReadFrom(destResult, buffer, offset) {
-    var res = this.readFrom(buffer, offset);
+BufferRW.prototype.poolReadFrom = function poolReadFrom(destResult, arg1, arg2, arg3) {
+    var res = this.readFrom(arg1, arg2, arg3);
     return destResult.copyFrom(res);
 };
 
