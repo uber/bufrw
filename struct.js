@@ -73,8 +73,14 @@ StructRW.prototype.poolByteLength = function poolByteLength(destResult, obj) {
 
         var value = field.name && obj && obj[field.name];
         if (field.call) {
-            if (!field.call.poolByteLength) continue;
-            field.call.poolByteLength(destResult, obj);
+            if (field.call.poolByteLength) {
+                field.call.poolByteLength(destResult, obj);
+            } else if (field.call.byteLength) {
+                var res = field.call.byteLength(obj);
+                destResult.copyFrom(res);
+            } else {
+                continue;
+            }
         } else {
             field.rw.poolByteLength(destResult, value);
         }
@@ -98,8 +104,14 @@ StructRW.prototype.poolWriteInto = function poolWriteInto(destResult, obj, buffe
 
         var value = field.name && obj[field.name];
         if (field.call) {
-            if (!field.call.poolWriteInto) continue;
-            field.call.poolWriteInto(destResult, obj, buffer, offset);
+            if (field.call.poolWriteInto) {
+                field.call.poolWriteInto(destResult, obj, buffer, offset);
+            } else if (field.call.writeInto) {
+                var res = field.call.writeInto(obj, buffer, offset);
+                destResult.copyFrom(res);
+            } else {
+                continue;
+            }
         } else {
             field.rw.poolWriteInto(destResult, value, buffer, offset);
         }
@@ -112,7 +124,6 @@ StructRW.prototype.poolWriteInto = function poolWriteInto(destResult, obj, buffe
 var readRes = new ReadResult();
 StructRW.prototype.poolReadFrom = function poolReadFrom(destResult, buffer, offset) {
     if (typeof destResult.value === 'object' && destResult.value !== null) {
-        // istanbul ignore next
         if (destResult.value.constructor !== this.cons) {
             destResult.value = new this.cons();
         }
@@ -122,8 +133,14 @@ StructRW.prototype.poolReadFrom = function poolReadFrom(destResult, buffer, offs
     for (var i = 0; i < this.fields.length; i++) {
         var field = this.fields[i];
         if (field.call) {
-            if (!field.call.poolReadFrom) continue;
-            field.call.poolReadFrom(readRes, destResult.value, buffer, offset);
+            if (field.call.poolReadFrom) {
+                field.call.poolReadFrom(readRes, destResult.value, buffer, offset);
+            } else if (field.call.readFrom) {
+                var res = field.call.readFrom(destResult.value, buffer, offset);
+                readRes.copyFrom(res);
+            } else {
+                continue;
+            }
         } else {
             field.rw.poolReadFrom(readRes, buffer, offset);
         }
