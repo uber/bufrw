@@ -25,6 +25,8 @@ var test = require('tape');
 
 var bufrw = require('../');
 var LengthResult = require('../base').LengthResult;
+var ReadResult = require('../base').ReadResult;
+var WriteResult = require('../base').WriteResult;
 var UInt8 = require('../atoms').UInt8;
 var UInt16BE = require('../atoms').UInt16BE;
 var DoubleBE = require('../atoms').DoubleBE;
@@ -176,3 +178,88 @@ test('StructRW: writing with invalid field', testRW.cases(Thing.RW, [
         }
     }
 ]));
+
+function NonPoolFrame(mess) {
+    this.size = 0;
+    this.mess = mess || '';
+}
+
+NonPoolFrame.rw = StructRW(NonPoolFrame, [
+    {call: {
+        byteLength: function(frame) {
+            var res = str1.byteLength(frame.mess);
+            if (res.err) return res;
+            frame.size = res.length + UInt16BE.width;
+            if (frame.size > 10) {
+                return new LengthResult(new Error('arbitrary length limit'), null);
+            } else {
+                return new LengthResult(null, 0);
+            }
+        },
+        writeInto: function(frame, buffer, offset) {
+            var res = str1.byteLength(frame.mess);
+            if (res.err) return res;
+            frame.size = res.length + UInt16BE.width;
+            if (buffer.length - offset < frame.size) {
+                return new WriteResult(new Error('not enough room'), null);
+            } else {
+                return new WriteResult(null, 0);
+            }
+        }
+    }},
+    {name: 'size', rw: UInt16BE},
+    {name: 'mess', rw: str1},
+    {call: {
+        readFrom: function(frame, buffer, offset) {
+            if (offset < buffer.length) {
+                return ReadResult.error(new Error('frame data past message'), offset);
+            } else {
+                return ReadResult.just(offset);
+            }
+        }
+    }}
+]);
+
+test('StructRW: non pooled frame', testRW.cases(NonPoolFrame.rw, [
+    [new NonPoolFrame('cat'), [0x00, 0x06, 0x03, 0x63, 0x61, 0x74]],
+
+    // provoke call error paths
+    {
+        lengthTest: {
+            value: new NonPoolFrame('what even is this?'),
+            error: {
+                message: 'arbitrary length limit'
+            }
+        },
+        writeTest: {
+            value: new NonPoolFrame('what even is this?'),
+            length: 2,
+            error: {
+                message: 'not enough room'
+            }
+        },
+        readTest: {
+            bytes: [0x00, 0x00, 0x00, 0xff],
+            error: {
+                message: 'frame data past message'
+            }
+        }
+    }
+]));
+
+test('structrw poolreadfrom correctly allocates new obj', function t(assert) {
+    var buf = new Buffer([0x00, 0x06, 0x03, 0x63, 0x61, 0x74]);
+    var destResult = new ReadResult(null, 0, {a: 'b'});
+    NonPoolFrame.rw.poolReadFrom(destResult, buf, 0);
+    assert.equal(destResult.value.constructor, NonPoolFrame);
+    assert.end();
+});
+
+test('structrw poolreadfrom correctly reuses obj', function t(assert) {
+    var buf = new Buffer([0x00, 0x06, 0x03, 0x63, 0x61, 0x74]);
+    var obj = new NonPoolFrame();
+    var destResult = new ReadResult(null, 0, obj);
+    NonPoolFrame.rw.poolReadFrom(destResult, buf, 0);
+    assert.equal(destResult.value, obj);
+    assert.end();
+});

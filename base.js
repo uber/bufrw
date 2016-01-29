@@ -33,6 +33,7 @@ function BufferRW(byteLength, readFrom, writeInto, isPooled) {
         return new BufferRW(byteLength, readFrom, writeInto, isPooled);
     }
 
+    // istanbul ignore else
     if (byteLength && readFrom && writeInto) {
         assert(typeof byteLength === 'function', 'expected byteLength to be function');
         assert(typeof readFrom === 'function', 'expected readFrom to be function');
@@ -198,6 +199,7 @@ WriteResult.poolShortError = function poolShortError(destResult, expected, actua
 function ReadResult(err, offset, value) {
     this.err = err || null;
     this.offset = offset || 0;
+    // istanbul ignore next
     this.value = value === undefined ? null : value;
 }
 

@@ -77,7 +77,6 @@ RepeatRW.prototype.poolReadFrom = function poolReadFrom(destResult, buffer, offs
         if (res.err) return res;
         offset = res.offset;
 
-        // istanbul ignore if
         if (Array.isArray(res.value)) values[i] = res.value.slice(0);
         else if (typeof res.value === 'object') values[i] = shallowCopy(res.value);
         else values[i] = res.value;
@@ -85,12 +84,12 @@ RepeatRW.prototype.poolReadFrom = function poolReadFrom(destResult, buffer, offs
     return destResult.reset(null, offset, values);
 };
 
-// istanbul ignore next
 function shallowCopy(obj) {
     var keys = Object.keys(obj);
     var i;
     var dest = {};
     for (i = 0; i < keys.length; i++) {
-        dest[i] = obj[i];
+        dest[keys[i]] = obj[keys[i]];
     }
+    return dest;
 }
