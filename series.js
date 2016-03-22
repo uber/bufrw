@@ -65,14 +65,16 @@ SeriesRW.prototype.poolWriteInto = function poolWriteInto(destResult, values, bu
 
 var readResult = new ReadResult();
 SeriesRW.prototype.poolReadFrom = function poolReadFrom(destResult, buffer, offset) {
-    if (!Array.isArray(destResult.value)) {
-        destResult.value = new Array(this.rws.length);
-    }
+    // The prior value cannot be reused, even if it is already an array of the right size.
+    // The array may have been captured by reference by the prior consumer.
+    var values = new Array(this.rws.length);
     for (var i = 0; i < this.rws.length; i++) {
         this.rws[i].poolReadFrom(readResult, buffer, offset);
         if (readResult.err) return destResult.copyFrom(readResult);
         offset = readResult.offset;
-        destResult.value[i] = readResult.value;
+        values[i] = readResult.value;
     }
+    // The values must be assigned to the result last so reading a series is reentrant.
+    destResult.value = values;
     return destResult.reset(null, offset, destResult.value);
 };

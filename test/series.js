@@ -63,6 +63,10 @@ var tinyShortWord = SeriesRW(
     orFillZero(atoms.UInt16BE),
     orFillZero(atoms.UInt32BE));
 
+var duduple = SeriesRW(
+    SeriesRW(atoms.UInt8, atoms.UInt8),
+    SeriesRW(atoms.UInt8, atoms.UInt8));
+
 test('SeriesRW: tinyShortWord', testRW.cases(tinyShortWord, [
     [[0, 0, 0], [0x00,
                  0x00, 0x00,
@@ -115,4 +119,10 @@ test('SeriesRW: passes error thru', testRW.cases(SeriesRW(brokenRW), [
             error: {message: 'bork'}
         }
     }
+]));
+
+test('SeriesRW: duple of duples', testRW.cases(duduple, [
+    [[[0, 1], [2, 3]], [
+        0x00, 0x01, 0x02, 0x03
+    ]]
 ]));
