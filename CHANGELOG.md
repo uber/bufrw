@@ -1,4 +1,4 @@
-# vNEXT // FIXME
+# v1.2.1
 
 - Fixes a regression in SeriesRW, which would modify the reused result if it
   happened to be an array.
