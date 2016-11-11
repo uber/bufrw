@@ -20,12 +20,7 @@
 
 'use strict';
 
-var canRequire = require('./lib/can-require.js');
-var hex = null;
-// istanbul ignore if
-if (canRequire('hexer')) {
-    hex = require('hexer');
-}
+var hex = require('hexer');
 
 var util = require('util');
 var Result = require('./result');
