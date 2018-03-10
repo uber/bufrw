@@ -65,18 +65,18 @@ ConcatReadBuffer.prototype.shift = function shift(n) {
 
 
 // istanbul ignore next
-ConcatReadBuffer.prototype.readUInt8 = function readUInt8(offset, noAssert) {
-    return this.buffer.readUInt8(offset, noAssert);
+ConcatReadBuffer.prototype.readUInt8 = function readUInt8(offset) {
+    return this.buffer.readUInt8(offset);
 };
 
 // istanbul ignore next
-ConcatReadBuffer.prototype.readUInt16BE = function readUInt16BE(offset, noAssert) {
-    return this.buffer.readUInt16BE(offset, noAssert);
+ConcatReadBuffer.prototype.readUInt16BE = function readUInt16BE(offset) {
+    return this.buffer.readUInt16BE(offset);
 };
 
 // istanbul ignore next
-ConcatReadBuffer.prototype.readUInt32BE = function readUInt32BE(offset, noAssert) {
-    return this.buffer.readUInt32BE(offset, noAssert);
+ConcatReadBuffer.prototype.readUInt32BE = function readUInt32BE(offset) {
+    return this.buffer.readUInt32BE(offset);
 };
 
 // TODO: complete Buffer API aping
