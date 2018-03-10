@@ -64,7 +64,7 @@ function writeUnsignedVarIntInto(destResult, n, buffer, offset) {
         var b = n & 0x7f;
         n >>= 7;
         if (offset !== end) b |= 0x80;
-        buffer.writeUInt8(b, --offset, true);
+        buffer.writeUInt8(b, --offset);
         if (n <= 0) break;
     }
 
@@ -75,7 +75,7 @@ function readUnsignedVarIntFrom(destResult, buffer, offset) {
     var start = offset;
     var n = 0;
     while (offset < buffer.length) {
-        var b = buffer.readUInt8(offset++, true);
+        var b = buffer.readUInt8(offset++);
         if (n !== 0) n <<= 7;
         n += b & 0x7f;
         if (!(b & 0x80)) {
