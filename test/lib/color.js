@@ -20,19 +20,27 @@
 
 'use strict';
 
-require('./errors');
-require('./interface');
-require('./atoms');
-require('./fixed_width_rw');
-require('./null_rw');
-require('./repeat_rw');
-require('./series');
-require('./skip');
-require('./string_rw');
-require('./struct_rw');
-require('./switch_rw');
-require('./variable_buffer_rw');
-require('./varint');
-require('./stream');
-require('./test_rw');
-require('./lib/color');
+var test = require('tape');
+
+var color = require('../../lib/color');
+
+test('color', function t(assert) {
+    assert.equal(color('foo', 'red'), '\x1b[31mfoo\x1b[39m');
+
+    assert.equal(
+        color('foo', 'yellow+bold'),
+        '\x1b[33m\x1b[1mfoo\x1b[22m\x1b[39m'
+    );
+
+    assert.equal(
+        color('foo', 'green+bold+underline'),
+        '\x1b[32m\x1b[1m\x1b[4mfoo\x1b[24m\x1b[22m\x1b[39m'
+    );
+
+    assert.equal(
+        color('foo', 'blue+bold+underline+white_bg'),
+        '\x1b[34m\x1b[1m\x1b[4m\x1b[47mfoo\x1b[49m\x1b[24m\x1b[22m\x1b[39m'
+    );
+
+    assert.end();
+});

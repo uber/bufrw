@@ -22,7 +22,7 @@
 
 var hex = require('hexer');
 
-var color = require('ansi-color').set;
+var color = require('./lib/color.js');
 var stripColor = require('./lib/strip_color.js');
 var extend = require('xtend');
 var inspect = require('util').inspect;

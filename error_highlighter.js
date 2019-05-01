@@ -20,7 +20,7 @@
 
 'use strict';
 
-var color = require('ansi-color').set;
+var color = require('./lib/color.js');
 var stripColor = require('./lib/strip_color.js');
 
 module.exports = errorHighlighter;
