@@ -1,3 +1,8 @@
+# v1.3.0
+
+- Addresses a dependency issue with hexer that complicated bundling for use in
+  browser scripts.
+
 # v1.2.1
 
 - Fixes a regression in SeriesRW, which would modify the reused result if it
