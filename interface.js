@@ -29,6 +29,10 @@ var errors = require('./errors');
 var AnnotatedBuffer = require('./annotated_buffer');
 var errorHighlighter = require('./error_highlighter');
 
+// Node.js deprecated Buffer(length) in favor of Buffer.alloc(length).
+// istanbul ignore next
+var bufferAlloc = Buffer.alloc || Buffer;
+
 function makeAnnotatedBuffer(buffer, start, clear) {
     // istanbul ignore if
     if (start > 0) buffer = buffer.slice(start);
@@ -51,7 +55,7 @@ function annotateError(res1, res2, start, annBuf) {
     }
 }
 
-var emptyBuffer = Buffer(0);
+var emptyBuffer = bufferAlloc(0);
 
 function fromBuffer(rw, buffer, offset) {
     return fromBufferResult(rw, buffer, offset).toValue();
@@ -133,7 +137,7 @@ function toBufferResult(rw, value) {
     var lenRes = rw.byteLength(value);
     if (lenRes.err) return new Result(lenRes.err, emptyBuffer);
     var length = lenRes.length;
-    var buffer = new Buffer(length);
+    var buffer = bufferAlloc(length);
     // buffer.fill(0); TODO option
     return intoBufferResult(rw, buffer, value);
 }

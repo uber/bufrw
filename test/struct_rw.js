@@ -32,6 +32,9 @@ var UInt16BE = require('../atoms').UInt16BE;
 var DoubleBE = require('../atoms').DoubleBE;
 var StringRW = require('../string_rw');
 var StructRW = require('../struct');
+
+var bufferFrom = Buffer.from || Buffer;
+
 var str1 = StringRW(UInt8);
 
 var anonLoc = StructRW({
@@ -248,7 +251,7 @@ test('StructRW: non pooled frame', testRW.cases(NonPoolFrame.rw, [
 ]));
 
 test('structrw poolreadfrom correctly allocates new obj', function t(assert) {
-    var buf = new Buffer([0x00, 0x06, 0x03, 0x63, 0x61, 0x74]);
+    var buf = bufferFrom([0x00, 0x06, 0x03, 0x63, 0x61, 0x74]);
     var destResult = new ReadResult(null, 0, {a: 'b'});
     NonPoolFrame.rw.poolReadFrom(destResult, buf, 0);
     assert.equal(destResult.value.constructor, NonPoolFrame);
@@ -256,7 +259,7 @@ test('structrw poolreadfrom correctly allocates new obj', function t(assert) {
 });
 
 test('structrw poolreadfrom correctly reuses obj', function t(assert) {
-    var buf = new Buffer([0x00, 0x06, 0x03, 0x63, 0x61, 0x74]);
+    var buf = bufferFrom([0x00, 0x06, 0x03, 0x63, 0x61, 0x74]);
     var obj = new NonPoolFrame();
     var destResult = new ReadResult(null, 0, obj);
     NonPoolFrame.rw.poolReadFrom(destResult, buf, 0);

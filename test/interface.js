@@ -25,6 +25,9 @@ var test = require('tape');
 var iface = require('../interface');
 var BufferRW = require('../base').BufferRW;
 
+var bufferFrom = Buffer.from || Buffer;
+var bufferAlloc = Buffer.alloc || Buffer;
+
 var byteRW = {
     poolByteLength: function(destResult) {return destResult.reset(null, 1);},
     poolWriteInto: function(destResult, b, buffer, offset) {
@@ -71,7 +74,7 @@ test('byteLength', function t(assert) {
 test('toBuffer', function t(assert) {
     assert.deepEqual(
         iface.toBuffer(byteRW, 1),
-        Buffer([0x01]), 'write 1 uint8');
+        bufferFrom([0x01]), 'write 1 uint8');
     assert.throws(function() {
         iface.toBuffer(lengthErrorRW, 1);
     }, /boom/, 'length error throws');
@@ -83,26 +86,26 @@ test('toBuffer', function t(assert) {
 
 test('intoBuffer', function t(assert) {
     assert.deepEqual(
-        iface.intoBuffer(byteRW, Buffer([0]), 1),
-        Buffer([0x01]), 'write 1 uint8');
+        iface.intoBuffer(byteRW, bufferFrom([0]), 1),
+        bufferFrom([0x01]), 'write 1 uint8');
     assert.throws(function() {
-        iface.intoBuffer(writeErrorRW, Buffer([0]), 1);
+        iface.intoBuffer(writeErrorRW, bufferFrom([0]), 1);
     }, /bang/, 'write error throws');
     assert.throws(function() {
-        iface.intoBuffer(byteRW, Buffer([0, 0]), 1);
+        iface.intoBuffer(byteRW, bufferFrom([0, 0]), 1);
     }, /short write, 1 byte left over after writing 1/, 'short write error');
     assert.end();
 });
 
 test('fromBuffer', function t(assert) {
     assert.equal(
-        iface.fromBuffer(byteRW, Buffer([0x01])),
+        iface.fromBuffer(byteRW, bufferFrom([0x01])),
         1, 'read 1 uint8');
     assert.throws(function() {
-        iface.fromBuffer(readErrorRW, Buffer(0));
+        iface.fromBuffer(readErrorRW, bufferAlloc(0));
     }, /zot/, 'read error throws');
     assert.throws(function() {
-        iface.fromBuffer(byteRW, Buffer([0, 0]));
+        iface.fromBuffer(byteRW, bufferFrom([0, 0]));
     }, /short read, 1 byte left over after consuming 1/, 'short read error');
     assert.end();
 });

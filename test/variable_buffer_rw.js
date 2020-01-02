@@ -23,6 +23,8 @@
 var testRW = require('../test_rw');
 var test = require('tape');
 
+var bufferFrom = Buffer.from || Buffer;
+
 var BufferRW = require('../base').BufferRW;
 var brokenRW = {
     poolByteLength: function(destResult) {
@@ -50,8 +52,9 @@ var normalTestCases = [
         lengthTest: {length: 1, value: null},
         writeTest: {bytes: [0x00], value: null}
     },
-    [ Buffer([0x00, 0x88, 0xff]),
-      [0x03, 0x00, 0x88, 0xff]
+    [
+        bufferFrom([0x00, 0x88, 0xff]),
+        [0x03, 0x00, 0x88, 0xff]
     ],
 
     // invalid value length/write errors
@@ -98,11 +101,11 @@ test('VariableBufferRW: lazy buf~1',
 var brokenTestCases = [
     {
         lengthTest: {
-            value: Buffer([2]),
+            value: bufferFrom([2]),
             error: {message: 'boom'}
         },
         writeTest: {
-            value: Buffer([2]),
+            value: bufferFrom([2]),
             length: 2,
             error: {message: 'bang'}
         },

@@ -29,6 +29,8 @@ var SeriesRW = require('../series');
 var ReadResult = require('../base').ReadResult;
 var StructRW = require('../struct');
 
+var bufferFrom = Buffer.from || Buffer;
+
 var brokenRW = {
     poolByteLength: function(destResult) {
         return destResult.reset(new Error('boom'));
@@ -124,7 +126,7 @@ test('RepeatRW: passes partrw error thru', testRW.cases(RepeatRW(atoms.UInt8, br
 
 test('RepeatRW: properly handles repeated array rws', function t(assert) {
     var thing = RepeatRW(atoms.UInt8, SeriesRW(atoms.UInt8, atoms.UInt8));
-    var buf = new Buffer([0x01, 0x02, 0x03]);
+    var buf = bufferFrom([0x01, 0x02, 0x03]);
 
     var readResult = new ReadResult();
     thing.poolReadFrom(readResult, buf, 0);
@@ -150,7 +152,7 @@ var consLoc = StructRW(Loc, {
 
 test('RepeatRW: properly handles repeated object rws', function t(assert) {
     var thing = RepeatRW(atoms.UInt8, consLoc);
-    var buf = new Buffer([0x01, 0x40, 0x42, 0xe3, 0x43, 0x7c, 0x56, 0x92, 0xb4,
+    var buf = bufferFrom([0x01, 0x40, 0x42, 0xe3, 0x43, 0x7c, 0x56, 0x92, 0xb4,
       0xc0, 0x5e, 0x9a, 0xb8, 0xa1, 0x9c, 0x9d, 0x5a]);
 
     var readResult = new ReadResult();
