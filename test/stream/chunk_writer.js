@@ -33,6 +33,8 @@ var StringRW = require('../../string_rw');
 var SeriesRW = require('../../series');
 var BufferRW = require('../../base').BufferRW;
 
+var bufferAlloc = Buffer.alloc || Buffer;
+
 var str1 = StringRW(UInt8);
 var frameRW = SeriesRW(UInt8, str1);
 var writeErrorRW = {
@@ -58,7 +60,7 @@ var expectedBuffers = [];
 ].forEach(function eachToken(token, i) {
     var frame = [0, token];
     frame[0] = byteLength(frameRW, frame);
-    var expectedBuffer = intoBuffer(frameRW, Buffer(frame[0]), frame);
+    var expectedBuffer = intoBuffer(frameRW, bufferAlloc(frame[0]), frame);
     var assertMess = util.format('got expected[%s] buffer', i);
     frames.push(frame);
     expectedBuffers.push({
