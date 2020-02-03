@@ -20,7 +20,8 @@
 
 'use strict';
 
-var color = require('ansi-color').set;
+var color = require('ansi-colors');
+var getAnsiColor = require('./lib/get_ansi_color');
 var stripColor = require('./lib/strip_color.js');
 
 module.exports = errorHighlighter;
@@ -28,7 +29,15 @@ module.exports = errorHighlighter;
 // istanbul ignore next
 function errorHighlighter(err, options) {
     options = options || {};
-    var errColor = colorer(options.errorColor || 'red+bold');
+
+    // split errorColor on + and . for backwards compatibility
+    var ansiColor = getAnsiColor(options.errorColor);
+    if(ansiColor === color) {
+        ansiColor = color.red.bold;
+    }
+
+    var errColor = colorer(ansiColor);
+    console.log(errColor);
 
     var hasOffset = !(err.offset === undefined || err.offset === null);
     var hasEnd = !(err.endOffset === undefined || err.endOffset === null);
@@ -68,6 +77,7 @@ function errorHighlighter(err, options) {
 function colorer(col) {
     if (typeof col === 'function') return col;
     return function colorIt(str) {
-        return color(str, col);
+        console.log(col);
+        return col(str);
     };
 }
