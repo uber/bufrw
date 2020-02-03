@@ -81,7 +81,6 @@ test('testRW: unexpected errors', function t(assert) {
 
         assert.equal(results[4].name, 'no read error', 'expected "no read error"');
         assert.equal(results[4].actual.message, 'bork', 'expected actual "bork" error');
-
         assert.equal(results[5],
             'read error Error: bork');
 
