@@ -20,7 +20,7 @@
 
 'use strict';
 
-var color = require('ansi-color').set;
+var chalk = require('chalk');
 var stripColor = require('./lib/strip_color.js');
 
 module.exports = errorHighlighter;
@@ -28,7 +28,7 @@ module.exports = errorHighlighter;
 // istanbul ignore next
 function errorHighlighter(err, options) {
     options = options || {};
-    var errColor = colorer(options.errorColor || 'red+bold');
+    var errColor = chalk.keyword(options.errorColor) || chalk.red.bold;
 
     var hasOffset = !(err.offset === undefined || err.offset === null);
     var hasEnd = !(err.endOffset === undefined || err.endOffset === null);
@@ -62,12 +62,4 @@ function errorHighlighter(err, options) {
             return str;
         }
     }
-}
-
-// istanbul ignore next
-function colorer(col) {
-    if (typeof col === 'function') return col;
-    return function colorIt(str) {
-        return color(str, col);
-    };
 }

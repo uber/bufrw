@@ -22,7 +22,7 @@
 
 var hex = require('hexer');
 
-var color = require('ansi-color').set;
+var chalk = require('chalk');
 var stripColor = require('./lib/strip_color.js');
 var extend = require('xtend');
 var inspect = require('util').inspect;
@@ -305,7 +305,7 @@ AnnotatedBuffer.prototype.hexdump = function hexdump(options) {
                 desc += '(' + inspect(part.value) + ')';
             }
             if (part.color) {
-                desc = color(desc, part.color);
+                desc = chalk.keyword(part.color)(desc);
             } else if (part.start === part.end) {
                 desc += '@' + part.start.toString(16);
             } else {
@@ -330,8 +330,8 @@ AnnotatedBuffer.prototype.hexdump = function hexdump(options) {
             i >= ann.start &&
             i < ann.end) {
             str = stripColor(str);
-            str = color(str, colors[colorI]);
-            if (i === ann.start && options.boldStart) str = color(str, 'bold');
+            str = chalk.keyword(colors[colorI])(str);
+            if (i === ann.start && options.boldStart) str = chalk.bold(str);
         }
 
         if (options.highlight) {

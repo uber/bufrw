@@ -17,7 +17,7 @@
     }
   ],
   "dependencies": {
-    "ansi-color": "^0.2.1",
+    "chalk": "^4.1.0",
     "error": "^7.0.0",
     "hexer": "^1.5.0",
     "xtend": "^4.0.0"
