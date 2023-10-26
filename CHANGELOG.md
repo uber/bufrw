@@ -1,3 +1,7 @@
+# v1.4.0
+
+- Addresses deprecation of Buffer constructor forms
+
 # v1.3.0
 
 - Addresses a dependency issue with hexer that complicated bundling for use in
