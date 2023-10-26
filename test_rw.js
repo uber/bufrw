@@ -98,8 +98,7 @@ RWTestCase.prototype.runLengthTest = function runLengthTest() {
 RWTestCase.prototype.runWriteTest = function runWriteTest() {
     var testCase = this.testCase.writeTest;
     var val = testCase.value;
-    var got = Buffer(testCase.bytes ? testCase.bytes.length : testCase.length || 0);
-    got.fill(0);
+    var got = Buffer.alloc(testCase.bytes ? testCase.bytes.length : testCase.length || 0);
     var res = intoBufferResult(this.rw, got, val);
     var err = res.err;
 
@@ -117,7 +116,7 @@ RWTestCase.prototype.runWriteTest = function runWriteTest() {
         this.assert.fail('expected write error');
     } else {
         var desc = util.format('write: %j', val);
-        var buf = Buffer(testCase.bytes);
+        var buf = Buffer.from(testCase.bytes);
         // istanbul ignore if
         if (got.toString('hex') !== buf.toString('hex')) {
             // TODO: re-run write with an annotated buffer
@@ -132,7 +131,7 @@ RWTestCase.prototype.runWriteTest = function runWriteTest() {
 
 RWTestCase.prototype.runReadTest = function runReadTest() {
     var testCase = this.testCase.readTest;
-    var buffer = Buffer(testCase.bytes);
+    var buffer = Buffer.from(testCase.bytes);
     var res = fromBufferResult(this.rw, buffer);
     var err = res.err;
     var got = res.value;

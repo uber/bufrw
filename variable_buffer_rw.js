@@ -78,7 +78,7 @@ VariableBufferRW.prototype.eagerPoolReadFrom = function eagerPoolReadFrom(destRe
         return ReadResult.poolShortError(destResult, length, remain, offset, destResult.offset);
     } else {
         offset = destResult.offset;
-        var buf = Buffer(length);
+        var buf = Buffer.alloc(length);
         buffer.copy(buf, 0, offset);
         return destResult.reset(null, offset + length, buf);
     }

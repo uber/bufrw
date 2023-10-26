@@ -50,7 +50,7 @@ var normalTestCases = [
         lengthTest: {length: 1, value: null},
         writeTest: {bytes: [0x00], value: null}
     },
-    [ Buffer([0x00, 0x88, 0xff]),
+    [ Buffer.from([0x00, 0x88, 0xff]),
       [0x03, 0x00, 0x88, 0xff]
     ],
 
@@ -98,11 +98,11 @@ test('VariableBufferRW: lazy buf~1',
 var brokenTestCases = [
     {
         lengthTest: {
-            value: Buffer([2]),
+            value: Buffer.from([2]),
             error: {message: 'boom'}
         },
         writeTest: {
-            value: Buffer([2]),
+            value: Buffer.from([2]),
             length: 2,
             error: {message: 'bang'}
         },

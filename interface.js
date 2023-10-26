@@ -51,7 +51,7 @@ function annotateError(res1, res2, start, annBuf) {
     }
 }
 
-var emptyBuffer = Buffer(0);
+var emptyBuffer = Buffer.alloc(0);
 
 function fromBuffer(rw, buffer, offset) {
     return fromBufferResult(rw, buffer, offset).toValue();

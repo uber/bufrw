@@ -71,7 +71,7 @@ test('byteLength', function t(assert) {
 test('toBuffer', function t(assert) {
     assert.deepEqual(
         iface.toBuffer(byteRW, 1),
-        Buffer([0x01]), 'write 1 uint8');
+        Buffer.from([0x01]), 'write 1 uint8');
     assert.throws(function() {
         iface.toBuffer(lengthErrorRW, 1);
     }, /boom/, 'length error throws');
@@ -83,26 +83,26 @@ test('toBuffer', function t(assert) {
 
 test('intoBuffer', function t(assert) {
     assert.deepEqual(
-        iface.intoBuffer(byteRW, Buffer([0]), 1),
-        Buffer([0x01]), 'write 1 uint8');
+        iface.intoBuffer(byteRW, Buffer.from([0]), 1),
+        Buffer.from([0x01]), 'write 1 uint8');
     assert.throws(function() {
-        iface.intoBuffer(writeErrorRW, Buffer([0]), 1);
+        iface.intoBuffer(writeErrorRW, Buffer.from([0]), 1);
     }, /bang/, 'write error throws');
     assert.throws(function() {
-        iface.intoBuffer(byteRW, Buffer([0, 0]), 1);
+        iface.intoBuffer(byteRW, Buffer.from([0, 0]), 1);
     }, /short write, 1 byte left over after writing 1/, 'short write error');
     assert.end();
 });
 
 test('fromBuffer', function t(assert) {
     assert.equal(
-        iface.fromBuffer(byteRW, Buffer([0x01])),
+        iface.fromBuffer(byteRW, Buffer.from([0x01])),
         1, 'read 1 uint8');
     assert.throws(function() {
-        iface.fromBuffer(readErrorRW, Buffer(0));
+        iface.fromBuffer(readErrorRW, Buffer.alloc(0));
     }, /zot/, 'read error throws');
     assert.throws(function() {
-        iface.fromBuffer(byteRW, Buffer([0, 0]));
+        iface.fromBuffer(byteRW, Buffer.from([0, 0]));
     }, /short read, 1 byte left over after consuming 1/, 'short read error');
     assert.end();
 });

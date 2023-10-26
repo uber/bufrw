@@ -28,28 +28,28 @@ test('ConcatReadBuffer', function t(assert) {
     var buf = ConcatReadBuffer();
     assert.equal(buf.avail(), 0, 'starts out with no avail');
     assert.equal(buf.free(), 0, 'starts out with no free');
-    assert.deepEqual(buf.shift(2), Buffer(0), 'expected empty shift at first');
+    assert.deepEqual(buf.shift(2), Buffer.alloc(0), 'expected empty shift at first');
 
-    buf.push(Buffer([1, 2, 3, 4]));
+    buf.push(Buffer.from([1, 2, 3, 4]));
     assert.equal(buf.avail(), 4, 'now has 4 avail');
     assert.equal(buf.free(), 0, 'still has no free');
-    assert.deepEqual(buf.shift(2), Buffer([1, 2]), 'expected shift first two');
+    assert.deepEqual(buf.shift(2), Buffer.from([1, 2]), 'expected shift first two');
 
     buf.clear();
     assert.equal(buf.avail(), 0, 'expected now empty avail');
     assert.equal(buf.free(), 0, 'expected now empty free');
-    assert.deepEqual(buf.shift(2), Buffer(0), 'expected no shift after clear');
+    assert.deepEqual(buf.shift(2), Buffer.alloc(0), 'expected no shift after clear');
 
-    buf.push(Buffer([5, 6]));
+    buf.push(Buffer.from([5, 6]));
     assert.equal(buf.avail(), 2, 'now has 2 avail');
     assert.equal(buf.free(), 0, 'still has no free');
-    buf.push(Buffer([7, 8]));
+    buf.push(Buffer.from([7, 8]));
     assert.equal(buf.avail(), 4, 'now has 4 avail');
     assert.equal(buf.free(), 0, 'still has no free');
-    assert.deepEqual(buf.shift(4), Buffer([5, 6, 7, 8]), 'expected exact shift of four');
+    assert.deepEqual(buf.shift(4), Buffer.from([5, 6, 7, 8]), 'expected exact shift of four');
     assert.equal(buf.avail(), 0, 'expected now empty avail');
     assert.equal(buf.free(), 0, 'expected now empty free');
-    assert.deepEqual(buf.shift(2), Buffer(0), 'expected no shift after drain');
+    assert.deepEqual(buf.shift(2), Buffer.alloc(0), 'expected no shift after drain');
 
     assert.end();
 });
