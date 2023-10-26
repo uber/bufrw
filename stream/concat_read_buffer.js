@@ -20,7 +20,7 @@
 
 'use strict';
 
-var emptyBuffer = Buffer(0);
+var emptyBuffer = Buffer.alloc(0);
 
 function ConcatReadBuffer() {
     if (!(this instanceof ConcatReadBuffer)) {

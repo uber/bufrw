@@ -54,7 +54,7 @@ var expectedFrames = [];
 ].forEach(function eachToken(token, i) {
     var frame = [0, token];
     frame[0] = byteLength(frameRW, frame);
-    var buf = intoBuffer(frameRW, Buffer(frame[0]), frame);
+    var buf = intoBuffer(frameRW, Buffer.alloc(frame[0]), frame);
     buffers.push(buf);
     var assertMess = util.format('got expected[%s] payload token %j', i, token);
     expectedFrames.push({frame: expectToken});
@@ -67,7 +67,7 @@ var BigChunk = Buffer.concat(buffers);
 
 var oneBytePer = new Array(BigChunk.length);
 for (var i = 0; i < BigChunk.length; i++) {
-    oneBytePer.push(Buffer([BigChunk[i]]));
+    oneBytePer.push(Buffer.from([BigChunk[i]]));
 }
 
 readerTest('works frame-at-a-time', frameRW, buffers, expectedFrames);
@@ -96,7 +96,7 @@ function readerTest(desc, frameRW, chunks, expected) {
 }
 
 readerTest('recognizes zero-sized chunks with an error', frameRW, [
-    Buffer([0x00])
+    Buffer.from([0x00])
 ], [
     {
         error: function(err, assert) {
@@ -111,7 +111,7 @@ readerTest('recognizes zero-sized chunks with an error', frameRW, [
 ]);
 
 readerTest('handles sizeRW errors', SeriesRW(readErrorRW, str1), [
-    Buffer([0x01])
+    Buffer.from([0x01])
 ], [
     {
         error: function(err, assert) {
@@ -121,7 +121,7 @@ readerTest('handles sizeRW errors', SeriesRW(readErrorRW, str1), [
 ]);
 
 readerTest('handles chunkRW errors', SeriesRW(UInt8, readErrorRW), [
-    Buffer([0x02, 0x00])
+    Buffer.from([0x02, 0x00])
 ], [
     {
         error: function(err, assert) {
@@ -131,7 +131,7 @@ readerTest('handles chunkRW errors', SeriesRW(UInt8, readErrorRW), [
 ]);
 
 readerTest('errors on truncated frame', frameRW, [
-    Buffer([0x02, 0x01, 0x05])
+    Buffer.from([0x02, 0x01, 0x05])
 ], [
     {
         error: function(err, assert) {
@@ -143,7 +143,7 @@ readerTest('errors on truncated frame', frameRW, [
                 expected: 1,
                 actual: 0,
                 buffer: {
-                    buffer: Buffer([2, 1]),
+                    buffer: Buffer.from([2, 1]),
                     annotations: [
                         { kind: 'read', name: 'UInt8', start: 0, end: 1, value: 2 },
                         { kind: 'read', name: 'UInt8', start: 1, end: 2, value: 1 }
