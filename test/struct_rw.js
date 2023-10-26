@@ -248,7 +248,7 @@ test('StructRW: non pooled frame', testRW.cases(NonPoolFrame.rw, [
 ]));
 
 test('structrw poolreadfrom correctly allocates new obj', function t(assert) {
-    var buf = new Buffer([0x00, 0x06, 0x03, 0x63, 0x61, 0x74]);
+    var buf = Buffer.from([0x00, 0x06, 0x03, 0x63, 0x61, 0x74]);
     var destResult = new ReadResult(null, 0, {a: 'b'});
     NonPoolFrame.rw.poolReadFrom(destResult, buf, 0);
     assert.equal(destResult.value.constructor, NonPoolFrame);
@@ -256,7 +256,7 @@ test('structrw poolreadfrom correctly allocates new obj', function t(assert) {
 });
 
 test('structrw poolreadfrom correctly reuses obj', function t(assert) {
-    var buf = new Buffer([0x00, 0x06, 0x03, 0x63, 0x61, 0x74]);
+    var buf = Buffer.from([0x00, 0x06, 0x03, 0x63, 0x61, 0x74]);
     var obj = new NonPoolFrame();
     var destResult = new ReadResult(null, 0, obj);
     NonPoolFrame.rw.poolReadFrom(destResult, buf, 0);
