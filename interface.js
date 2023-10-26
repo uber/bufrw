@@ -133,8 +133,7 @@ function toBufferResult(rw, value) {
     var lenRes = rw.byteLength(value);
     if (lenRes.err) return new Result(lenRes.err, emptyBuffer);
     var length = lenRes.length;
-    var buffer = new Buffer(length);
-    // buffer.fill(0); TODO option
+    var buffer = Buffer.alloc(length);
     return intoBufferResult(rw, buffer, value);
 }
 
