@@ -49,3 +49,4 @@ coverage/
 ehthumbs.db
 Icon?
 Thumbs.db
+package-lock.json
